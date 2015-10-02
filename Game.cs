@@ -2,61 +2,34 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-using System;
-using System.Xml;
-
 public class MyGame : Game
 {
 	GraphicsDeviceManager graphics;
 	SpriteBatch spriteBatch;
-	Texture2D[] texture;
-
-	int[,] map;
-	int width, height;
 
 	public MyGame()
 	{
 		graphics = new GraphicsDeviceManager(this);
-		graphics.PreferredBackBufferWidth = 256;
-		graphics.PreferredBackBufferHeight = 192;
+		graphics.PreferredBackBufferWidth = 640;
+		graphics.PreferredBackBufferHeight = 480;
 		graphics.ApplyChanges();
 
 		Content.RootDirectory = "Content";
-		texture = new Texture2D[3];
 	}
 
 	protected override void Initialize()
 	{
 		base.Initialize();
 		IsMouseVisible = true;
-
-		XmlDocument xdoc = new XmlDocument();
-		xdoc.Load("map.xml");
-		XmlNode xnode = xdoc.FirstChild;
-
-		XmlElement xl = (XmlElement)xnode;
-		width = int.Parse(xl.GetAttribute("width"));
-		height = int.Parse(xl.GetAttribute("height"));
-		map = new int[width, height];
-
-		xnode = xnode.FirstChild;
-		string text = xnode.InnerText;
-		char[] delimiters = new char[] { '\r', '\n', ' ' };
-		string[] dataLines = text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-
-		for (int j = 0; j < height; j++)
-		{
-			string line = dataLines[j];
-			for (int i = 0; i < width; i++) map[i, j] = (int)Char.GetNumericValue(line[i]);
-		}
 	}
 
 	protected override void LoadContent()
 	{
 		spriteBatch = new SpriteBatch(GraphicsDevice);
-		texture[0] = Content.Load<Texture2D>("water");
-		texture[1] = Content.Load<Texture2D>("land");
-		texture[2] = Content.Load<Texture2D>("forest");
+
+		BigBase.Instance.Load();
+		World.Instance.Init();
+		GlobalTile.LoadTextures(this);
 	}
 
 	protected override void UnloadContent()
@@ -78,12 +51,15 @@ public class MyGame : Game
 		GraphicsDevice.Clear(Color.Black);
 		spriteBatch.Begin();
 
-		for (int i = 0; i < 8; i++)
-			for (int j = 0; j < 6; j++)
+		for (int i = 0; i < World.Instance.globalMap.Width; i++)
+			for (int j = 0; j < World.Instance.globalMap.Height; j++)
 			{
-				Vector2 position = new Vector2(i * 32, j * 32);
-				spriteBatch.Draw(texture[map[i, j]], position);
-			}
+				Vector2 position = new Vector2 ();
+				if (j % 2 == 0) position.X = i * 32;
+				else position.X = i * 32 + 16;
+				position.Y = j * 32;
+				spriteBatch.Draw(World.Instance.globalMap[i,j].texture, position);
+            }
 
 		spriteBatch.End();
 		base.Draw(gameTime);
