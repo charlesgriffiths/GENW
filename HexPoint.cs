@@ -10,11 +10,11 @@
 	public HexPoint Shift(HexDirection d)
 	{
 		if (d == HexDirection.S) return new HexPoint(x, y + 1);
-		else if (d == HexDirection.SE) return new HexPoint(x + 1, y + x % 2);
-		else if (d == HexDirection.NE) return new HexPoint(x + 1, y - 1 + x % 2);
+		else if (d == HexDirection.SE) return new HexPoint(x + 1, y + MyMath.IsOdd(x));
+		else if (d == HexDirection.NE) return new HexPoint(x + 1, y - MyMath.IsEven(x));
 		else if (d == HexDirection.N) return new HexPoint(x, y - 1);
-		else if (d == HexDirection.NW) return new HexPoint(x - 1, y - 1 + x % 2);
-		else return new HexPoint(x - 1, y + x % 2);
+		else if (d == HexDirection.NW) return new HexPoint(x - 1, y - MyMath.IsEven(x));
+		else return new HexPoint(x - 1, y + MyMath.IsOdd(x));
 	}
 
 	public void Change(HexDirection d)
@@ -27,5 +27,10 @@
 	public static implicit operator ZPoint(HexPoint hexPoint)
 	{
 		return new ZPoint(hexPoint.x, hexPoint.y);
+	}
+
+	public static implicit operator string (HexPoint hexPoint)
+	{
+		return "(" + hexPoint.x + ", " + hexPoint.y + ")";
 	}
 }

@@ -11,7 +11,7 @@ class GlobalTile : NamedObject
 	{
 		get
 		{
-			if (type == "ground" || type == "forest") return true;
+			if (type == "ground" || type == "forest" || type == "hill") return true;
 			else return false;
 		}
 	}
@@ -25,7 +25,7 @@ class GlobalTile : NamedObject
 
 	public static void LoadBase()
 	{
-		Log.Write("Loading tile base... ");
+		Log.Write("loading tile base... ");
 		XmlNode xnode = MyXml.SecondChild("globalTiles.xml");
 
 		while (xnode != null)

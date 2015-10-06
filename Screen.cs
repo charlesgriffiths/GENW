@@ -3,28 +3,38 @@ using Microsoft.Xna.Framework.Graphics;
 
 class Screen
 {
-	private static readonly Screen instance = new Screen();
-	public static Screen Instance { get { return instance; } }
+	private Texture2D background;
+	public ZPoint position, size;
 
-	public ZPoint position = new ZPoint(200, 150);
-	public ZPoint size = new ZPoint(1280, 720);
-	public ZPoint viewRadius = new ZPoint(16, 8);
-
-	public void Draw(SpriteBatch spriteBatch)
+	public Screen()
 	{
-		World.Instance.Draw(spriteBatch);
+		ZPoint position = new ZPoint(10, 10);
+		ZPoint size = new ZPoint(200, 100);
+	}
+	
+	public Screen(ZPoint positioni, ZPoint sizei)
+	{
+		position = positioni;
+		size = sizei;
+
+		background = new Texture2D(BigBase.Instance.graphicsDevice, 1, 1);
+		Color[] c = new Color[1];
+		c[0] = Color.Black;
+		background.SetData(c);
 	}
 
-	public Vector2 ZeroGraphicCoordinates { get { return new Vector2(size.x * 0.5f, size.y * 0.5f); } }
-
-	public Vector2 GraphicCoordinates(HexPoint hexPoint, ZPoint camera)
+	public void Fill(SpriteBatch spriteBatch)
 	{
-		Vector2 result = new Vector2();
+		spriteBatch.Draw(background, destinationRectangle: new Rectangle(position.x, position.y, size.x, size.y));
+	}
 
-		result.X = (hexPoint.x - camera.x) * 40;
-		result.Y = (hexPoint.y - camera.y) * 48 + (hexPoint.x % 2) * 24 - (camera.x % 2) * 24;
-		result = result + ZeroGraphicCoordinates - new Vector2(26, 24);
+	public void Draw(Texture2D texture, ZPoint p, SpriteBatch spriteBatch, Color color)
+	{
+		spriteBatch.Draw(texture, position + p, color);
+	}
 
-		return result;
+	public void Draw(Texture2D texture, ZPoint p, SpriteBatch spriteBatch)
+	{
+		Draw(texture, p, spriteBatch, Color.White);
 	}
 }

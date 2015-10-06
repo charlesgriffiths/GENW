@@ -6,11 +6,12 @@ abstract class NamedObject
 {
 	public string name;
 
-	public NamedObject() {}
+//	public NamedObject() {}
 	private void Load(XmlElement xelement) {}
 }
 
-class GeneralBase<T> where T : NamedObject, new()
+//class GeneralBase<T> where T : NamedObject, new()
+class GeneralBase<T> where T : NamedObject
 {
 	public Collection<T> data;
 	public bool loaded;
@@ -20,6 +21,8 @@ class GeneralBase<T> where T : NamedObject, new()
 		data = new Collection<T>();
 		loaded = false;
 	}
+
+	public int Size { get { return data.Count; } }
 
 	public void Add(T t)
 	{
@@ -35,6 +38,6 @@ class GeneralBase<T> where T : NamedObject, new()
 		}
 
 		Log.Error("No name found in base");
-		return new T();
+		return null;
 	}
 }
