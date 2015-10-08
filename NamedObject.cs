@@ -6,11 +6,9 @@ abstract class NamedObject
 {
 	public string name;
 
-//	public NamedObject() {}
 	private void Load(XmlElement xelement) {}
 }
 
-//class GeneralBase<T> where T : NamedObject, new()
 class GeneralBase<T> where T : NamedObject
 {
 	public Collection<T> data;

@@ -28,6 +28,7 @@ class World
 		xnode = xnode.NextSibling;
 		player.position.x = MyXml.GetInt(xnode, "x");
 		player.position.y = MyXml.GetInt(xnode, "y");
+		player.UpdateVisitedLocations();
 		Log.WriteLine("OK");
 	}
 

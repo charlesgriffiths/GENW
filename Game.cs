@@ -15,9 +15,6 @@ public class MyGame : Game
 	{
 		graphics = new GraphicsDeviceManager(this);
 		mainScreen = new MainScreen();
-		//		graphics.PreferredBackBufferWidth = Screen.Instance.size.x;
-		//		graphics.PreferredBackBufferHeight = Screen.Instance.size.y;
-		//		Window.Position = new Point(Screen.Instance.position.x, Screen.Instance.position.y);
 		graphics.PreferredBackBufferWidth = mainScreen.size.x;
 		graphics.PreferredBackBufferHeight = mainScreen.size.y;
 		Window.Position = new Point(mainScreen.position.x, mainScreen.position.y);
@@ -81,6 +78,7 @@ public class MyGame : Game
 		if (KeyPressed(keyboardState, previousKeyboardState, Keys.Right)) mainScreen.editor.GoRight();
 		if (KeyPressed(keyboardState, previousKeyboardState, Keys.Left)) mainScreen.editor.GoLeft();
 		if (KeyPressed(keyboardState, previousKeyboardState, Keys.S)) World.Instance.map.Save();
+		if (KeyPressed(keyboardState, previousKeyboardState, Keys.F)) World.Instance.player.FOVEnabled = !World.Instance.player.FOVEnabled;
 
 		if (mouseState.LeftButton == ButtonState.Pressed)
 		{

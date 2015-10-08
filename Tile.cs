@@ -5,14 +5,24 @@ using Microsoft.Xna.Framework.Graphics;
 class GlobalTile : NamedObject
 {
 	public Texture2D texture;
-	private string type, picture;
+	private string picture;
+	public string type;
 	
 	public bool IsWalkable
 	{
 		get
 		{
-			if (type == "ground" || type == "forest" || type == "hill") return true;
+			if (type == "ground" || type == "forest" || type == "hills") return true;
 			else return false;
+		}
+	}
+
+	public bool IsFlat
+	{
+		get
+		{
+			if (type == "forest" || type == "hills" || type == "mountains") return false;
+			else return true;
 		}
 	}
 

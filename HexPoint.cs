@@ -1,4 +1,6 @@
-﻿class HexPoint
+﻿using System;
+
+class HexPoint
 {
 	public int x, y;
 
@@ -17,6 +19,20 @@
 		else return new HexPoint(x - 1, y + MyMath.IsOdd(x));
 	}
 
+	public HexPoint S { get { return Shift(HexDirection.S); } }
+	public HexPoint SE { get { return Shift(HexDirection.SE); } }
+	public HexPoint NE { get { return Shift(HexDirection.NE); } }
+	public HexPoint N { get { return Shift(HexDirection.N); } }
+	public HexPoint NW { get { return Shift(HexDirection.NW); } }
+	public HexPoint SW { get { return Shift(HexDirection.SW); } }
+/*
+	public bool Adjacent(HexPoint p)
+	{
+		if (p.TheSameAs(S) || p.TheSameAs(SE) || p.TheSameAs(NE) || p.TheSameAs(N) || 
+			p.TheSameAs(NW) || p.TheSameAs(SW) || TheSameAs(p)) return true;
+		else return false;
+	}
+*/
 	public void Change(HexDirection d)
 	{
 		HexPoint p = Shift(d);
@@ -32,5 +48,31 @@
 	public static implicit operator string (HexPoint hexPoint)
 	{
 		return "(" + hexPoint.x + ", " + hexPoint.y + ")";
+	}
+
+	public bool TheSameAs(HexPoint p)
+	{
+		if (x == p.x && y == p.y) return true;
+		else return false;
+	}
+
+	public struct CubePoint { public int x, y, z; }
+	public CubePoint CubeCoordinates
+	{
+		get
+		{
+			CubePoint result = new CubePoint();
+			result.x = x;
+			result.z = y - (x - MyMath.IsOdd(x)) / 2;
+			result.y = -result.x - result.z;
+			return result;
+		}
+	}
+
+	public static int Distance(HexPoint p1, HexPoint p2)
+	{
+		CubePoint c1 = p1.CubeCoordinates;
+		CubePoint c2 = p2.CubeCoordinates;
+		return MyMath.Max(Math.Abs(c1.x - c2.x), Math.Abs(c1.y - c2.y), Math.Abs(c1.z - c2.z));
 	}
 }
