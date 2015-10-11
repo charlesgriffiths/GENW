@@ -5,13 +5,13 @@ class BigBase
 	private static readonly BigBase instance = new BigBase();
 	public static BigBase Instance { get { return instance; } }
 
-	public GeneralBase<GlobalTile> globalTileBase = new GeneralBase<GlobalTile>();
+	public GeneralBase<GTile> gTileBase = new GeneralBase<GTile>();
 
 	public GraphicsDevice graphicsDevice;
 
 	public void Load(GraphicsDevice g)
 	{
-		GlobalTile.LoadBase();
+		GTile.LoadBase();
 		graphicsDevice = g;
 	}
 }

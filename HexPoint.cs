@@ -25,14 +25,19 @@ class HexPoint
 	public HexPoint N { get { return Shift(HexDirection.N); } }
 	public HexPoint NW { get { return Shift(HexDirection.NW); } }
 	public HexPoint SW { get { return Shift(HexDirection.SW); } }
-/*
-	public bool Adjacent(HexPoint p)
+
+	public static HexDirection GetDirection(int i)
 	{
-		if (p.TheSameAs(S) || p.TheSameAs(SE) || p.TheSameAs(NE) || p.TheSameAs(N) || 
-			p.TheSameAs(NW) || p.TheSameAs(SW) || TheSameAs(p)) return true;
-		else return false;
+		Log.Assert(i >= 0 && i < 6, "code for HexDirection is out of range");
+
+		if (i == 0) return HexDirection.S;
+		else if (i == 1) return HexDirection.SE;
+		else if (i == 2) return HexDirection.NE;
+		else if (i == 3) return HexDirection.N;
+		else if (i == 4) return HexDirection.NW;
+		else return HexDirection.SW;
 	}
-*/
+
 	public void Change(HexDirection d)
 	{
 		HexPoint p = Shift(d);

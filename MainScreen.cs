@@ -5,6 +5,7 @@ class MainScreen : Screen
 {
 	public Editor editor;
 	private Texture2D hexSelectionTexture;
+	private SpriteFont font;
 
 	public MainScreen()
 	{
@@ -16,14 +17,19 @@ class MainScreen : Screen
 	{
 		editor = new Editor(size - new ZPoint(66, 62), new ZPoint(56, 52));
 		hexSelectionTexture = game.Content.Load<Texture2D>("hexSelection");
+		font = game.Content.Load<SpriteFont>("font1");
 	}
 
 	public void Draw(SpriteBatch spriteBatch, Vector2 mouse)
 	{
 		World.Instance.Draw(this, spriteBatch);
-		spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(HexCoordinates(mouse)));
+
+		HexPoint hexMouse = HexCoordinates(mouse);
+        spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
+		spriteBatch.DrawString(font, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
+
 		editor.Draw(spriteBatch);
-    }
+	}
 
 	public Vector2 ZeroGraphicCoordinates { get { return new Vector2(size.x * 0.5f, size.y * 0.5f); } }
 

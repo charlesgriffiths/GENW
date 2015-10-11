@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class GlobalTile : NamedObject
+class GTile : NamedObject
 {
 	public Texture2D texture;
 	private string picture;
@@ -36,25 +36,25 @@ class GlobalTile : NamedObject
 	public static void LoadBase()
 	{
 		Log.Write("loading tile base... ");
-		XmlNode xnode = MyXml.SecondChild("globalTiles.xml");
+		XmlNode xnode = MyXml.SecondChild("gTiles.xml");
 
 		while (xnode != null)
 		{
-			GlobalTile temp = new GlobalTile();
+			GTile temp = new GTile();
 			temp.Load((XmlElement)xnode);
-			BigBase.Instance.globalTileBase.Add(temp);
+			BigBase.Instance.gTileBase.Add(temp);
 			xnode = xnode.NextSibling;
 		}
 
-		BigBase.Instance.globalTileBase.loaded = true;
+		BigBase.Instance.gTileBase.loaded = true;
 		Log.WriteLine("OK");
 	}
 
 	public static void LoadTextures(Game game)
 	{
-		foreach (GlobalTile globalTile in BigBase.Instance.globalTileBase.data)
+		foreach (GTile gTile in BigBase.Instance.gTileBase.data)
 		{
-			globalTile.texture = game.Content.Load<Texture2D>(globalTile.picture);
+			gTile.texture = game.Content.Load<Texture2D>(gTile.picture);
 		}
 	}
 }

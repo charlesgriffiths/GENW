@@ -1,5 +1,4 @@
 ﻿using System.Xml;
-using System.Collections;
 using System.Collections.ObjectModel;
 
 abstract class NamedObject
@@ -35,7 +34,7 @@ class GeneralBase<T> where T : NamedObject
 			if (d.name == name) return d;
 		}
 
-		Log.Error("No name found in base");
+		Log.Error("No name " + name + " found in base");
 		return null;
 	}
 }

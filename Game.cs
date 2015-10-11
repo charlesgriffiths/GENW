@@ -40,8 +40,8 @@ public class MyGame : Game
 		World.Instance.Load();
 
 		mainScreen.LoadTextures(this);
-		GlobalTile.LoadTextures(this);
-		World.Instance.player.LoadTexture(this);
+		GTile.LoadTextures(this);
+		World.Instance.LoadTextures(this);
 	}
 
 	protected override void UnloadContent()

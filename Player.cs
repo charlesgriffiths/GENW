@@ -1,35 +1,60 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class Player
+class Player : GObject
 {
-	public HexPoint position = new HexPoint();
-	public Texture2D texture, textureHidden;
+	public Texture2D textureHidden;
 
 	public bool FOVEnabled = true;
 	public bool[,] visitedLocations;
 
-	public void LoadTexture(Game game)
+	public int partySize;
+
+	public Player()
 	{
-		texture = game.Content.Load<Texture2D>("player");
-		textureHidden = game.Content.Load<Texture2D>("playerHidden");
+		name = "player";
+		speed = 1.0f;
+		partySize = 0;
 	}
 
-	public void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
+	public override void LoadTexture(Game game)
+	{
+		texture = game.Content.Load<Texture2D>("gPlayer");
+		textureHidden = game.Content.Load<Texture2D>("gPlayerHidden");
+	}
+
+	public override void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
 	{
 		if (World.Instance.map[position].type != "forest") spriteBatch.Draw(texture, mainScreen.GraphicCoordinates(position));
 		else spriteBatch.Draw(textureHidden, mainScreen.GraphicCoordinates(position));
 	}
 
-	public void Move(HexPoint.HexDirection d)
+	public override void Kill()
 	{
-		ZPoint destination = position.Shift(d);
-		if (World.Instance.map.IsWalkable(destination))
+		Log.WriteLine("Game Over!");
+	}
+
+	public override void ProcessCollisions(GObject g)
+	{
+		if (g.name == "Neutral")
 		{
-			position = destination;
-			UpdateVisitedLocations();
+			partySize++;
+			g.Kill();
+		}
+		else if (g.name == "Monster" && partySize > 0)
+		{
+			partySize--;
+			g.Kill();
 		}
 	}
+
+	public override void Move(HexPoint.HexDirection d)
+	{
+		base.Move(d);
+		UpdateVisitedLocations();
+	}
+
+	public override void Run(){}
 
 	public bool this[ZPoint p]
 	{
