@@ -34,17 +34,24 @@ class Player : GObject
 		Log.WriteLine("Game Over!");
 	}
 
+	public void StartDialog(string name, GObject g)
+	{
+		MainScreen.Instance.dialogScreen.StartDialog(name, g);
+	}
+
 	public override void ProcessCollisions(GObject g)
 	{
-		if (g.name == "Neutral")
+		if (g.name == "Morlocks")
 		{
-			partySize++;
-			g.Kill();
+			StartDialog("Morlocks Encounter", g);
+			//partySize++;
+			//g.Kill();
 		}
-		else if (g.name == "Monster" && partySize > 0)
+		else if (g.name == "Wild Dogs")
 		{
-			partySize--;
-			g.Kill();
+			StartDialog("Wild Dogs Encounter", g);
+			//partySize--;
+			//g.Kill();
 		}
 	}
 

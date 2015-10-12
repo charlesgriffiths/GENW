@@ -3,9 +3,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 class MainScreen : Screen
 {
+	private static readonly MainScreen instance = new MainScreen();
+	public static MainScreen Instance { get { return instance; } }
+
 	public Editor editor;
+	public DialogScreen dialogScreen;
+
 	private Texture2D hexSelectionTexture;
-	private SpriteFont font;
+	private SpriteFont ambientFont;
 
 	public MainScreen()
 	{
@@ -16,8 +21,11 @@ class MainScreen : Screen
 	public void LoadTextures(Game game)
 	{
 		editor = new Editor(size - new ZPoint(66, 62), new ZPoint(56, 52));
+		dialogScreen = new DialogScreen(new ZPoint(200, 200), new ZPoint(600, 400));
+
 		hexSelectionTexture = game.Content.Load<Texture2D>("hexSelection");
-		font = game.Content.Load<SpriteFont>("font1");
+		ambientFont = game.Content.Load<SpriteFont>("fAmbient");
+		dialogScreen.dialogFont = game.Content.Load<SpriteFont>("fDialog");
 	}
 
 	public void Draw(SpriteBatch spriteBatch, Vector2 mouse)
@@ -26,9 +34,11 @@ class MainScreen : Screen
 
 		HexPoint hexMouse = HexCoordinates(mouse);
         spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
-		spriteBatch.DrawString(font, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
+		spriteBatch.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
+		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.partySize, new Vector2(10, 30), Color.Yellow);
 
 		editor.Draw(spriteBatch);
+		dialogScreen.Draw(spriteBatch);
 	}
 
 	public Vector2 ZeroGraphicCoordinates { get { return new Vector2(size.x * 0.5f, size.y * 0.5f); } }

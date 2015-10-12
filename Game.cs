@@ -6,7 +6,7 @@ public class MyGame : Game
 {
 	GraphicsDeviceManager graphics;
 	SpriteBatch spriteBatch;
-	MainScreen mainScreen;
+//	MainScreen mainScreen;
 
 	KeyboardState previousKeyboardState;
 	MouseState previousMouseState;
@@ -14,10 +14,13 @@ public class MyGame : Game
 	public MyGame()
 	{
 		graphics = new GraphicsDeviceManager(this);
-		mainScreen = new MainScreen();
-		graphics.PreferredBackBufferWidth = mainScreen.size.x;
-		graphics.PreferredBackBufferHeight = mainScreen.size.y;
-		Window.Position = new Point(mainScreen.position.x, mainScreen.position.y);
+		//		mainScreen = new MainScreen();
+		//		graphics.PreferredBackBufferWidth = mainScreen.size.x;
+		//		graphics.PreferredBackBufferHeight = mainScreen.size.y;
+		//		Window.Position = new Point(mainScreen.position.x, mainScreen.position.y);
+		graphics.PreferredBackBufferWidth = MainScreen.Instance.size.x;
+		graphics.PreferredBackBufferHeight = MainScreen.Instance.size.y;
+		Window.Position = new Point(MainScreen.Instance.position.x, MainScreen.Instance.position.y);
 		graphics.ApplyChanges();
 
 		Content.RootDirectory = "Content";
@@ -39,8 +42,9 @@ public class MyGame : Game
 		BigBase.Instance.Load(GraphicsDevice);
 		World.Instance.Load();
 
-		mainScreen.LoadTextures(this);
-		GTile.LoadTextures(this);
+		//		mainScreen.LoadTextures(this);
+		MainScreen.Instance.LoadTextures(this);
+        GTile.LoadTextures(this);
 		World.Instance.LoadTextures(this);
 	}
 
@@ -65,25 +69,30 @@ public class MyGame : Game
 	{
 		KeyboardState keyboardState = Keyboard.GetState();
 		MouseState mouseState = Mouse.GetState();
+		MainScreen m = MainScreen.Instance;
 
 		if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
 
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.Home)) World.Instance.player.Move(HexPoint.HexDirection.N);
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.End)) World.Instance.player.Move(HexPoint.HexDirection.S);
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.Insert)) World.Instance.player.Move(HexPoint.HexDirection.NW);
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.Delete)) World.Instance.player.Move(HexPoint.HexDirection.SW);
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageUp)) World.Instance.player.Move(HexPoint.HexDirection.NE);
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageDown)) World.Instance.player.Move(HexPoint.HexDirection.SE);
-
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.Right)) mainScreen.editor.GoRight();
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.Left)) mainScreen.editor.GoLeft();
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.S)) World.Instance.map.Save();
-		if (KeyPressed(keyboardState, previousKeyboardState, Keys.F)) World.Instance.player.FOVEnabled = !World.Instance.player.FOVEnabled;
-
-		if (mouseState.LeftButton == ButtonState.Pressed)
+		if (m.dialogScreen.isActive && keyboardState != previousKeyboardState) m.dialogScreen.Press(keyboardState);
+		else
 		{
-			HexPoint p = mainScreen.HexCoordinates(mouseState.Position.ToVector2());
-			World.Instance.map[p] = mainScreen.editor.Brush;
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Home)) World.Instance.player.Move(HexPoint.HexDirection.N);
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.End)) World.Instance.player.Move(HexPoint.HexDirection.S);
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Insert)) World.Instance.player.Move(HexPoint.HexDirection.NW);
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Delete)) World.Instance.player.Move(HexPoint.HexDirection.SW);
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageUp)) World.Instance.player.Move(HexPoint.HexDirection.NE);
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageDown)) World.Instance.player.Move(HexPoint.HexDirection.SE);
+
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Right)) m.editor.GoRight();
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Left)) m.editor.GoLeft();
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.S)) World.Instance.map.Save();
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.F)) World.Instance.player.FOVEnabled = !World.Instance.player.FOVEnabled;
+
+			if (mouseState.LeftButton == ButtonState.Pressed)
+			{
+				HexPoint p = m.HexCoordinates(mouseState.Position.ToVector2());
+				World.Instance.map[p] = m.editor.Brush;
+			}
 		}
 
 		previousKeyboardState = keyboardState;
@@ -96,7 +105,7 @@ public class MyGame : Game
 		GraphicsDevice.Clear(Color.Black);
 		spriteBatch.Begin();
 
-		mainScreen.Draw(spriteBatch, previousMouseState.Position.ToVector2());
+		MainScreen.Instance.Draw(spriteBatch, previousMouseState.Position.ToVector2());
 
 		spriteBatch.End();
 		base.Draw(gameTime);

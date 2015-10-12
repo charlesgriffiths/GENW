@@ -40,6 +40,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BigBase.cs" />
+    <Compile Include="Dialog.cs" />
+    <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GObject.cs" />

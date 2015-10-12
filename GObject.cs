@@ -6,7 +6,7 @@ class GObject
 {
 	public string name;
 	public HexPoint position;
-	public float initiative = 0.0f, speed = 1.0f;
+	public float initiative = -5.0f, speed = 3.0f;
 
 	public Texture2D texture;
 
@@ -31,7 +31,8 @@ class GObject
 
 	public virtual void ProcessCollisions(GObject g)
 	{
-		if ((name == "Neutral" && g.name == "Monster") || (g.name == "Neutral" && name == "Monster"))
+		if (MyMath.SamePairs("Morlocks", "Wild Dogs", name, g.name))
+//		if ((name == "Neutral" && g.name == "Monster") || (g.name == "Neutral" && name == "Monster"))
 		{
 			Kill();
 			g.Kill();

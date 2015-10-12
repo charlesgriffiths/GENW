@@ -26,16 +26,19 @@ class GTile : NamedObject
 		}
 	}
 
-	public void Load(XmlElement xl)
+	public override void Load(XmlNode xnode)
 	{
-		name = xl.GetAttribute("name");
-		type = xl.GetAttribute("type");
-		picture = xl.GetAttribute("picture");
-    }
-
+		//		name = xl.GetAttribute("name");
+		//		type = xl.GetAttribute("type");
+		//		picture = xl.GetAttribute("picture");
+		name = MyXml.GetString(xnode, "name");
+		type = MyXml.GetString(xnode, "type");
+		picture = MyXml.GetString(xnode, "picture");
+	}
+/*
 	public static void LoadBase()
 	{
-		Log.Write("loading tile base... ");
+		Log.Write("loading the tile database... ");
 		XmlNode xnode = MyXml.SecondChild("gTiles.xml");
 
 		while (xnode != null)
@@ -49,12 +52,12 @@ class GTile : NamedObject
 		BigBase.Instance.gTileBase.loaded = true;
 		Log.WriteLine("OK");
 	}
-
+*/
 	public static void LoadTextures(Game game)
 	{
 		foreach (GTile gTile in BigBase.Instance.gTileBase.data)
 		{
-			gTile.texture = game.Content.Load<Texture2D>(gTile.picture);
+			gTile.texture = game.Content.Load<Texture2D>("t" + gTile.picture);
 		}
 	}
 }

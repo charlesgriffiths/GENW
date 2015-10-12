@@ -5,10 +5,11 @@ abstract class NamedObject
 {
 	public string name;
 
-	private void Load(XmlElement xelement) {}
+	//	private void Load(XmlElement xelement) {}
+	public abstract void Load(XmlNode xnode);
 }
 
-class GeneralBase<T> where T : NamedObject
+class GeneralBase<T> where T : NamedObject, new ()
 {
 	public Collection<T> data;
 	public bool loaded;
@@ -36,5 +37,20 @@ class GeneralBase<T> where T : NamedObject
 
 		Log.Error("No name " + name + " found in base");
 		return null;
+	}
+
+	public void Load(string filename)
+	{
+		XmlNode xnode = MyXml.SecondChild(filename);
+
+		while (xnode != null)
+		{
+			T t = new T();
+			t.Load(xnode);
+			Add(t);
+			xnode = xnode.NextSibling;
+		}
+
+		loaded = true;
 	}
 }

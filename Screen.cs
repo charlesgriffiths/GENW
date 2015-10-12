@@ -5,6 +5,7 @@ class Screen
 {
 	private Texture2D background;
 	public ZPoint position, size;
+//	public Color color = Color.Black;
 
 	public Screen()
 	{
@@ -12,14 +13,14 @@ class Screen
 		ZPoint size = new ZPoint(200, 100);
 	}
 	
-	public Screen(ZPoint positioni, ZPoint sizei)
+	public Screen(ZPoint positioni, ZPoint sizei, Color color)
 	{
 		position = positioni;
 		size = sizei;
 
 		background = new Texture2D(BigBase.Instance.graphicsDevice, 1, 1);
 		Color[] c = new Color[1];
-		c[0] = Color.Black;
+		c[0] = color;
 		background.SetData(c);
 	}
 
@@ -36,5 +37,15 @@ class Screen
 	public void Draw(Texture2D texture, ZPoint p, SpriteBatch spriteBatch)
 	{
 		Draw(texture, p, spriteBatch, Color.White);
+	}
+
+	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, SpriteBatch spriteBatch)
+	{
+		spriteBatch.DrawString(font, text, position + p, color);
+	}
+
+	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, int length, SpriteBatch spriteBatch)
+	{
+		spriteBatch.DrawString(font, MyMath.Split(text, length), position + p, color);
 	}
 }
