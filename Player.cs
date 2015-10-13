@@ -14,7 +14,7 @@ class Player : GObject
 	{
 		name = "player";
 		speed = 1.0f;
-		partySize = 0;
+		partySize = 2;
 	}
 
 	public override void LoadTexture(Game game)
@@ -32,6 +32,7 @@ class Player : GObject
 	public override void Kill()
 	{
 		Log.WriteLine("Game Over!");
+		BigBase.Instance.game.Exit();
 	}
 
 	public void StartDialog(string name, GObject g)
@@ -41,18 +42,8 @@ class Player : GObject
 
 	public override void ProcessCollisions(GObject g)
 	{
-		if (g.name == "Morlocks")
-		{
-			StartDialog("Morlocks Encounter", g);
-			//partySize++;
-			//g.Kill();
-		}
-		else if (g.name == "Wild Dogs")
-		{
-			StartDialog("Wild Dogs Encounter", g);
-			//partySize--;
-			//g.Kill();
-		}
+		if (g.name == "Morlocks") StartDialog("Morlocks Encounter", g);
+		else if (g.name == "Wild Dogs") StartDialog("Wild Dogs Encounter", g);
 	}
 
 	public override void Move(HexPoint.HexDirection d)

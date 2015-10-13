@@ -5,7 +5,6 @@ class Screen
 {
 	private Texture2D background;
 	public ZPoint position, size;
-//	public Color color = Color.Black;
 
 	public Screen()
 	{
@@ -18,7 +17,8 @@ class Screen
 		position = positioni;
 		size = sizei;
 
-		background = new Texture2D(BigBase.Instance.graphicsDevice, 1, 1);
+		//background = new Texture2D(BigBase.Instance.graphicsDevice, 1, 1);
+		background = new Texture2D(BigBase.Instance.game.GraphicsDevice, 1, 1);
 		Color[] c = new Color[1];
 		c[0] = color;
 		background.SetData(c);

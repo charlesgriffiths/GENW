@@ -6,7 +6,6 @@ public class MyGame : Game
 {
 	GraphicsDeviceManager graphics;
 	SpriteBatch spriteBatch;
-//	MainScreen mainScreen;
 
 	KeyboardState previousKeyboardState;
 	MouseState previousMouseState;
@@ -14,10 +13,6 @@ public class MyGame : Game
 	public MyGame()
 	{
 		graphics = new GraphicsDeviceManager(this);
-		//		mainScreen = new MainScreen();
-		//		graphics.PreferredBackBufferWidth = mainScreen.size.x;
-		//		graphics.PreferredBackBufferHeight = mainScreen.size.y;
-		//		Window.Position = new Point(mainScreen.position.x, mainScreen.position.y);
 		graphics.PreferredBackBufferWidth = MainScreen.Instance.size.x;
 		graphics.PreferredBackBufferHeight = MainScreen.Instance.size.y;
 		Window.Position = new Point(MainScreen.Instance.position.x, MainScreen.Instance.position.y);
@@ -39,12 +34,13 @@ public class MyGame : Game
 	{
 		spriteBatch = new SpriteBatch(GraphicsDevice);
 
-		BigBase.Instance.Load(GraphicsDevice);
+		BigBase.Instance.Load(this);
 		World.Instance.Load();
 
-		//		mainScreen.LoadTextures(this);
 		MainScreen.Instance.LoadTextures(this);
         GTile.LoadTextures(this);
+		LTile.LoadTextures(this);
+		CreatureShape.LoadTextures();
 		World.Instance.LoadTextures(this);
 	}
 
@@ -65,6 +61,7 @@ public class MyGame : Game
 		else return false;
 	}
 
+	//тут много тяжелого текста, можно все убрать на самом деле!
 	protected override void Update(GameTime gameTime)
 	{
 		KeyboardState keyboardState = Keyboard.GetState();
@@ -73,20 +70,27 @@ public class MyGame : Game
 
 		if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
 
-		if (m.dialogScreen.isActive && keyboardState != previousKeyboardState) m.dialogScreen.Press(keyboardState);
+		if (m.gameState == MainScreen.GameState.Dialog && keyboardState != previousKeyboardState) m.dialogScreen.Press(keyboardState);
+		else if (m.gameState == MainScreen.GameState.Local)
+		{
+			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Right)) World.Instance.battlefield.currentLObject.TryToMove(ZPoint.Direction.Right);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.Up)) World.Instance.battlefield.currentLObject.TryToMove(ZPoint.Direction.Up);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.Left)) World.Instance.battlefield.currentLObject.TryToMove(ZPoint.Direction.Left);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.Down)) World.Instance.battlefield.currentLObject.TryToMove(ZPoint.Direction.Down);
+		}
 		else
 		{
 			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Home)) World.Instance.player.Move(HexPoint.HexDirection.N);
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.End)) World.Instance.player.Move(HexPoint.HexDirection.S);
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Insert)) World.Instance.player.Move(HexPoint.HexDirection.NW);
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Delete)) World.Instance.player.Move(HexPoint.HexDirection.SW);
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageUp)) World.Instance.player.Move(HexPoint.HexDirection.NE);
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageDown)) World.Instance.player.Move(HexPoint.HexDirection.SE);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.End)) World.Instance.player.Move(HexPoint.HexDirection.S);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.Insert)) World.Instance.player.Move(HexPoint.HexDirection.NW);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.Delete)) World.Instance.player.Move(HexPoint.HexDirection.SW);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageUp)) World.Instance.player.Move(HexPoint.HexDirection.NE);
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.PageDown)) World.Instance.player.Move(HexPoint.HexDirection.SE);
 
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Right)) m.editor.GoRight();
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.Left)) m.editor.GoLeft();
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.S)) World.Instance.map.Save();
-			if (KeyPressed(keyboardState, previousKeyboardState, Keys.F)) World.Instance.player.FOVEnabled = !World.Instance.player.FOVEnabled;
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.Right)) m.editor.GoRight();
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.Left)) m.editor.GoLeft();
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.S)) World.Instance.map.Save();
+			else if (KeyPressed(keyboardState, previousKeyboardState, Keys.F)) World.Instance.player.FOVEnabled = !World.Instance.player.FOVEnabled;
 
 			if (mouseState.LeftButton == ButtonState.Pressed)
 			{

@@ -1,12 +1,13 @@
-﻿using System.Xml;
+﻿//Если функциональность этих классов сильно не изменится, то их можно унаследовать из abstract Tile, используя обобщения.
+//Аналогично Map и Battlefield. Короче, ту часть кода можно сделать существенно более красивой, но сейчас это не стоит того.
+using System.Xml;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 class GTile : NamedObject
 {
 	public Texture2D texture;
-	private string picture;
-	public string type;
+	public string picture, type;
 	
 	public bool IsWalkable
 	{
@@ -28,36 +29,56 @@ class GTile : NamedObject
 
 	public override void Load(XmlNode xnode)
 	{
-		//		name = xl.GetAttribute("name");
-		//		type = xl.GetAttribute("type");
-		//		picture = xl.GetAttribute("picture");
 		name = MyXml.GetString(xnode, "name");
 		type = MyXml.GetString(xnode, "type");
 		picture = MyXml.GetString(xnode, "picture");
 	}
-/*
-	public static void LoadBase()
-	{
-		Log.Write("loading the tile database... ");
-		XmlNode xnode = MyXml.SecondChild("gTiles.xml");
 
-		while (xnode != null)
-		{
-			GTile temp = new GTile();
-			temp.Load((XmlElement)xnode);
-			BigBase.Instance.gTileBase.Add(temp);
-			xnode = xnode.NextSibling;
-		}
-
-		BigBase.Instance.gTileBase.loaded = true;
-		Log.WriteLine("OK");
-	}
-*/
 	public static void LoadTextures(Game game)
 	{
-		foreach (GTile gTile in BigBase.Instance.gTileBase.data)
+		foreach (GTile gTile in BigBase.Instance.gTiles.data)
 		{
 			gTile.texture = game.Content.Load<Texture2D>("t" + gTile.picture);
+		}
+	}
+}
+
+class LTile : NamedObject
+{
+	public Texture2D texture;
+	private string picture;
+	public string type;
+
+	public bool IsWalkable
+	{
+		get
+		{
+			if (type == "ground" || type == "shallowWater") return true;
+			else return false;
+		}
+	}
+
+	public bool IsFlat
+	{
+		get
+		{
+			if (type == "tree" || type == "wall") return false;
+			else return true;
+		}
+	}
+
+	public override void Load(XmlNode xnode)
+	{
+		name = MyXml.GetString(xnode, "name");
+		type = MyXml.GetString(xnode, "type");
+		picture = MyXml.GetString(xnode, "picture");
+	}
+
+	public static void LoadTextures(Game game)
+	{
+		foreach (LTile lTile in BigBase.Instance.lTiles.data)
+		{
+			lTile.texture = game.Content.Load<Texture2D>("_" + lTile.picture);
 		}
 	}
 }

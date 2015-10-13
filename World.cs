@@ -10,6 +10,7 @@ class World
 	public static World Instance { get { return instance; } }
 	
 	public Map map = new Map();
+	public Battlefield battlefield = new Battlefield();
 	public Player player = new Player();
 	public Collection<GObject> gObjects = new Collection<GObject>();
 
@@ -67,9 +68,10 @@ class World
 
 	public void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
 	{
-		map.Draw(mainScreen, spriteBatch);
+		map.Draw(spriteBatch);
 		foreach (GObject gObject in gObjects) gObject.Draw(mainScreen, spriteBatch);
 		player.Draw(mainScreen, spriteBatch);
+		battlefield.Draw(spriteBatch);
 	}
 
 	public GObject NextGObject

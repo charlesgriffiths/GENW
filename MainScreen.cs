@@ -12,10 +12,14 @@ class MainScreen : Screen
 	private Texture2D hexSelectionTexture;
 	private SpriteFont ambientFont;
 
+	public enum GameState { Global, Local, Dialog };
+	public GameState gameState;
+
 	public MainScreen()
 	{
 		position = new ZPoint(200, 150);
 		size = new ZPoint(1280, 720);
+		gameState = GameState.Global;
 	}
 
 	public void LoadTextures(Game game)
@@ -28,17 +32,17 @@ class MainScreen : Screen
 		dialogScreen.dialogFont = game.Content.Load<SpriteFont>("fDialog");
 	}
 
-	public void Draw(SpriteBatch spriteBatch, Vector2 mouse)
+	public void Draw(SpriteBatch sb, Vector2 mouse)
 	{
-		World.Instance.Draw(this, spriteBatch);
+		World.Instance.Draw(this, sb);
 
 		HexPoint hexMouse = HexCoordinates(mouse);
-        spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
-		spriteBatch.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
-		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.partySize, new Vector2(10, 30), Color.Yellow);
+        if (gameState == GameState.Global) sb.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
+		sb.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
+		sb.DrawString(ambientFont, "Party size: " + World.Instance.player.partySize, new Vector2(10, 30), Color.Yellow);
 
-		editor.Draw(spriteBatch);
-		dialogScreen.Draw(spriteBatch);
+		editor.Draw(sb);
+		dialogScreen.Draw(sb);
 	}
 
 	public Vector2 ZeroGraphicCoordinates { get { return new Vector2(size.x * 0.5f, size.y * 0.5f); } }

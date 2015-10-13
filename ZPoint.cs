@@ -9,6 +9,26 @@ class ZPoint
 	public ZPoint(int xi, int yi) { x = xi; y = yi; }
 	public static ZPoint Zero { get { return new ZPoint(0, 0); } }
 
+	public enum Direction { Right, Up, Left, Down };
+
+	public ZPoint Shift(Direction d)
+	{
+		if (d == Direction.Right) return new ZPoint(x + 1, y);
+		else if (d == Direction.Up) return new ZPoint(x, y - 1);
+		else if (d == Direction.Left) return new ZPoint(x - 1, y);
+		else return new ZPoint(x, y + 1);
+	}
+
+	public static Direction GetDirection(int i)
+	{
+		Log.Assert(i >= 0 && i < 4, "wrong rectangular direction");
+
+		if (i == 0) return Direction.Right;
+		else if (i == 1) return Direction.Up;
+		else if (i == 2) return Direction.Left;
+		else return Direction.Down;
+	}
+
 	public static ZPoint Min(ZPoint p1, ZPoint p2)
 	{
 		return new ZPoint(Math.Min(p1.x, p2.x), Math.Min(p1.y, p2.y));
@@ -39,6 +59,12 @@ class ZPoint
 		return new Vector2(zPoint.x, zPoint.y);
 	}
 
+	public bool TheSameAs(ZPoint p)
+	{
+		if (x == p.x && y == p.y) return true;
+		else return false;
+	}
+
 	public ZPoint Boundaries(ZPoint p1, ZPoint p2)
 	{
 		if (p1.x > p2.x || p1.y > p2.y) return this;
@@ -51,3 +77,12 @@ class ZPoint
 		else return true;
 	}
 }
+
+/*
+class ZRectangle
+{
+	public ZPoint p, size;
+
+	public ZPoint q { get { return p + size; } }
+}
+*/

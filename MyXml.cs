@@ -1,5 +1,4 @@
-﻿// просто синтаксический сахар для работы с XML
-using System.Xml;
+﻿using System.Xml;
 
 static class MyXml
 {
@@ -24,5 +23,10 @@ static class MyXml
 	public static int GetInt(XmlNode xmlNode, string attribute)
 	{
         return int.Parse(GetString(xmlNode, attribute));
+	}
+
+	public static float GetFloat(XmlNode xmlNode, string attribute)
+	{
+		return float.Parse(GetString(xmlNode, attribute));
 	}
 }

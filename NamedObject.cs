@@ -5,7 +5,6 @@ abstract class NamedObject
 {
 	public string name;
 
-	//	private void Load(XmlElement xelement) {}
 	public abstract void Load(XmlNode xnode);
 }
 

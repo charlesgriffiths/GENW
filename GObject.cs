@@ -32,7 +32,6 @@ class GObject
 	public virtual void ProcessCollisions(GObject g)
 	{
 		if (MyMath.SamePairs("Morlocks", "Wild Dogs", name, g.name))
-//		if ((name == "Neutral" && g.name == "Monster") || (g.name == "Neutral" && name == "Monster"))
 		{
 			Kill();
 			g.Kill();

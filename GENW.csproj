@@ -39,12 +39,14 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Battlefield.cs" />
     <Compile Include="BigBase.cs" />
     <Compile Include="Dialog.cs" />
     <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GObject.cs" />
+    <Compile Include="LObject.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MyMath.cs" />
     <Compile Include="MainScreen.cs" />

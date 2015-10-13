@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 class DialogScreen
 {
-	public bool isActive = false;
+	//public bool isActive = false;
 
 	private DialogNode dialogNode;
 	private string dialogName;
@@ -20,7 +20,7 @@ class DialogScreen
 
 	public void Draw(SpriteBatch spriteBatch)
 	{
-		if (isActive == false) return;
+		if (MainScreen.Instance.gameState != MainScreen.GameState.Dialog) return;
 
 		screen.Fill(spriteBatch);
 		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.LightGray, 50, spriteBatch);
@@ -46,18 +46,18 @@ class DialogScreen
 
 	public void Press(DialogResponse r)
 	{
-		if (dialogName == "Morlocks Encounter")
-		{
-			if (r.name == "fight") { gObject.Kill(); World.Instance.player.partySize--; }
-			else if (r.name == "join") { gObject.Kill(); World.Instance.player.partySize++; }
-		}
-		else if (dialogName == "Wild Dogs Encounter")
-		{
-			if (r.name == "fight") { gObject.Kill(); World.Instance.player.partySize--; }
-		}
+		if (r.name == "fight") { World.Instance.battlefield.StartBattle(gObject); return; }
 
-		if (r.jump != "") dialogNode = BigBase.Instance.dialogBase.Get(dialogName).nodes[r.jump];
-		else isActive = false;
+		if (dialogName == "Morlocks Encounter")
+			if (r.name == "join")
+			{
+				gObject.Kill();
+				World.Instance.player.partySize++;
+			}
+//		else if (dialogName == "Wild Dogs Encounter")
+
+		if (r.jump != "") dialogNode = BigBase.Instance.dialogs.Get(dialogName).nodes[r.jump];
+		else MainScreen.Instance.gameState = MainScreen.GameState.Global;
 	}
 
 	public void Press(KeyboardState keyboardState)
@@ -69,8 +69,9 @@ class DialogScreen
 	public void StartDialog(string name, GObject g)
 	{
 		dialogName = name;
-		dialogNode = BigBase.Instance.dialogBase.Get(name).nodes["entry"];
+		dialogNode = BigBase.Instance.dialogs.Get(name).nodes["entry"];
 		gObject = g;
-		isActive = true;
+		//isActive = true;
+		MainScreen.Instance.gameState = MainScreen.GameState.Dialog;
 	}
 }
