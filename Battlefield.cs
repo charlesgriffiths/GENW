@@ -1,4 +1,5 @@
 ﻿using System.Xml;
+using System.Linq;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,6 +11,7 @@ class Battlefield
 	private Collection<LObject> lObjects = new Collection<LObject>();
 
 	public LObject currentLObject;
+	private Texture2D currentLObjectSymbol;
 
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 
@@ -30,6 +32,11 @@ class Battlefield
 		}
 	}
 
+	public void LoadTextures(Game game)
+	{
+		currentLObjectSymbol = game.Content.Load<Texture2D>("lCurrentObject");
+	}
+
 	private bool InRange(ZPoint p)
 	{
 		return p.InBoundaries(new ZPoint(0, 0), Size - new ZPoint(1, 1));
@@ -43,8 +50,9 @@ class Battlefield
 
 	public bool IsWalkable(ZPoint p)
 	{
+		if (!InRange(p)) return false;
 		if (!this[p].IsWalkable || GetLObject(p) != null) return false;
-		else return true;
+		return true;
 	}
 
 	private ZPoint RandomFreeTile(bool inParty)
@@ -87,7 +95,7 @@ class Battlefield
 		if (g.name == "Morlocks") AddLObjects("Morlock", false, true, 2);
 		else if (g.name == "Wild Dogs") AddLObjects("Wild Dog", false, true, 3);
 
-		foreach (LObject l in lObjects) l.position = RandomFreeTile(l.isInParty);
+		foreach (LObject l in lObjects) l.SetPosition(RandomFreeTile(l.isInParty), 100.0f);
 
 		currentLObject = NextLObject;
 		MainScreen.Instance.gameState = MainScreen.GameState.Local;
@@ -128,10 +136,10 @@ class Battlefield
 		}
 	}
 
-	private Vector2 GraphicCoordinates(ZPoint p)
+	private Vector2 GraphicCoordinates(RPoint p)
 	{
-		return new Vector2(100, 100) + new Vector2(p.x * 32, p.y * 32);
-    }
+		return new Vector2(100, 100) + new Vector2(32 * p.x, 32 * p.y);
+	}
 
 	public void Draw(SpriteBatch sb)
 	{
@@ -143,16 +151,23 @@ class Battlefield
 			sb.Draw(this[p].texture, GraphicCoordinates(p));
 		}
 
-		foreach (LObject l in lObjects) sb.Draw(l.texture, GraphicCoordinates(l.position));
+		var query = from l in lObjects orderby l.isActive select l;
+		foreach (LObject l in query)
+		{
+			l.rPosition.Update();
+			sb.Draw(l.texture, GraphicCoordinates(l.rPosition));
+		}
+
+		sb.Draw(currentLObjectSymbol, GraphicCoordinates(currentLObject.rPosition) - new Vector2(0, 12));
 	}
 
-	public LObject NextLObject //переписать на LINQ!
+	public LObject NextLObject
 	{
 		get
 		{
-			LObject result = lObjects[0]; //тут ошибка в случае отсутствия существ, потом исправить
-			foreach (LObject l in lObjects) if (l.initiative > result.initiative && l.isActive) result = l;
-			return result;
+			var query = from l in lObjects where l.isActive orderby -l.initiative select l;
+			if (query.Count() != 0) return query.First();
+			else return null;
 		}
 	}
 }

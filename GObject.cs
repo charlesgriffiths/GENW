@@ -4,14 +4,21 @@ using Microsoft.Xna.Framework.Graphics;
 
 class GObject
 {
-	public string name;
-	public HexPoint position;
-	public float initiative = -5.0f, speed = 3.0f;
+	public HexPoint position = new HexPoint();
+	public RPoint rPosition = new RPoint();
 
+	public string name;
+	public float initiative = -5.0f, speed = 3.0f;
 	public Texture2D texture;
 
+	protected World W { get { return World.Instance; } }
+
 	public GObject() { name = ""; position = new HexPoint(); }
-	public GObject(string namei, HexPoint p) { name = namei; position = p; }
+	public GObject(string namei, HexPoint p)
+	{
+		name = namei;
+		SetPosition (p, 100.0f);
+	}
 
 	public virtual void LoadTexture(Game game)
 	{
@@ -20,8 +27,9 @@ class GObject
 
 	public virtual void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
 	{
-		if (!World.Instance.player.FOVEnabled || World.Instance.map.IsInView(World.Instance.player.position, position))
-			spriteBatch.Draw(texture, mainScreen.GraphicCoordinates(position));
+		rPosition.Update();
+		if (!W.player.FOVEnabled || W.map.IsInView(W.player.position, position))
+			spriteBatch.Draw(texture, mainScreen.GraphicCoordinates(rPosition));
 	}
 
 	public virtual void Kill()
@@ -47,21 +55,27 @@ class GObject
 	public virtual void Move(HexPoint.HexDirection d)
 	{
 		ZPoint destination = position.Shift(d);
-		if (World.Instance.map.IsWalkable(destination)) position = destination;
+		if (W.map.IsWalkable(destination)) SetPosition(destination, 2.0f);
 
-		ProcessCollisions(World.Instance[position]);
+		ProcessCollisions(W[position]);
 
 		PassTurn(speed);
 	}
 
 	public virtual void Run()
 	{
-		Move(HexPoint.GetDirection(World.Instance.random.Next(6)));
+		Move(HexPoint.GetDirection(W.random.Next(6)));
 	}
 
 	public void PassTurn(float time)
 	{
 		initiative -= time;
-		World.Instance.NextGObject.Run();
+		W.NextGObject.Run();
+	}
+
+	public void SetPosition(HexPoint p, float speed)
+	{
+		rPosition.Add((ZPoint)position, (ZPoint)p, speed);
+		position = p;
 	}
 }

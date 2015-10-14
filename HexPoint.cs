@@ -45,10 +45,8 @@ class HexPoint
 		y = p.y;
 	}
 
-	public static implicit operator ZPoint(HexPoint hexPoint)
-	{
-		return new ZPoint(hexPoint.x, hexPoint.y);
-	}
+	public static implicit operator ZPoint(HexPoint hexPoint) {	return new ZPoint(hexPoint.x, hexPoint.y); }
+	public static implicit operator RPoint(HexPoint hexPoint) { return new RPoint(hexPoint.x, hexPoint.y); }
 
 	public static implicit operator string (HexPoint hexPoint)
 	{

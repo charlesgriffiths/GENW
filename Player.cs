@@ -25,8 +25,9 @@ class Player : GObject
 
 	public override void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
 	{
-		if (World.Instance.map[position].type != "forest") spriteBatch.Draw(texture, mainScreen.GraphicCoordinates(position));
-		else spriteBatch.Draw(textureHidden, mainScreen.GraphicCoordinates(position));
+		rPosition.Update();
+		if (W.map[position].type != "forest") spriteBatch.Draw(texture, mainScreen.GraphicCoordinates(rPosition));
+		else spriteBatch.Draw(textureHidden, mainScreen.GraphicCoordinates(rPosition));
 	}
 
 	public override void Kill()
@@ -58,12 +59,12 @@ class Player : GObject
 	{
 		get
 		{
-			if (World.Instance.map.InRange(p)) return visitedLocations[p.x, p.y];
+			if (W.map.InRange(p)) return visitedLocations[p.x, p.y];
 			else return false;
 		}
 		set
 		{
-			if (World.Instance.map.InRange(p)) visitedLocations[p.x, p.y] = value;
+			if (W.map.InRange(p)) visitedLocations[p.x, p.y] = value;
 		}
 	}
 
@@ -71,16 +72,19 @@ class Player : GObject
 	{
 		if (visitedLocations == null)
 		{
-			visitedLocations = new bool[World.Instance.map.Size.x, World.Instance.map.Size.y];
-			for (int j = 0; j < World.Instance.map.Size.y; j++)
-				for (int i = 0; i < World.Instance.map.Size.x; i++)
+			visitedLocations = new bool[W.map.Size.x, W.map.Size.y];
+			for (int j = 0; j < W.map.Size.y; j++)
+				for (int i = 0; i < W.map.Size.x; i++)
 					visitedLocations[i, j] = false;
 		}
 
 		for (int j=-2; j <= 2; j++) for (int i=-2; i <=2; i++)
 		{
 				ZPoint p = position + new ZPoint(i, j);
-				if (World.Instance.map.IsInView(position, p)) this[p] = true;
+				if (W.map.IsInView(position, p)) this[p] = true;
 		}
+
+		ZPoint pvr = new ZPoint(3, 3);
+		if (!((ZPoint)position).InBoundaries(W.camera - W.viewRadius + pvr, W.camera + W.viewRadius - pvr))	W.camera = position;
 	}
 }

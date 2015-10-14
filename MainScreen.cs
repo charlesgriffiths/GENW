@@ -47,13 +47,13 @@ class MainScreen : Screen
 
 	public Vector2 ZeroGraphicCoordinates { get { return new Vector2(size.x * 0.5f, size.y * 0.5f); } }
 
-	public Vector2 GraphicCoordinates(HexPoint hexPoint)
+	public Vector2 GraphicCoordinates(RPoint p)
 	{
 		Vector2 result = new Vector2();
-		ZPoint camera = World.Instance.Camera;
 
-		result.X = (hexPoint.x - camera.x) * 40;
-		result.Y = (hexPoint.y - camera.y) * 48 + MyMath.IsOdd(hexPoint.x) * 24 - MyMath.IsOdd(camera.x) * 24;
+		result.X = (p.x - World.Instance.camera.x) * 40;
+		//result.Y = (p.y - World.Instance.camera.y) * 48 /*+ MyMath.IsOdd(p.x) * 24*/ - MyMath.IsOdd(World.Instance.camera.x) * 24;
+		result.Y = (p.y - World.Instance.camera.y) * 48 + MyMath.SawFunction(p.x) * 24 - MyMath.IsOdd(World.Instance.camera.x) * 24;
 		result = result + ZeroGraphicCoordinates - new Vector2(26, 24);
 
 		return result;
@@ -62,8 +62,8 @@ class MainScreen : Screen
 	public HexPoint HexCoordinates(Vector2 mouse)
 	{
 		HexPoint p = new HexPoint();
-		p.x = (int)(0.025f * (mouse.X - ZeroGraphicCoordinates.X + 26.0f) + World.Instance.Camera.x);
-		p.y = (int)(0.0208333f * (mouse.Y - ZeroGraphicCoordinates.Y + 24.0f) + World.Instance.Camera.y);
+		p.x = (int)(0.025f * (mouse.X - ZeroGraphicCoordinates.X + 26.0f) + World.Instance.camera.x);
+		p.y = (int)(0.0208333f * (mouse.Y - ZeroGraphicCoordinates.Y + 24.0f) + World.Instance.camera.y);
 
 		float[] distances = new float[7];
 		Vector2 shift = new Vector2(26, 24);

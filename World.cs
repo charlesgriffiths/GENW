@@ -15,6 +15,7 @@ class World
 	public Collection<GObject> gObjects = new Collection<GObject>();
 
 	public ZPoint viewRadius = new ZPoint(16, 8);
+	public ZPoint camera = new ZPoint();
 	public Random random = new Random();
 
 	public void Load()
@@ -32,8 +33,12 @@ class World
 		map.Load(width, height, method);
 
 		xnode = xnode.NextSibling;
-		player.position.x = MyXml.GetInt(xnode, "x");
-		player.position.y = MyXml.GetInt(xnode, "y");
+		//player.position.x = MyXml.GetInt(xnode, "x");
+		//player.position.y = MyXml.GetInt(xnode, "y");
+		camera = new ZPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y"));
+		//player.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 100);
+		//camera = new ZPoint(px, py);
+		player.SetPosition(camera, 60.0f);
 		player.UpdateVisitedLocations();
 		Log.WriteLine("OK");
 
@@ -53,23 +58,13 @@ class World
 	{
 		player.LoadTexture(game);
 		foreach (GObject gObject in gObjects) gObject.LoadTexture(game);
-	}
-
-	public ZPoint Camera
-	{
-		get
-		{
-			ZPoint camera = player.position;
-			ZPoint min = viewRadius;
-			ZPoint max = map.Size - viewRadius - new ZPoint(1, 1);
-			return camera.Boundaries(min, max);
-		}
+		battlefield.LoadTextures(game);
 	}
 
 	public void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
 	{
 		map.Draw(spriteBatch);
-		foreach (GObject gObject in gObjects) gObject.Draw(mainScreen, spriteBatch);
+		foreach (GObject g in gObjects) g.Draw(mainScreen, spriteBatch);
 		player.Draw(mainScreen, spriteBatch);
 		battlefield.Draw(spriteBatch);
 	}

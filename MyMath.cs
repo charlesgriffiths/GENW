@@ -1,10 +1,16 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using Microsoft.Xna.Framework;
 
 static class MyMath
 {
 	public static int IsOdd(int n) { return Math.Abs(n) % 2; }
 	public static int IsEven(int n) { return 1 - IsOdd(n); }
+
+	public static float SawFunction(float x)
+	{
+		if ((int)x % 2 == 0) return x - (int)x;
+		else return 1 + (int)x - x;
+	}
 
 	public static int Max(int i1, int i2, int i3) { return Math.Max(i1, Math.Max(i2, i3)); }
 
@@ -12,6 +18,11 @@ static class MyMath
 	{
 		if ((s1 == t1 && s2 == t2) || (s1 == t2 && s2 == t1)) return true;
 		else return false;
+	}
+
+	public static float ManhattanDistance(Vector2 v1, Vector2 v2)
+	{
+		return Math.Abs(v1.X - v2.X) + Math.Abs(v1.Y - v2.Y);
 	}
 
 	public static string Split(string s, int length)
@@ -24,7 +35,6 @@ static class MyMath
 			if (s[i] == ' ') k = i + 2*(line-1);
 			if (i > length * line)
 			{
-				//result.Remove(k);
 				result = result.Insert(k+1, "\n\r");
 				line++;
 			}

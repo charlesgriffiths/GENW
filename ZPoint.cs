@@ -7,6 +7,7 @@ class ZPoint
 
 	public ZPoint() { x = y = 0; }
 	public ZPoint(int xi, int yi) { x = xi; y = yi; }
+	public ZPoint(Vector2 v) { x = (int)v.X; y = (int)v.Y; }
 	public static ZPoint Zero { get { return new ZPoint(0, 0); } }
 
 	public enum Direction { Right, Up, Left, Down };
@@ -44,9 +45,19 @@ class ZPoint
 		return new ZPoint(p1.x + p2.x, p1.y + p2.y);
 	}
 
+	public static Vector2 operator +(ZPoint p, Vector2 v)
+	{
+		return new Vector2(p.x + v.X, p.y + v.Y);
+	}
+
 	public static ZPoint operator -(ZPoint p1, ZPoint p2)
 	{
 		return new ZPoint(p1.x - p2.x, p1.y - p2.y);
+	}
+
+	public static Vector2 operator /(ZPoint p, float f)
+	{
+		return new Vector2(p.x / f, p.y / f);
 	}
 
 	public static implicit operator HexPoint(ZPoint zPoint)
@@ -57,6 +68,13 @@ class ZPoint
 	public static implicit operator Vector2(ZPoint zPoint)
 	{
 		return new Vector2(zPoint.x, zPoint.y);
+	}
+
+	public static implicit operator RPoint(ZPoint zPoint) { return new RPoint(zPoint.x, zPoint.y); }
+
+	public override string ToString()
+	{
+		return "(" + x + "," + y + ")";
 	}
 
 	public bool TheSameAs(ZPoint p)
