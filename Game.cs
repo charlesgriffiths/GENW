@@ -5,8 +5,7 @@ using Microsoft.Xna.Framework.Input;
 public class MyGame : Game
 {
 	GraphicsDeviceManager graphics;
-	SpriteBatch spriteBatch;
-
+	//SpriteBatch spriteBatch;
 	KeyboardState keyboardState, previousKeyboardState;
 	MouseState mouseState, previousMouseState;
 
@@ -36,16 +35,17 @@ public class MyGame : Game
 
 	protected override void LoadContent()
 	{
-		spriteBatch = new SpriteBatch(GraphicsDevice);
+		//spriteBatch = new SpriteBatch(GraphicsDevice);
 
-		BigBase.Instance.Load(this);
+		MainScreen.Instance.Init(this);
+		BigBase.Instance.Load();
 		World.Instance.Load();
-
-		MainScreen.Instance.LoadTextures(this);
-        GTile.LoadTextures(this);
-		LTile.LoadTextures(this);
+		
+		MainScreen.Instance.LoadTextures();
+        GTile.LoadTextures();
+		LTile.LoadTextures();
 		CreatureShape.LoadTextures();
-		World.Instance.LoadTextures(this);
+		World.Instance.LoadTextures();
 	}
 
 	protected override void UnloadContent()
@@ -109,11 +109,9 @@ public class MyGame : Game
 	protected override void Draw(GameTime gameTime)
 	{
 		GraphicsDevice.Clear(Color.Black);
-		spriteBatch.Begin();
-
-		MainScreen.Instance.Draw(spriteBatch, previousMouseState.Position.ToVector2());
-
-		spriteBatch.End();
+		M.spriteBatch.Begin();
+		MainScreen.Instance.Draw(previousMouseState.Position.ToVector2());
+		M.spriteBatch.End();
 		base.Draw(gameTime);
 	}
 }

@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Battlefield.cs" />
     <Compile Include="BigBase.cs" />
+    <Compile Include="CreatureShape.cs" />
     <Compile Include="Dialog.cs" />
     <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />

@@ -15,19 +15,19 @@ class DialogScreen
 
 	public DialogScreen(ZPoint position, ZPoint size)
 	{
-		screen = new Screen(position, size, new Color(0.2f, 0.2f, 0.2f));
+		screen = new Screen(position, size);
 	}
 
-	public void Draw(SpriteBatch spriteBatch)
+	public void Draw()
 	{
 		if (MainScreen.Instance.gameState != MainScreen.GameState.Dialog) return;
 
-		screen.Fill(spriteBatch);
-		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.LightGray, 50, spriteBatch);
+		screen.Fill(new Color(0.2f, 0.2f, 0.2f));
+		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.LightGray, 50);
 
 		for (int i = 0; i < dialogNode.responses.Count; i++)
 			screen.DrawString(dialogFont, (i+1) + ". " + dialogNode.responses[i].text, 
-				new ZPoint(10, 170 + i*20), Color.White, 47, spriteBatch);
+				new ZPoint(10, 170 + i*20), Color.White, 47);
 	}
 
 	private static int KeyCode(KeyboardState k)

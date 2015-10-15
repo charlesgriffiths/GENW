@@ -34,11 +34,11 @@ class GTile : NamedObject
 		picture = MyXml.GetString(xnode, "picture");
 	}
 
-	public static void LoadTextures(Game game)
+	public static void LoadTextures()
 	{
 		foreach (GTile gTile in BigBase.Instance.gTiles.data)
 		{
-			gTile.texture = game.Content.Load<Texture2D>("t" + gTile.picture);
+			gTile.texture = MainScreen.Instance.game.Content.Load<Texture2D>("t" + gTile.picture);
 		}
 	}
 }
@@ -74,11 +74,11 @@ class LTile : NamedObject
 		picture = MyXml.GetString(xnode, "picture");
 	}
 
-	public static void LoadTextures(Game game)
+	public static void LoadTextures()
 	{
 		foreach (LTile lTile in BigBase.Instance.lTiles.data)
 		{
-			lTile.texture = game.Content.Load<Texture2D>("_" + lTile.picture);
+			lTile.texture = MainScreen.Instance.game.Content.Load<Texture2D>("_" + lTile.picture);
 		}
 	}
 }

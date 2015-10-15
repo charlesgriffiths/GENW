@@ -5,14 +5,17 @@ class RMove
 {
 	public Vector2 delta;
 	public int n, numberOfSteps;
+	public RPoint rPoint;
 
-	public RMove(Vector2 v, float speed)
+	public RMove(RPoint p, Vector2 v, float speed)
 	{
 		Log.Assert(speed > 0, "speed is less then zero in RMove");
 		numberOfSteps = (int)(60.0f / speed);
 		if (numberOfSteps == 0) numberOfSteps = 1;
 		delta = v / numberOfSteps;
 		n = 0;
+
+		rPoint = p;
 	}
 }
 
@@ -27,24 +30,32 @@ class RPoint
 	public RPoint() { data = new Vector2(); }
 	public RPoint(float x, float y) { data = new Vector2(x, y); }
 
-	public void Update()
+	public static void Update(Queue<RMove> q)
 	{
-		if (rMoves.Count == 0) return;
-		RMove rMove = rMoves.Peek();
+		if (q.Count == 0) return;
+		RMove rMove = q.Peek();
 
 		if (rMove.n < rMove.numberOfSteps)
 		{
-			data += rMove.delta;
+			rMove.rPoint.data += rMove.delta;
 			rMove.n++;
 		}
-		else rMoves.Dequeue();
+		else q.Dequeue();
 	}
 
-	public void Add(Vector2 start, Vector2 finish, float speed)
+	public void Update() { Update(rMoves); }
+
+	public void Add(Vector2 v, float speed, Queue<RMove> q)
 	{
-		RMove rMove = new RMove(finish - start, speed);
-		rMoves.Enqueue(rMove);
+		RMove rMove = new RMove(this, v, speed);
+		q.Enqueue(rMove);
 	}
+
+	public void Add(Vector2 start, Vector2 finish, float speed, Queue<RMove> q)
+	{ Add(finish - start, speed, q); }
+
+	public void Add(Vector2 v, float speed) { Add(v, speed, rMoves); }
+	public void Add(Vector2 start, Vector2 finish, float speed) { Add(finish - start, speed); }
 
 	public static implicit operator Vector2(RPoint p) { return new Vector2(p.x, p.y); }
 }

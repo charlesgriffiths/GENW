@@ -3,8 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 class Screen
 {
-	private Texture2D background;
 	public ZPoint position, size;
+
+	private MainScreen M { get { return MainScreen.Instance; } }
 
 	public Screen()
 	{
@@ -12,40 +13,39 @@ class Screen
 		ZPoint size = new ZPoint(200, 100);
 	}
 	
-	public Screen(ZPoint positioni, ZPoint sizei, Color color)
+	public Screen(ZPoint positioni, ZPoint sizei)
 	{
 		position = positioni;
 		size = sizei;
-
-		//background = new Texture2D(BigBase.Instance.graphicsDevice, 1, 1);
-		background = new Texture2D(BigBase.Instance.game.GraphicsDevice, 1, 1);
-		Color[] c = new Color[1];
-		c[0] = color;
-		background.SetData(c);
 	}
 
-	public void Fill(SpriteBatch spriteBatch)
+	public void DrawRectangle(ZPoint p, ZPoint s, Color color)
 	{
-		spriteBatch.Draw(background, destinationRectangle: new Rectangle(position.x, position.y, size.x, size.y));
+		M.spriteBatch.Draw(M.universalTexture, new Rectangle(position.x + p.x, position.y + p.y, s.x, s.y), color);
 	}
 
-	public void Draw(Texture2D texture, ZPoint p, SpriteBatch spriteBatch, Color color)
+	public void Fill(Color color)
 	{
-		spriteBatch.Draw(texture, position + p, color);
+		DrawRectangle(ZPoint.Zero, size, color);
 	}
 
-	public void Draw(Texture2D texture, ZPoint p, SpriteBatch spriteBatch)
+	public void Draw(Texture2D texture, ZPoint p, Color color)
 	{
-		Draw(texture, p, spriteBatch, Color.White);
+		MainScreen.Instance.spriteBatch.Draw(texture, position + p, color);
 	}
 
-	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, SpriteBatch spriteBatch)
+	public void Draw(Texture2D texture, ZPoint p)
 	{
-		spriteBatch.DrawString(font, text, position + p, color);
+		Draw(texture, p, Color.White);
 	}
 
-	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, int length, SpriteBatch spriteBatch)
+	public void DrawString(SpriteFont font, string text, ZPoint p, Color color)
 	{
-		spriteBatch.DrawString(font, MyMath.Split(text, length), position + p, color);
+		MainScreen.Instance.spriteBatch.DrawString(font, text, position + p, color);
+	}
+
+	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, int length)
+	{
+		MainScreen.Instance.spriteBatch.DrawString(font, MyMath.Split(text, length), position + p, color);
 	}
 }

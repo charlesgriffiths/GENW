@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 class GObject
@@ -20,16 +19,16 @@ class GObject
 		SetPosition (p, 100.0f);
 	}
 
-	public virtual void LoadTexture(Game game)
+	public virtual void LoadTexture()
 	{
-		texture = game.Content.Load<Texture2D>("g" + name);
+		texture = MainScreen.Instance.game.Content.Load<Texture2D>("g" + name);
 	}
 
-	public virtual void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
+	public virtual void Draw()
 	{
 		rPosition.Update();
 		if (!W.player.FOVEnabled || W.map.IsInView(W.player.position, position))
-			spriteBatch.Draw(texture, mainScreen.GraphicCoordinates(rPosition));
+			MainScreen.Instance.spriteBatch.Draw(texture, MainScreen.Instance.GraphicCoordinates(rPosition));
 	}
 
 	public virtual void Kill()
@@ -56,9 +55,6 @@ class GObject
 	{
 		ZPoint destination = position.Shift(d);
 		if (W.map.IsWalkable(destination)) SetPosition(destination, 2.0f);
-
-		ProcessCollisions(W[position]);
-
 		PassTurn(speed);
 	}
 
@@ -69,6 +65,7 @@ class GObject
 
 	public void PassTurn(float time)
 	{
+		ProcessCollisions(W[position]);
 		initiative -= time;
 		W.NextGObject.Run();
 	}

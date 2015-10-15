@@ -42,4 +42,6 @@ static class MyMath
 
 		return result;
 	}
+
+	public static Color DarkDarkGray { get { return new Color(0.2f, 0.2f, 0.2f); } }
 }

@@ -10,6 +10,8 @@ class Player : GObject
 
 	public int partySize;
 
+	private MainScreen M { get { return MainScreen.Instance; } }
+
 	public Player()
 	{
 		name = "player";
@@ -17,29 +19,26 @@ class Player : GObject
 		partySize = 2;
 	}
 
-	public override void LoadTexture(Game game)
+	public override void LoadTexture()
 	{
-		texture = game.Content.Load<Texture2D>("gPlayer");
-		textureHidden = game.Content.Load<Texture2D>("gPlayerHidden");
+		texture = M.game.Content.Load<Texture2D>("gPlayer");
+		textureHidden = M.game.Content.Load<Texture2D>("gPlayerHidden");
 	}
 
-	public override void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
+	public override void Draw()
 	{
 		rPosition.Update();
-		if (W.map[position].type != "forest") spriteBatch.Draw(texture, mainScreen.GraphicCoordinates(rPosition));
-		else spriteBatch.Draw(textureHidden, mainScreen.GraphicCoordinates(rPosition));
+		if (W.map[position].type != "forest") M.spriteBatch.Draw(texture, M.GraphicCoordinates(rPosition));
+		else M.spriteBatch.Draw(textureHidden, M.GraphicCoordinates(rPosition));
 	}
 
 	public override void Kill()
 	{
 		Log.WriteLine("Game Over!");
-		BigBase.Instance.game.Exit();
+		MainScreen.Instance.game.Exit();
 	}
 
-	public void StartDialog(string name, GObject g)
-	{
-		MainScreen.Instance.dialogScreen.StartDialog(name, g);
-	}
+	private void StartDialog(string name, GObject g) { M.dialogScreen.StartDialog(name, g);	}
 
 	public override void ProcessCollisions(GObject g)
 	{

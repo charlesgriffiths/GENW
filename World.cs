@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Xml;
 using System.Collections.ObjectModel;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 class World
 {
@@ -33,11 +31,7 @@ class World
 		map.Load(width, height, method);
 
 		xnode = xnode.NextSibling;
-		//player.position.x = MyXml.GetInt(xnode, "x");
-		//player.position.y = MyXml.GetInt(xnode, "y");
 		camera = new ZPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y"));
-		//player.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 100);
-		//camera = new ZPoint(px, py);
 		player.SetPosition(camera, 60.0f);
 		player.UpdateVisitedLocations();
 		Log.WriteLine("OK");
@@ -46,27 +40,27 @@ class World
 		gObjects.Add(new GObject("Morlocks", new HexPoint(20, 10)));
 		gObjects.Add(new GObject("Morlocks", new HexPoint(5, 16)));
 		gObjects.Add(new GObject("Morlocks", new HexPoint(15, 9)));
-		gObjects.Add(new GObject("Morlocks", new HexPoint(20, 16)));
 
+		gObjects.Add(new GObject("Wild Dogs", new HexPoint(20, 16)));
 		gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 13)));
 		gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 18)));
 		gObjects.Add(new GObject("Wild Dogs", new HexPoint(24, 15)));
 		gObjects.Add(new GObject("Wild Dogs", new HexPoint(19, 20)));
 	}
 
-	public void LoadTextures(Game game)
+	public void LoadTextures()
 	{
-		player.LoadTexture(game);
-		foreach (GObject gObject in gObjects) gObject.LoadTexture(game);
-		battlefield.LoadTextures(game);
+		player.LoadTexture();
+		foreach (GObject gObject in gObjects) gObject.LoadTexture();
+		battlefield.LoadTextures();
 	}
 
-	public void Draw(MainScreen mainScreen, SpriteBatch spriteBatch)
+	public void Draw()
 	{
-		map.Draw(spriteBatch);
-		foreach (GObject g in gObjects) g.Draw(mainScreen, spriteBatch);
-		player.Draw(mainScreen, spriteBatch);
-		battlefield.Draw(spriteBatch);
+		map.Draw();
+		foreach (GObject g in gObjects) g.Draw();
+		player.Draw();
+		battlefield.Draw();
 	}
 
 	public GObject NextGObject

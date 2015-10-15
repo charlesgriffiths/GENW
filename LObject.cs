@@ -1,33 +1,11 @@
-﻿using System.Xml;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-class CreatureShape : NamedObject
-{
-	public Texture2D texture;
-	public int maxHP, damage;
-	public float movementSpeed, attackSpeed;
-
-	public override void Load(XmlNode xnode)
-	{
-		name = MyXml.GetString(xnode, "name");
-		maxHP = MyXml.GetInt(xnode, "maxHP");
-		damage = MyXml.GetInt(xnode, "damage");
-		movementSpeed = MyXml.GetFloat(xnode, "movementSpeed");
-		attackSpeed = MyXml.GetFloat(xnode, "attackSpeed");
-	}
-
-	public static void LoadTextures()
-	{
-		foreach (CreatureShape s in BigBase.Instance.creatureShapes.data)
-			s.texture = BigBase.Instance.game.Content.Load<Texture2D>("l" + s.name);
-	}
-}
 
 class LObject
 {
 	public ZPoint position = new ZPoint();
 	public RPoint rPosition = new RPoint();
+	public RPoint rInitiative = new RPoint();
 
 	public float initiative;
 	public int HP;
@@ -38,6 +16,7 @@ class LObject
 	public bool isInParty, isAIControlled, isActive;
 
 	private Battlefield B { get { return World.Instance.battlefield; } }
+	private MainScreen M { get { return MainScreen.Instance; } }
 
 	public LObject() {}
 	public LObject(string shapei, bool isInPartyi, bool isAIControlledi)
@@ -55,18 +34,36 @@ class LObject
 		HP = shape.maxHP;
 		controlMovementCounter = 0;
 		isActive = true;
+
+		M.rPoints.Add(rPosition);
+		M.rPoints.Add(rInitiative);
 	}
 
-	public void SetPosition(ZPoint p, float speed)
+	public void SetPosition(ZPoint p, float speed, bool commonQueue)
 	{
-		rPosition.Add(position, p, speed);
+		if (commonQueue) rPosition.Add(position, p, speed, M.rMoves);
+		else rPosition.Add(position, p, speed);
 		position = p;
+	}
+
+	public void SetInitiative(float initiativei, float speed)
+	{
+		//rInitiative.Add(new ZPoint((int)(100 * initiative), 0), new ZPoint((int)(100 * initiativei), 0), speed, false);
+		rInitiative.Add(new Vector2(initiative, 0), new Vector2(initiativei, 0), speed, B.scaleAnimations);
+		initiative = initiativei;
 	}
 
 	public virtual void Kill()
 	{
 		isActive = false;
-		texture = BigBase.Instance.game.Content.Load<Texture2D>("oBlood");
+		texture = M.game.Content.Load<Texture2D>("oBlood");
+	}
+
+	private void AnimateFailedMovement(ZPoint.Direction d)
+	{
+		Vector2 v = 0.25f * (Vector2)(ZPoint.Zero.Shift(d));
+		rPosition.Add(v, 0.5f, M.rMoves);
+		rPosition.Add(-v, 0.5f, M.rMoves);
 	}
 
 	private void AnimateAttack(ZPoint p)
@@ -75,8 +72,8 @@ class LObject
 		v.Normalize();
 		v *= 0.5f;
 
-		rPosition.Add(position, position + v, 5.0f);
-		rPosition.Add(position + v, position, 5.0f);
+		rPosition.Add(v, 0.5f, M.rMoves);
+		rPosition.Add(-v, 0.5f, M.rMoves);
 	}
 
 	public void Attack(LObject l)
@@ -100,7 +97,8 @@ class LObject
 	public void Move(ZPoint.Direction d, bool control)
 	{
 		ZPoint destination = position.Shift(d);
-		if (B.IsWalkable(destination)) SetPosition(destination, 5.0f);
+		if (B.IsWalkable(destination)) SetPosition(destination, 1.0f, true);
+		else AnimateFailedMovement(d);
 
 		if (control == true && controlMovementCounter < 3)
 		{
@@ -122,20 +120,23 @@ class LObject
 			return;
 		}
 
-		TryToMove(ZPoint.GetDirection(World.Instance.random.Next(4)), false);
+		Move(ZPoint.GetDirection(World.Instance.random.Next(4)), false);
 	}
 
 	private void ContinueTurn(float time)
 	{
-		initiative -= time;
+		//float initiativeSpeed = 1.0f;
+		//if (this == B.currentLObject) initiativeSpeed = 60.0f;
+
+		SetInitiative(initiative - time, 1.0f);
 		B.CheckForEvents();
 	}
 
 	private void PassTurn(float time)
 	{
 		ContinueTurn(time);
-		LObject nextLObject = B.NextLObject;
-        if (nextLObject != null) nextLObject.Run();
+		//B.previousLObject = this;
+		B.NextLObject.Run();
 	}
 }
 

@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-
-class BigBase
+﻿class BigBase
 {
 	private static readonly BigBase instance = new BigBase();
 	public static BigBase Instance { get { return instance; } }
@@ -10,15 +8,14 @@ class BigBase
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
 	public GeneralBase<CreatureShape> creatureShapes = new GeneralBase<CreatureShape>();
 
-	public Game game;
+	//public Game game;
 
-	public void Load(Game g)
+	public void Load()
 	{
 		gTiles.Load("gTiles.xml");
 		lTiles.Load("lTiles.xml");
 		dialogs.Load("dialogs.xml");
 		creatureShapes.Load("creatureShapes.xml");
-		
-		game = g;
+		//game = g;
 	}
 }

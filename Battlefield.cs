@@ -1,5 +1,6 @@
 ﻿using System.Xml;
 using System.Linq;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,8 +11,10 @@ class Battlefield
 	private ZPoint p1, p2, m1, m2;
 	private Collection<LObject> lObjects = new Collection<LObject>();
 
-	public LObject currentLObject;
+	public LObject currentLObject;// previousLObject;
 	private Texture2D currentLObjectSymbol;
+
+	public Queue<RMove> scaleAnimations = new Queue<RMove>();
 
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 
@@ -32,9 +35,9 @@ class Battlefield
 		}
 	}
 
-	public void LoadTextures(Game game)
+	public void LoadTextures()
 	{
-		currentLObjectSymbol = game.Content.Load<Texture2D>("lCurrentObject");
+		currentLObjectSymbol = MainScreen.Instance.game.Content.Load<Texture2D>("lCurrentObject");
 	}
 
 	private bool InRange(ZPoint p)
@@ -90,13 +93,20 @@ class Battlefield
 		else battlefieldName = "grassy";
 		Load(battlefieldName);
 
+		lObjects.Clear();
 		lObjects.Add(new LPlayer());
 		AddLObjects("Morlock", true, false, World.Instance.player.partySize);
 		if (g.name == "Morlocks") AddLObjects("Morlock", false, true, 2);
 		else if (g.name == "Wild Dogs") AddLObjects("Wild Dog", false, true, 3);
 
-		foreach (LObject l in lObjects) l.SetPosition(RandomFreeTile(l.isInParty), 100.0f);
+		foreach (LObject l in lObjects)
+		{
+			l.SetPosition(RandomFreeTile(l.isInParty), 60.0f, false);
+			l.SetInitiative(World.Instance.random.Next(100) / 100.0f, 60.0f);
+		}
 
+		//previousLObject = NextLObject;
+        if (NextLObject.isAIControlled) NextLObject.Run();
 		currentLObject = NextLObject;
 		MainScreen.Instance.gameState = MainScreen.GameState.Local;
 	}
@@ -141,24 +151,47 @@ class Battlefield
 		return new Vector2(100, 100) + new Vector2(32 * p.x, 32 * p.y);
 	}
 
-	public void Draw(SpriteBatch sb)
+	private void DrawScale(ZPoint position)
 	{
-		if (MainScreen.Instance.gameState != MainScreen.GameState.Local) return;
+		int length = 500, height = 20;
+		Screen screen = new Screen(position, new ZPoint(length, height));
+
+		screen.Fill(MyMath.DarkDarkGray);
+
+		var query = from l in lObjects where l.isActive orderby l.rInitiative.x select l;
+		float zeroInitiative = -query.Last().rInitiative.x;
+
+		foreach (LObject l in query)
+		{
+			int rInitiative = (int)(100.0f * (-l.rInitiative.x - zeroInitiative)) + 1;
+			int y = -32, z = -32;
+			if (l.isInParty) { y = height; z = 0; }
+
+			if (scaleAnimations.Count == 0 || scaleAnimations.Peek().rPoint != l.rInitiative)
+				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), Color.White);
+
+			screen.Draw(l.texture, new ZPoint(rInitiative + 1, y));
+		}
+	}
+
+	public void Draw()
+	{
+		RPoint.Update(scaleAnimations);
+
+		MainScreen M = MainScreen.Instance;
+		if (M.gameState != MainScreen.GameState.Local) return;
 
 		for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++)
 		{
 			ZPoint p = new ZPoint(i, j);
-			sb.Draw(this[p].texture, GraphicCoordinates(p));
+			M.spriteBatch.Draw(this[p].texture, GraphicCoordinates(p));
 		}
 
 		var query = from l in lObjects orderby l.isActive select l;
-		foreach (LObject l in query)
-		{
-			l.rPosition.Update();
-			sb.Draw(l.texture, GraphicCoordinates(l.rPosition));
-		}
+		foreach (LObject l in query) M.spriteBatch.Draw(l.texture, GraphicCoordinates(l.rPosition));
 
-		sb.Draw(currentLObjectSymbol, GraphicCoordinates(currentLObject.rPosition) - new Vector2(0, 12));
+		M.spriteBatch.Draw(currentLObjectSymbol, GraphicCoordinates(currentLObject.rPosition) - new Vector2(0, 12));
+		DrawScale(new ZPoint(100, 650));
 	}
 
 	public LObject NextLObject
