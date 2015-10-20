@@ -41,7 +41,8 @@ public class MyMonoGame : Game
 		MainScreen.Instance.LoadTextures();
         GTile.LoadTextures();
 		LTile.LoadTextures();
-		CreatureShape.LoadTextures();
+		Texture.LoadTextures();
+		CreepShape.LoadTextures();
 		World.Instance.LoadTextures();
 	}
 
@@ -72,10 +73,10 @@ public class MyMonoGame : Game
 		if (MyGame.Instance.gameState == MyGame.GameState.Dialog && keyboardState != previousKeyboardState) M.dialogScreen.Press(keyboardState);
 		else if (MyGame.Instance.gameState == MyGame.GameState.Local)
 		{
-			if (KeyPressed(Keys.Right)) B.currentLObject.TryToMove(ZPoint.Direction.Right, keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Up)) B.currentLObject.TryToMove(ZPoint.Direction.Up, keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Left)) B.currentLObject.TryToMove(ZPoint.Direction.Left, keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Down)) B.currentLObject.TryToMove(ZPoint.Direction.Down, keyboardState.IsKeyDown(Keys.LeftControl));
+			if (KeyPressed(Keys.Right)) B.CurrentCreature.TryToMove(ZPoint.Direction.Right, keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Up)) B.CurrentCreature.TryToMove(ZPoint.Direction.Up, keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Left)) B.CurrentCreature.TryToMove(ZPoint.Direction.Left, keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Down)) B.CurrentCreature.TryToMove(ZPoint.Direction.Down, keyboardState.IsKeyDown(Keys.LeftControl));
 
 			if (mouseState.ScrollWheelValue > previousMouseState.ScrollWheelValue) M.editor.GoLeft();
 			else if (mouseState.ScrollWheelValue < previousMouseState.ScrollWheelValue) M.editor.GoRight();

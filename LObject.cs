@@ -1,5 +1,25 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Xml;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+class Texture : NamedObject
+{
+	public Texture2D data;
+
+	public override void Load(XmlNode xnode)
+	{
+		name = MyXml.GetString(xnode, "name");
+	}
+
+	public static void LoadTextures()
+	{
+		foreach (Texture t in BigBase.Instance.textures.data)
+		{
+			t.data = MainScreen.Instance.game.Content.Load<Texture2D>("local/" + t.name);
+		}
+	}
+}
 
 class LObject
 {
@@ -7,33 +27,34 @@ class LObject
 	public RPoint rPosition = new RPoint();
 	public RPoint rInitiative = new RPoint();
 
+	public bool isActive;
 	public float initiative;
-	public int HP;
-	private int controlMovementCounter;
-
-	public CreatureShape shape;
+	
 	public Texture2D texture;
-	public bool isInParty, isAIControlled, isActive;
+	public string name;
 
 	private Battlefield B { get { return World.Instance.battlefield; } }
 	private MainScreen M { get { return MainScreen.Instance; } }
 
 	public LObject() {}
-	public LObject(string shapei, bool isInPartyi, bool isAIControlledi)
+	//public LObject(string shapei, bool isInPartyi, bool isAIControlledi)
+	public LObject(string namei)
 	{
-		shape = BigBase.Instance.creatureShapes.Get(shapei);
-		isInParty = isInPartyi;
-		isAIControlled = isAIControlledi;
+		name = namei;
+		//shape = BigBase.Instance.creatureShapes.Get(shapei);
+		//isInParty = isInPartyi;
+		//isAIControlled = isAIControlledi;
 		Init();
 	}
 
-	protected void Init()
+	protected virtual void Init()
 	{
-		texture = shape.texture;
+		//texture = shape.texture;
 		initiative = 0.0f;
-		HP = shape.maxHP;
-		controlMovementCounter = 0;
-		isActive = true;
+		//HP = shape.maxHP;
+		//controlMovementCounter = 0;
+		//isActive = true;
+		isActive = false;
 
 		M.rPoints.Add(rPosition);
 		M.rPoints.Add(rInitiative);
@@ -55,106 +76,35 @@ class LObject
 	public virtual void Kill()
 	{
 		isActive = false;
-		texture = M.game.Content.Load<Texture2D>("other/blood");
+		//texture = M.game.Content.Load<Texture2D>("local/blood");
 	}
 
-	public Color RelationshipColor
+	public virtual Color RelationshipColor
 	{
 		get
 		{
-			if (isInParty) return Color.Green;
-			else return Color.Red;
+			return Color.Blue;
+			//if (isInParty) return Color.Green;
+			//else return Color.Red;
 		}
 	}
 
-	private void AnimateFailedMovement(ZPoint.Direction d)
+	public virtual void Run()
 	{
-		Vector2 v = 0.25f * (Vector2)(ZPoint.Zero.Shift(d));
-		rPosition.Add(v, 0.5f / shape.movementSpeed, M.rMoves);
-		rPosition.Add(-v, 0.5f / shape.movementSpeed, M.rMoves);
 	}
 
-	private void AnimateAttack(ZPoint p)
-	{
-		Vector2 v = p - position;
-		v.Normalize();
-		v *= 0.5f;
-
-		rPosition.Add(v, 0.5f / shape.attackSpeed, M.rMoves);
-		rPosition.Add(-v, 0.5f / shape.attackSpeed, M.rMoves);
-	}
-
-	public void Attack(LObject l)
-	{
-		l.HP -= shape.damage;
-		if (l.HP <= 0) l.Kill();
-
-		AnimateAttack(l.position);
-		PassTurn(shape.attackSpeed);
-	}
-
-	public void TryToMove(ZPoint.Direction d, bool control)
-	{
-		ZPoint destination = position.Shift(d);
-		LObject l = B.GetLObject(destination);
-
-		if (l != null) Attack(l);
-		else if (B.IsWalkable(destination)) Move(d, control);
-	}
-
-	public void Move(ZPoint.Direction d, bool control)
-	{
-		ZPoint destination = position.Shift(d);
-		if (B.IsWalkable(destination)) SetPosition(destination, 1.0f / shape.movementSpeed, true);
-		else AnimateFailedMovement(d);
-
-		if (control == true && controlMovementCounter < 3)
-		{
-			controlMovementCounter++;
-			ContinueTurn(shape.movementSpeed);
-		}
-		else
-		{
-			controlMovementCounter = 0;
-			PassTurn(shape.movementSpeed);
-		}
-	}
-
-	public void Run()
-	{
-		if (!isAIControlled)
-		{
-			B.currentLObject = B.NextLObject;
-			return;
-		}
-
-		Move(ZPoint.GetDirection(World.Instance.random.Next(4)), false);
-	}
-
-	private void ContinueTurn(float time)
+	protected void ContinueTurn(float time)
 	{
 		Log.Assert(time > 0, "time <= 0");
 		SetInitiative(initiative - time, 1.0f / time);
 		B.CheckForEvents();
 	}
 
-	private void PassTurn(float time)
+	protected void PassTurn(float time)
 	{
 		ContinueTurn(time);
 
 		LObject nextLObject = B.NextLObject;
 		if (nextLObject != null) nextLObject.Run();
 	}
-}
-
-class LPlayer : LObject
-{
-	public LPlayer()
-	{
-		shape = BigBase.Instance.creatureShapes.Get("Human");
-		isInParty = true;
-		isAIControlled = false;
-		Init();
-	}
-    public override void Kill() { World.Instance.player.Kill(); }
 }

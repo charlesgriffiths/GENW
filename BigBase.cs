@@ -10,7 +10,11 @@
 	public GeneralBase<LTile> lTiles = new GeneralBase<LTile>();
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
-	public GeneralBase<CreatureShape> creatureShapes = new GeneralBase<CreatureShape>();
+
+	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
+	public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
+	public GeneralBase<CharacterClass> classes = new GeneralBase<CharacterClass>();
+	public GeneralBase<CharacterRace> races = new GeneralBase<CharacterRace>();
 
 	public void Load()
 	{
@@ -22,7 +26,11 @@
 		lTiles.Load("lTiles.xml");
 		palettes.Load("palettes.xml");
 		dialogs.Load("dialogs.xml");
-		creatureShapes.Load("creatureShapes.xml");
+
+		textures.Load("textures.xml");
+		creepShapes.Load("creepShapes.xml");
+		classes.Load("classes.xml");
+		races.Load("races.xml");
 
 		Log.WriteLine("OK");
 	}

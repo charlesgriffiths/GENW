@@ -41,7 +41,9 @@
   <ItemGroup>
     <Compile Include="Battlefield.cs" />
     <Compile Include="BigBase.cs" />
-    <Compile Include="CreatureShape.cs" />
+    <Compile Include="Character.cs" />
+    <Compile Include="Creature.cs" />
+    <Compile Include="Creep.cs" />
     <Compile Include="Dialog.cs" />
     <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />
@@ -78,6 +80,20 @@
   </ItemGroup>
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.mgcb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\WindowsGL\Debug\Data\Battlefields\Custom Mountain.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\classes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\codex.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\gTiles.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\gTileTypes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\lTiles.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\lTileTypes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\palettes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\races.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\tips.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\world.xml" />
   </ItemGroup>
   <!-- Specify the search path explicitly so the ResolveAssemblyReferences task picks the right ones -->
   <Target Name="BeforeResolveReferences">

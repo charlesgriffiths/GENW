@@ -14,6 +14,7 @@ class Battlefield
 	private Collection<LObject> lObjects = new Collection<LObject>();
 
 	public LObject currentLObject;
+	//public Creature currentCreature;
 	private Texture2D currentLObjectSymbol, zSelectionTexture;
 
 	public Queue<RMove> scaleAnimations = new Queue<RMove>();
@@ -32,10 +33,6 @@ class Battlefield
 				return null;
 			}
 		}
-		//set
-		//{
-			//if (InRange(p)) data[p.x, p.y] = value.name[0]; // !!!
-		//}
 	}
 
 	public void SetTile(ZPoint p, char value) {	if (InRange(p)) data[p.x, p.y] = value;	}
@@ -53,18 +50,33 @@ class Battlefield
 
 	public LObject GetLObject(ZPoint p)
 	{
-		foreach (LObject l in lObjects) if (l.position.TheSameAs(p) && l.isActive) return l;
+		//foreach (LObject l in lObjects) if (l.position.TheSameAs(p) && l.isActive) return l;
+		foreach (LObject l in lObjects) if (l.position.TheSameAs(p)) return l;
 		return null;
+	}
+
+	public Creature GetCreature(ZPoint p)
+	{
+		foreach (Creature c in lObjects) if (c.position.TheSameAs(p) && c.isActive) return c;
+		return null;
+	}
+
+	public Creature CurrentCreature
+	{
+		get
+		{
+			return currentLObject as Creature;
+		}
 	}
 
 	public bool IsWalkable(ZPoint p)
 	{
 		if (!InRange(p)) return false;
-		if (!this[p].IsWalkable || GetLObject(p) != null) return false;
+		if (!this[p].IsWalkable || GetCreature(p) != null) return false;
 		return true;
 	}
 
-	private ZPoint RandomFreeTile(bool inParty)
+	private ZPoint RandomFreeTile()
 	{
 		//ZPoint z1, z2;
 		//if (inParty) { z1 = p1; z2 = p2; }
@@ -84,12 +96,12 @@ class Battlefield
 		return new ZPoint(0, 0);
 	}
 
-	private void AddLObjects(string type, bool inParty, bool aiControlled, int quantity)
+	private void AddCreeps(string type, bool inParty, bool aiControlled, int quantity)
 	{
 		for (int i = 0; i < quantity; i++)
 		{
-			LObject lObject = new LObject(type, inParty, aiControlled);
-			lObjects.Add(lObject);
+			Creep item = new Creep(type, inParty, aiControlled);
+			lObjects.Add(item);
 		}
 	}
 
@@ -103,31 +115,38 @@ class Battlefield
 
 		lObjects.Clear();
 		lObjects.Add(new LPlayer());
-		AddLObjects("Morlock", true, false, World.Instance.player.partySize);
-		if (g.name == "Morlocks") AddLObjects("Morlock", false, true, 2);
-		else if (g.name == "Wild Dogs") AddLObjects("Wild Dog", false, true, 3);
+		AddCreeps("Morlock", true, false, World.Instance.player.partySize);
+		if (g.name == "Morlocks") AddCreeps("Morlock", false, true, 2);
+		else if (g.name == "Wild Dogs") AddCreeps("Wild Dog", false, true, 3);
 
 		foreach (LObject l in lObjects)
 		{
-			l.SetPosition(RandomFreeTile(l.isInParty), 60.0f, false);
+			l.SetPosition(RandomFreeTile(), 60.0f, false);
 			if (l is LPlayer) l.SetInitiative(0.1f, 60.0f);
 			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 60.0f);
 		}
 
-        if (NextLObject.isAIControlled) NextLObject.Run();
+		if(NextLObject is Creature) { if ((NextLObject as Creature).isAIControlled) NextLObject.Run(); }
+		else NextLObject.Run();
+
 		currentLObject = NextLObject;
 		MyGame.Instance.gameState = MyGame.GameState.Local;
 	}
 
 	public void CheckForEvents()
 	{
+		var aliveMonsters = from c in lObjects where c is Creature && c.isActive && !(c as Creature).isInParty select c;
+		if (aliveMonsters.Count() == 0) MyGame.Instance.gameState = MyGame.GameState.Global;
+
+		/*
 		Collection<LObject> aliveMonsters = new Collection<LObject>();
 		foreach (LObject l in lObjects) if (l.isActive && !l.isInParty) aliveMonsters.Add(l);
 		if (aliveMonsters.Count == 0)
 		{
-			lObjects.Clear();
+			//lObjects.Clear();
 			MyGame.Instance.gameState = MyGame.GameState.Global;
 		}
+		*/
 	}
 
 	private void Load(string name)
@@ -189,19 +208,19 @@ class Battlefield
 		var query = from l in lObjects where l.isActive orderby l.rInitiative.x select l;
 		float zeroInitiative = -query.Last().rInitiative.x;
 
-		foreach (LObject l in query)
+		foreach (Creature c in query)
 		{
-			int rInitiative = (int)(100.0f * (-l.rInitiative.x - zeroInitiative)) + 1;
+			int rInitiative = (int)(100.0f * (-c.rInitiative.x - zeroInitiative)) + 1;
 			int y = -32, z = -32;
-			if (l.isInParty) { y = height; z = 0; }
+			if (c.isInParty) { y = height; z = 0; }
 
 			Color color = Color.White;
-			if (l.position.TheSameAs(zMouse)) color = l.RelationshipColor;
+			if (c.position.TheSameAs(zMouse)) color = c.RelationshipColor;
 
-			if (scaleAnimations.Count == 0 || scaleAnimations.Peek().rPoint != l.rInitiative)
+			if (scaleAnimations.Count == 0 || scaleAnimations.Peek().rPoint != c.rInitiative)
 				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
 
-			screen.Draw(l.texture, new ZPoint(rInitiative + 1, y));
+			screen.Draw(c.texture, new ZPoint(rInitiative + 1, y));
 		}
 	}
 
@@ -233,7 +252,11 @@ class Battlefield
 	{
 		get
 		{
+			//Log.WriteLine(lObjects.Count.ToString());
 			var query = from l in lObjects where l.isActive orderby -l.initiative select l;
+			//var query = from l in lObjects select l;
+			//Log.WriteLine(query.Count().ToString());
+
 			if (query.Count() != 0) return query.First();
 			else return null;
 		}
