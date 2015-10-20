@@ -48,7 +48,6 @@ class LObject
 
 	public void SetInitiative(float initiativei, float speed)
 	{
-		//rInitiative.Add(new ZPoint((int)(100 * initiative), 0), new ZPoint((int)(100 * initiativei), 0), speed, false);
 		rInitiative.Add(new Vector2(initiative, 0), new Vector2(initiativei, 0), speed, B.scaleAnimations);
 		initiative = initiativei;
 	}
@@ -56,14 +55,23 @@ class LObject
 	public virtual void Kill()
 	{
 		isActive = false;
-		texture = M.game.Content.Load<Texture2D>("oBlood");
+		texture = M.game.Content.Load<Texture2D>("other/blood");
+	}
+
+	public Color RelationshipColor
+	{
+		get
+		{
+			if (isInParty) return Color.Green;
+			else return Color.Red;
+		}
 	}
 
 	private void AnimateFailedMovement(ZPoint.Direction d)
 	{
 		Vector2 v = 0.25f * (Vector2)(ZPoint.Zero.Shift(d));
-		rPosition.Add(v, 0.5f, M.rMoves);
-		rPosition.Add(-v, 0.5f, M.rMoves);
+		rPosition.Add(v, 0.5f / shape.movementSpeed, M.rMoves);
+		rPosition.Add(-v, 0.5f / shape.movementSpeed, M.rMoves);
 	}
 
 	private void AnimateAttack(ZPoint p)
@@ -72,8 +80,8 @@ class LObject
 		v.Normalize();
 		v *= 0.5f;
 
-		rPosition.Add(v, 0.5f, M.rMoves);
-		rPosition.Add(-v, 0.5f, M.rMoves);
+		rPosition.Add(v, 0.5f / shape.attackSpeed, M.rMoves);
+		rPosition.Add(-v, 0.5f / shape.attackSpeed, M.rMoves);
 	}
 
 	public void Attack(LObject l)
@@ -97,7 +105,7 @@ class LObject
 	public void Move(ZPoint.Direction d, bool control)
 	{
 		ZPoint destination = position.Shift(d);
-		if (B.IsWalkable(destination)) SetPosition(destination, 1.0f, true);
+		if (B.IsWalkable(destination)) SetPosition(destination, 1.0f / shape.movementSpeed, true);
 		else AnimateFailedMovement(d);
 
 		if (control == true && controlMovementCounter < 3)
@@ -125,18 +133,17 @@ class LObject
 
 	private void ContinueTurn(float time)
 	{
-		//float initiativeSpeed = 1.0f;
-		//if (this == B.currentLObject) initiativeSpeed = 60.0f;
-
-		SetInitiative(initiative - time, 1.0f);
+		Log.Assert(time > 0, "time <= 0");
+		SetInitiative(initiative - time, 1.0f / time);
 		B.CheckForEvents();
 	}
 
 	private void PassTurn(float time)
 	{
 		ContinueTurn(time);
-		//B.previousLObject = this;
-		B.NextLObject.Run();
+
+		LObject nextLObject = B.NextLObject;
+		if (nextLObject != null) nextLObject.Run();
 	}
 }
 

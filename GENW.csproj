@@ -45,7 +45,8 @@
     <Compile Include="Dialog.cs" />
     <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />
-    <Compile Include="Game.cs" />
+    <Compile Include="MyGame.cs" />
+    <Compile Include="MyMonoGame.cs" />
     <Compile Include="GObject.cs" />
     <Compile Include="LObject.cs" />
     <Compile Include="Map.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Log.cs" />
     <Compile Include="MyXml.cs" />
     <Compile Include="NamedObject.cs" />
+    <Compile Include="Palette.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

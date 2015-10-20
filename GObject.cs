@@ -21,7 +21,7 @@ class GObject
 
 	public virtual void LoadTexture()
 	{
-		texture = MainScreen.Instance.game.Content.Load<Texture2D>("g" + name);
+		texture = MainScreen.Instance.game.Content.Load<Texture2D>("global/g" + name);
 	}
 
 	public virtual void Draw()
@@ -54,7 +54,7 @@ class GObject
 	public virtual void Move(HexPoint.HexDirection d)
 	{
 		ZPoint destination = position.Shift(d);
-		if (W.map.IsWalkable(destination)) SetPosition(destination, 2.0f);
+		if (W.map.IsWalkable(destination)) SetPosition(destination, 4.0f);
 		PassTurn(speed);
 	}
 

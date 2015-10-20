@@ -39,6 +39,8 @@ class Screen
 		Draw(texture, p, Color.White);
 	}
 
+	public void Draw(Texture2D texture, Vector2 v) { Draw(texture, new ZPoint(v)); }
+
 	public void DrawString(SpriteFont font, string text, ZPoint p, Color color)
 	{
 		MainScreen.Instance.spriteBatch.DrawString(font, text, position + p, color);

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Xml;
 using System.Collections.ObjectModel;
+using Microsoft.Xna.Framework;
 
 class World
 {
 	private static readonly World instance = new World();
 	public static World Instance { get { return instance; } }
-	
+	private World() {}
+		
 	public Map map = new Map();
 	public Battlefield battlefield = new Battlefield();
 	public Player player = new Player();
@@ -19,7 +21,7 @@ class World
 	public void Load()
 	{
 		Log.Write("loading the world... ");
-		XmlNode xnode = MyXml.SecondChild("world.xml");
+		XmlNode xnode = MyXml.SecondChild("Data/world.xml");
 		Log.Assert(xnode.Name == "map", "wrong world file format");
 
 		int width = MyXml.GetInt(xnode, "width");
@@ -38,14 +40,14 @@ class World
 
 		gObjects.Add(new GObject("Morlocks", new HexPoint(13, 13)));
 		gObjects.Add(new GObject("Morlocks", new HexPoint(20, 10)));
-		gObjects.Add(new GObject("Morlocks", new HexPoint(5, 16)));
-		gObjects.Add(new GObject("Morlocks", new HexPoint(15, 9)));
+		//gObjects.Add(new GObject("Morlocks", new HexPoint(5, 16)));
+		//gObjects.Add(new GObject("Morlocks", new HexPoint(15, 9)));
 
 		gObjects.Add(new GObject("Wild Dogs", new HexPoint(20, 16)));
 		gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 13)));
-		gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 18)));
-		gObjects.Add(new GObject("Wild Dogs", new HexPoint(24, 15)));
-		gObjects.Add(new GObject("Wild Dogs", new HexPoint(19, 20)));
+		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 18)));
+		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(24, 15)));
+		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(19, 20)));
 	}
 
 	public void LoadTextures()
@@ -55,12 +57,12 @@ class World
 		battlefield.LoadTextures();
 	}
 
-	public void Draw()
+	public void Draw(Vector2 mouse)
 	{
 		map.Draw();
 		foreach (GObject g in gObjects) g.Draw();
 		player.Draw();
-		battlefield.Draw();
+		battlefield.Draw(mouse);
 	}
 
 	public GObject NextGObject

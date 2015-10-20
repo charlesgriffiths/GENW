@@ -60,17 +60,9 @@ class ZPoint
 		return new Vector2(p.x / f, p.y / f);
 	}
 
-	public static implicit operator HexPoint(ZPoint zPoint)
-	{
-		return new HexPoint(zPoint.x, zPoint.y);
-	}
-
-	public static implicit operator Vector2(ZPoint zPoint)
-	{
-		return new Vector2(zPoint.x, zPoint.y);
-	}
-
-	public static implicit operator RPoint(ZPoint zPoint) { return new RPoint(zPoint.x, zPoint.y); }
+	public static implicit operator HexPoint(ZPoint zPoint) { return new HexPoint(zPoint.x, zPoint.y); }
+	public static implicit operator RPoint(ZPoint zPoint) {	return new RPoint(zPoint.x, zPoint.y); }
+	public static implicit operator Vector2(ZPoint zPoint) { return new Vector2(zPoint.x, zPoint.y); }
 
 	public override string ToString()
 	{

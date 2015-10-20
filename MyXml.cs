@@ -20,6 +20,11 @@ static class MyXml
 		return xmlElement.GetAttribute(attribute);
     }
 
+	public static char GetChar(XmlNode xmlNode, string attribute)
+	{
+		return GetString(xmlNode, attribute)[0];
+	}
+
 	public static int GetInt(XmlNode xmlNode, string attribute)
 	{
         return int.Parse(GetString(xmlNode, attribute));
@@ -28,5 +33,10 @@ static class MyXml
 	public static float GetFloat(XmlNode xmlNode, string attribute)
 	{
 		return float.Parse(GetString(xmlNode, attribute));
+	}
+
+	public static bool GetBool(XmlNode xmlNode, string attribute)
+	{
+		return bool.Parse(GetString(xmlNode, attribute));
 	}
 }

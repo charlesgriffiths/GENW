@@ -8,6 +8,7 @@ class MainScreen : Screen
 	private static readonly MainScreen instance = new MainScreen();
 	public static MainScreen Instance { get { return instance; } }
 
+	public ZPoint windowPosition;
 	public SpriteBatch spriteBatch;
 	public Game game;
 
@@ -21,14 +22,11 @@ class MainScreen : Screen
 	public Collection<RPoint> rPoints = new Collection<RPoint>();
 	public Queue<RMove> rMoves = new Queue<RMove>();
 
-	public enum GameState { Global, Local, Dialog };
-	public GameState gameState;
-
-	public MainScreen()
+	private MainScreen()
 	{
-		position = new ZPoint(200, 150);
+		windowPosition = new ZPoint(200, 150);
+		position = new ZPoint(0, 0);
 		size = new ZPoint(1280, 720);
-		gameState = GameState.Global;
 	}
 
 	public void Init(Game g)
@@ -47,7 +45,7 @@ class MainScreen : Screen
 		editor = new Editor(size - new ZPoint(66, 62), new ZPoint(56, 52));
 		dialogScreen = new DialogScreen(new ZPoint(200, 200), new ZPoint(600, 400));
 
-		hexSelectionTexture = game.Content.Load<Texture2D>("hexSelection");
+		hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
 		ambientFont = game.Content.Load<SpriteFont>("fAmbient");
 		dialogScreen.dialogFont = game.Content.Load<SpriteFont>("fDialog");
 	}
@@ -57,10 +55,10 @@ class MainScreen : Screen
 		RPoint.Update(rMoves);
 		foreach (RPoint p in rPoints) p.Update();
 
-		World.Instance.Draw();
+		World.Instance.Draw(mouse);
 
 		HexPoint hexMouse = HexCoordinates(mouse);
-        if (gameState == GameState.Global) spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
+        if (MyGame.Instance.gameState == MyGame.GameState.Global) spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
 		spriteBatch.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
 		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.partySize, new Vector2(10, 30), Color.Yellow);
 

@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System;
+using System.Xml;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,11 +9,12 @@ using Microsoft.Xna.Framework.Graphics;
 class Battlefield
 {
 	private char[,] data;
-	private ZPoint p1, p2, m1, m2;
+	public Palette palette;
+	//private ZPoint p1, p2, m1, m2;
 	private Collection<LObject> lObjects = new Collection<LObject>();
 
-	public LObject currentLObject;// previousLObject;
-	private Texture2D currentLObjectSymbol;
+	public LObject currentLObject;
+	private Texture2D currentLObjectSymbol, zSelectionTexture;
 
 	public Queue<RMove> scaleAnimations = new Queue<RMove>();
 
@@ -22,22 +24,26 @@ class Battlefield
 	{
 		get
 		{
-			if (InRange(p)) return BigBase.Instance.lTiles.Get(data[p.x, p.y].ToString());
+			if (InRange(p)) return palette[data[p.x, p.y]];
+			//return BigBase.Instance.lTiles.Get(data[p.x, p.y].ToString());
 			else
 			{
 				Log.Error("battlefield index out of range");
 				return null;
 			}
 		}
-		set
-		{
-			if (InRange(p)) data[p.x, p.y] = value.name[0];
-		}
+		//set
+		//{
+			//if (InRange(p)) data[p.x, p.y] = value.name[0]; // !!!
+		//}
 	}
+
+	public void SetTile(ZPoint p, char value) {	if (InRange(p)) data[p.x, p.y] = value;	}
 
 	public void LoadTextures()
 	{
-		currentLObjectSymbol = MainScreen.Instance.game.Content.Load<Texture2D>("lCurrentObject");
+		currentLObjectSymbol = MainScreen.Instance.game.Content.Load<Texture2D>("other/currentObject");
+		zSelectionTexture = MainScreen.Instance.game.Content.Load<Texture2D>("other/zSelection");
 	}
 
 	private bool InRange(ZPoint p)
@@ -60,14 +66,16 @@ class Battlefield
 
 	private ZPoint RandomFreeTile(bool inParty)
 	{
-		ZPoint z1, z2;
-		if (inParty) { z1 = p1; z2 = p2; }
-		else { z1 = m1; z2 = m2; }
+		//ZPoint z1, z2;
+		//if (inParty) { z1 = p1; z2 = p2; }
+		//else { z1 = m1; z2 = m2; }
 
 		for (int i = 0; i < 100; i++)
 		{
-			int zx = World.Instance.random.Next(z1.x, z2.x + 1);
-			int zy = World.Instance.random.Next(z1.y, z2.y + 1);
+			//int zx = World.Instance.random.Next(z1.x, z2.x + 1);
+			//int zy = World.Instance.random.Next(z1.y, z2.y + 1);
+			int zx = World.Instance.random.Next(Size.x);
+			int zy = World.Instance.random.Next(Size.y);
 
 			ZPoint z = new ZPoint(zx, zy);
 			if (IsWalkable(z)) return z;
@@ -89,8 +97,8 @@ class Battlefield
 	{
 		GTile gTile = World.Instance.map[g.position];
 		string battlefieldName;
-		if (gTile.picture == "Deep Forest" || gTile.picture == "Light Forest") battlefieldName = "foresty";
-		else battlefieldName = "grassy";
+		if (gTile.type.name == "mountainPass") battlefieldName = "Custom Mountain";
+		else battlefieldName = "Custom Mountain";
 		Load(battlefieldName);
 
 		lObjects.Clear();
@@ -102,13 +110,13 @@ class Battlefield
 		foreach (LObject l in lObjects)
 		{
 			l.SetPosition(RandomFreeTile(l.isInParty), 60.0f, false);
-			l.SetInitiative(World.Instance.random.Next(100) / 100.0f, 60.0f);
+			if (l is LPlayer) l.SetInitiative(0.1f, 60.0f);
+			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 60.0f);
 		}
 
-		//previousLObject = NextLObject;
         if (NextLObject.isAIControlled) NextLObject.Run();
 		currentLObject = NextLObject;
-		MainScreen.Instance.gameState = MainScreen.GameState.Local;
+		MyGame.Instance.gameState = MyGame.GameState.Local;
 	}
 
 	public void CheckForEvents()
@@ -118,32 +126,46 @@ class Battlefield
 		if (aliveMonsters.Count == 0)
 		{
 			lObjects.Clear();
-			MainScreen.Instance.gameState = MainScreen.GameState.Global;
+			MyGame.Instance.gameState = MyGame.GameState.Global;
 		}
 	}
 
 	private void Load(string name)
 	{
-		XmlNode xnode = MyXml.FirstChild("Battlefields/" + name + ".xml");
-		int width = MyXml.GetInt(xnode, "width");
-		int height = MyXml.GetInt(xnode, "height");
-		data = new char[width, height];
+		XmlNode xnode = MyXml.FirstChild("Data/Battlefields/" + name + ".xml");
+		palette = BigBase.Instance.palettes.Get(MyXml.GetString(xnode, "palette"));
 
-		m1 = new ZPoint(MyXml.GetInt(xnode, "m1x"), MyXml.GetInt(xnode, "m1y"));
-		m2 = new ZPoint(MyXml.GetInt(xnode, "m2x"), MyXml.GetInt(xnode, "m2y"));
-		p1 = new ZPoint(MyXml.GetInt(xnode, "p1x"), MyXml.GetInt(xnode, "p1y"));
-		p2 = new ZPoint(MyXml.GetInt(xnode, "p2x"), MyXml.GetInt(xnode, "p2y"));
+		//int width = MyXml.GetInt(xnode, "width");
+		//int height = MyXml.GetInt(xnode, "height");
 
 		string text = xnode.InnerText;
-		text = text.Replace('\n', ' ');
-		text = text.Replace('\r', ' ');
-		text = text.Replace(" ", "");
-		Log.Assert(text.Length == width * height, "wrong battlefield data");
+		char[] delimiters = new char[] { '\r', '\n', ' ' };
+		string[] dataLines = text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+		int width = dataLines[0].Length;
+		int height = dataLines.Length;
+		data = new char[width, height];
 
-		for (int j = 0; j < height; j++)
-		{
-			for (int i = 0; i < width; i++) data[i, j] = text[i + j * width];
-		}
+		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) data[i, j] = dataLines[j][i];
+		
+
+		//m1 = new ZPoint(MyXml.GetInt(xnode, "m1x"), MyXml.GetInt(xnode, "m1y"));
+		//m2 = new ZPoint(MyXml.GetInt(xnode, "m2x"), MyXml.GetInt(xnode, "m2y"));
+		//p1 = new ZPoint(MyXml.GetInt(xnode, "p1x"), MyXml.GetInt(xnode, "p1y"));
+		//p2 = new ZPoint(MyXml.GetInt(xnode, "p2x"), MyXml.GetInt(xnode, "p2y"));
+
+		//(!)аккуратно: хотим, чтобы он сам определил ширину и высоту
+		/*
+				string text = xnode.InnerText;
+				text = text.Replace('\n', ' ');
+				text = text.Replace('\r', ' ');
+				text = text.Replace(" ", "");
+				Log.Assert(text.Length == width * height, "wrong battlefield data");
+
+				for (int j = 0; j < height; j++)
+				{
+					for (int i = 0; i < width; i++) data[i, j] = text[i + j * width];
+				}
+		*/
 	}
 
 	private Vector2 GraphicCoordinates(RPoint p)
@@ -151,7 +173,13 @@ class Battlefield
 		return new Vector2(100, 100) + new Vector2(32 * p.x, 32 * p.y);
 	}
 
-	private void DrawScale(ZPoint position)
+	public ZPoint ZCoordinates(Vector2 mouse)
+	{
+		Vector2 logical = (mouse - new Vector2(100, 100)) / 32.0f;
+		return new ZPoint((int)logical.X, (int)logical.Y);
+	}
+
+	private void DrawScale(ZPoint position, ZPoint zMouse)
 	{
 		int length = 500, height = 20;
 		Screen screen = new Screen(position, new ZPoint(length, height));
@@ -167,19 +195,22 @@ class Battlefield
 			int y = -32, z = -32;
 			if (l.isInParty) { y = height; z = 0; }
 
+			Color color = Color.White;
+			if (l.position.TheSameAs(zMouse)) color = l.RelationshipColor;
+
 			if (scaleAnimations.Count == 0 || scaleAnimations.Peek().rPoint != l.rInitiative)
-				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), Color.White);
+				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
 
 			screen.Draw(l.texture, new ZPoint(rInitiative + 1, y));
 		}
 	}
 
-	public void Draw()
+	public void Draw(Vector2 mouse)
 	{
 		RPoint.Update(scaleAnimations);
 
 		MainScreen M = MainScreen.Instance;
-		if (M.gameState != MainScreen.GameState.Local) return;
+		if (MyGame.Instance.gameState != MyGame.GameState.Local) return;
 
 		for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++)
 		{
@@ -191,7 +222,11 @@ class Battlefield
 		foreach (LObject l in query) M.spriteBatch.Draw(l.texture, GraphicCoordinates(l.rPosition));
 
 		M.spriteBatch.Draw(currentLObjectSymbol, GraphicCoordinates(currentLObject.rPosition) - new Vector2(0, 12));
-		DrawScale(new ZPoint(100, 650));
+
+		ZPoint zMouse = ZCoordinates(mouse);
+		M.Draw(zSelectionTexture, GraphicCoordinates(zMouse));
+
+		DrawScale(new ZPoint(100, 650), zMouse);
 	}
 
 	public LObject NextLObject

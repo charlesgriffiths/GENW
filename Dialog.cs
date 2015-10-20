@@ -50,23 +50,4 @@ class Dialog : NamedObject
 			node = node.NextSibling;
 		}
 	}
-/*
-	public static void LoadBase()
-	{
-		// повторяющийся код с тайлами, очевидно. Потом исправить!
-		Log.Write("loading the dialog database... ");
-		XmlNode xnode = MyXml.SecondChild("dialogs.xml");
-
-		while (xnode != null)
-		{
-			Dialog temp = new Dialog();	// вот эти 2 строчки превратить в одну, сделать специальный конструктор просто.
-			temp.Load((XmlElement)xnode); // аналогично для тайлов.
-			BigBase.Instance.dialogBase.Add(temp);
-			xnode = xnode.NextSibling;
-		}
-
-		BigBase.Instance.dialogBase.loaded = true;
-		Log.WriteLine("OK");
-	}
-*/
 }

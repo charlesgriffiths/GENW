@@ -21,14 +21,15 @@ class Player : GObject
 
 	public override void LoadTexture()
 	{
-		texture = M.game.Content.Load<Texture2D>("gPlayer");
-		textureHidden = M.game.Content.Load<Texture2D>("gPlayerHidden");
+		texture = M.game.Content.Load<Texture2D>("other/player");
+		textureHidden = M.game.Content.Load<Texture2D>("other/playerHidden");
 	}
 
 	public override void Draw()
 	{
 		rPosition.Update();
-		if (W.map[position].type != "forest") M.spriteBatch.Draw(texture, M.GraphicCoordinates(rPosition));
+		if (W.map[position].type.name != BigBase.Instance.gTileTypes.SafeName("forest"))
+			M.spriteBatch.Draw(texture, M.GraphicCoordinates(rPosition));
 		else M.spriteBatch.Draw(textureHidden, M.GraphicCoordinates(rPosition));
 	}
 

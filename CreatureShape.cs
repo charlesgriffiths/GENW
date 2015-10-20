@@ -19,6 +19,6 @@ class CreatureShape : NamedObject
 	public static void LoadTextures()
 	{
 		foreach (CreatureShape s in BigBase.Instance.creatureShapes.data)
-			s.texture = MainScreen.Instance.game.Content.Load<Texture2D>("l" + s.name);
+			s.texture = MainScreen.Instance.game.Content.Load<Texture2D>("local/" + s.name);
 	}
 }

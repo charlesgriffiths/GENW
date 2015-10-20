@@ -4,8 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 class DialogScreen
 {
-	//public bool isActive = false;
-
 	private DialogNode dialogNode;
 	private string dialogName;
 	private GObject gObject;
@@ -20,7 +18,7 @@ class DialogScreen
 
 	public void Draw()
 	{
-		if (MainScreen.Instance.gameState != MainScreen.GameState.Dialog) return;
+		if (MyGame.Instance.gameState != MyGame.GameState.Dialog) return;
 
 		screen.Fill(new Color(0.2f, 0.2f, 0.2f));
 		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.LightGray, 50);
@@ -57,7 +55,7 @@ class DialogScreen
 //		else if (dialogName == "Wild Dogs Encounter")
 
 		if (r.jump != "") dialogNode = BigBase.Instance.dialogs.Get(dialogName).nodes[r.jump];
-		else MainScreen.Instance.gameState = MainScreen.GameState.Global;
+		else MyGame.Instance.gameState = MyGame.GameState.Global;
 	}
 
 	public void Press(KeyboardState keyboardState)
@@ -71,7 +69,6 @@ class DialogScreen
 		dialogName = name;
 		dialogNode = BigBase.Instance.dialogs.Get(name).nodes["entry"];
 		gObject = g;
-		//isActive = true;
-		MainScreen.Instance.gameState = MainScreen.GameState.Dialog;
+		MyGame.Instance.gameState = MyGame.GameState.Dialog;
 	}
 }

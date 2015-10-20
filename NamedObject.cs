@@ -38,9 +38,16 @@ class GeneralBase<T> where T : NamedObject, new ()
 		return null;
 	}
 
+	public string SafeName(string name)
+	{
+		foreach (T t in data) if (t.name == name) return name;
+		Log.Error("No name " + name + " found in base");
+		return name;
+	}
+
 	public void Load(string filename)
 	{
-		XmlNode xnode = MyXml.SecondChild(filename);
+		XmlNode xnode = MyXml.SecondChild("Data/" + filename);
 
 		while (xnode != null)
 		{
