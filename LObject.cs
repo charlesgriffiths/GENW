@@ -37,24 +37,18 @@ class LObject
 	private MainScreen M { get { return MainScreen.Instance; } }
 
 	public LObject() {}
-	//public LObject(string shapei, bool isInPartyi, bool isAIControlledi)
 	public LObject(string namei)
 	{
 		name = namei;
-		//shape = BigBase.Instance.creatureShapes.Get(shapei);
-		//isInParty = isInPartyi;
-		//isAIControlled = isAIControlledi;
+		isActive = false;
+		texture = BigBase.Instance.textures.Get(name).data;
+
 		Init();
 	}
 
 	protected virtual void Init()
 	{
-		//texture = shape.texture;
 		initiative = 0.0f;
-		//HP = shape.maxHP;
-		//controlMovementCounter = 0;
-		//isActive = true;
-		isActive = false;
 
 		M.rPoints.Add(rPosition);
 		M.rPoints.Add(rInitiative);
@@ -76,22 +70,10 @@ class LObject
 	public virtual void Kill()
 	{
 		isActive = false;
-		//texture = M.game.Content.Load<Texture2D>("local/blood");
 	}
 
-	public virtual Color RelationshipColor
-	{
-		get
-		{
-			return Color.Blue;
-			//if (isInParty) return Color.Green;
-			//else return Color.Red;
-		}
-	}
-
-	public virtual void Run()
-	{
-	}
+	public virtual Color RelationshipColor { get { return Color.Blue; }	}
+	public virtual void Run() {}
 
 	protected void ContinueTurn(float time)
 	{
@@ -100,7 +82,7 @@ class LObject
 		B.CheckForEvents();
 	}
 
-	protected void PassTurn(float time)
+	protected virtual void PassTurn(float time)
 	{
 		ContinueTurn(time);
 

@@ -38,13 +38,8 @@ class World
 		player.UpdateVisitedLocations();
 		Log.WriteLine("OK");
 
-		gObjects.Add(new GObject("Morlocks", new HexPoint(13, 13)));
-		gObjects.Add(new GObject("Morlocks", new HexPoint(20, 10)));
-		//gObjects.Add(new GObject("Morlocks", new HexPoint(5, 16)));
-		//gObjects.Add(new GObject("Morlocks", new HexPoint(15, 9)));
-
 		gObjects.Add(new GObject("Wild Dogs", new HexPoint(20, 16)));
-		gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 13)));
+		gObjects.Add(new GObject("Wild Dogs", new HexPoint(15, 19)));
 		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 18)));
 		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(24, 15)));
 		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(19, 20)));

@@ -10,11 +10,9 @@ class Battlefield
 {
 	private char[,] data;
 	public Palette palette;
-	//private ZPoint p1, p2, m1, m2;
 	private Collection<LObject> lObjects = new Collection<LObject>();
 
 	public LObject currentLObject;
-	//public Creature currentCreature;
 	private Texture2D currentLObjectSymbol, zSelectionTexture;
 
 	public Queue<RMove> scaleAnimations = new Queue<RMove>();
@@ -26,7 +24,6 @@ class Battlefield
 		get
 		{
 			if (InRange(p)) return palette[data[p.x, p.y]];
-			//return BigBase.Instance.lTiles.Get(data[p.x, p.y].ToString());
 			else
 			{
 				Log.Error("battlefield index out of range");
@@ -50,15 +47,16 @@ class Battlefield
 
 	public LObject GetLObject(ZPoint p)
 	{
-		//foreach (LObject l in lObjects) if (l.position.TheSameAs(p) && l.isActive) return l;
 		foreach (LObject l in lObjects) if (l.position.TheSameAs(p)) return l;
 		return null;
 	}
 
 	public Creature GetCreature(ZPoint p)
 	{
-		foreach (Creature c in lObjects) if (c.position.TheSameAs(p) && c.isActive) return c;
-		return null;
+		//foreach (Creature c in lObjects) if (c.position.TheSameAs(p) && c.isActive) return c;
+		var query = from l in lObjects where l is Creature && l.position.TheSameAs(p) && l.isActive select l;
+		if (query.Count() > 0) return query.First() as Creature;
+		else return null;
 	}
 
 	public Creature CurrentCreature
@@ -78,14 +76,8 @@ class Battlefield
 
 	private ZPoint RandomFreeTile()
 	{
-		//ZPoint z1, z2;
-		//if (inParty) { z1 = p1; z2 = p2; }
-		//else { z1 = m1; z2 = m2; }
-
 		for (int i = 0; i < 100; i++)
 		{
-			//int zx = World.Instance.random.Next(z1.x, z2.x + 1);
-			//int zy = World.Instance.random.Next(z1.y, z2.y + 1);
 			int zx = World.Instance.random.Next(Size.x);
 			int zy = World.Instance.random.Next(Size.y);
 
@@ -119,6 +111,9 @@ class Battlefield
 		if (g.name == "Morlocks") AddCreeps("Morlock", false, true, 2);
 		else if (g.name == "Wild Dogs") AddCreeps("Wild Dog", false, true, 3);
 
+		LObject item = new LObject("Tree");
+		lObjects.Add(item);
+
 		foreach (LObject l in lObjects)
 		{
 			l.SetPosition(RandomFreeTile(), 60.0f, false);
@@ -137,25 +132,12 @@ class Battlefield
 	{
 		var aliveMonsters = from c in lObjects where c is Creature && c.isActive && !(c as Creature).isInParty select c;
 		if (aliveMonsters.Count() == 0) MyGame.Instance.gameState = MyGame.GameState.Global;
-
-		/*
-		Collection<LObject> aliveMonsters = new Collection<LObject>();
-		foreach (LObject l in lObjects) if (l.isActive && !l.isInParty) aliveMonsters.Add(l);
-		if (aliveMonsters.Count == 0)
-		{
-			//lObjects.Clear();
-			MyGame.Instance.gameState = MyGame.GameState.Global;
-		}
-		*/
 	}
 
 	private void Load(string name)
 	{
 		XmlNode xnode = MyXml.FirstChild("Data/Battlefields/" + name + ".xml");
 		palette = BigBase.Instance.palettes.Get(MyXml.GetString(xnode, "palette"));
-
-		//int width = MyXml.GetInt(xnode, "width");
-		//int height = MyXml.GetInt(xnode, "height");
 
 		string text = xnode.InnerText;
 		char[] delimiters = new char[] { '\r', '\n', ' ' };
@@ -165,26 +147,6 @@ class Battlefield
 		data = new char[width, height];
 
 		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) data[i, j] = dataLines[j][i];
-		
-
-		//m1 = new ZPoint(MyXml.GetInt(xnode, "m1x"), MyXml.GetInt(xnode, "m1y"));
-		//m2 = new ZPoint(MyXml.GetInt(xnode, "m2x"), MyXml.GetInt(xnode, "m2y"));
-		//p1 = new ZPoint(MyXml.GetInt(xnode, "p1x"), MyXml.GetInt(xnode, "p1y"));
-		//p2 = new ZPoint(MyXml.GetInt(xnode, "p2x"), MyXml.GetInt(xnode, "p2y"));
-
-		//(!)аккуратно: хотим, чтобы он сам определил ширину и высоту
-		/*
-				string text = xnode.InnerText;
-				text = text.Replace('\n', ' ');
-				text = text.Replace('\r', ' ');
-				text = text.Replace(" ", "");
-				Log.Assert(text.Length == width * height, "wrong battlefield data");
-
-				for (int j = 0; j < height; j++)
-				{
-					for (int i = 0; i < width; i++) data[i, j] = text[i + j * width];
-				}
-		*/
 	}
 
 	private Vector2 GraphicCoordinates(RPoint p)
@@ -252,11 +214,7 @@ class Battlefield
 	{
 		get
 		{
-			//Log.WriteLine(lObjects.Count.ToString());
 			var query = from l in lObjects where l.isActive orderby -l.initiative select l;
-			//var query = from l in lObjects select l;
-			//Log.WriteLine(query.Count().ToString());
-
 			if (query.Count() != 0) return query.First();
 			else return null;
 		}

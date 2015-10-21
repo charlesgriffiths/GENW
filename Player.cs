@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 
 class Player : GObject
 {
@@ -16,7 +15,7 @@ class Player : GObject
 	{
 		name = "player";
 		speed = 1.0f;
-		partySize = 2;
+		partySize = 0;
 	}
 
 	public override void LoadTexture()

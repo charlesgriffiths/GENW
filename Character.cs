@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 class CharacterRace : NamedObject
 {
 	public CharacterClass defaultClass;
-	//private int bonusHP;
+	public Ability raceAbility;
 
 	public override void Load(XmlNode xnode)
 	{
@@ -15,7 +15,7 @@ class CharacterRace : NamedObject
 
 class CharacterClass : NamedObject
 {
-	//private int bonusDamage;
+	public Ability classAbility;
 
 	public override void Load(XmlNode xnode)
 	{
@@ -27,6 +27,8 @@ class Character : Creature
 {
 	public CharacterRace characterRace;
 	public CharacterClass characterClass;
+
+	private int level = 1;
 
 	protected override void Init()
 	{

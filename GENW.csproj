@@ -39,6 +39,7 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Ability.cs" />
     <Compile Include="Battlefield.cs" />
     <Compile Include="BigBase.cs" />
     <Compile Include="Character.cs" />
@@ -82,9 +83,11 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bin\WindowsGL\Debug\Data\abilities.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\Battlefields\Custom Mountain.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\classes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\codex.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\creepShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\gTiles.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\gTileTypes.xml" />

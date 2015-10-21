@@ -11,6 +11,8 @@ class DialogScreen
 	public Screen screen;
 	public SpriteFont dialogFont;
 
+	private Player P { get { return World.Instance.player; } }
+
 	public DialogScreen(ZPoint position, ZPoint size)
 	{
 		screen = new Screen(position, size);
@@ -21,7 +23,7 @@ class DialogScreen
 		if (MyGame.Instance.gameState != MyGame.GameState.Dialog) return;
 
 		screen.Fill(new Color(0.2f, 0.2f, 0.2f));
-		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.LightGray, 50);
+		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.White, 45);
 
 		for (int i = 0; i < dialogNode.responses.Count; i++)
 			screen.DrawString(dialogFont, (i+1) + ". " + dialogNode.responses[i].text, 
@@ -44,17 +46,25 @@ class DialogScreen
 
 	public void Press(DialogResponse r)
 	{
+		string nextNode = r.jump;
+
 		if (r.name == "fight") { World.Instance.battlefield.StartBattle(gObject); return; }
 
-		if (dialogName == "Morlocks Encounter")
-			if (r.name == "join")
+		if (dialogName == "Wild Dogs Encounter")
+		{
+			if (r.name == "condition1")
 			{
-				gObject.Kill();
-				World.Instance.player.partySize++;
+				if (P.partySize == 0) nextNode = "1positive";
+				else nextNode = "1negative";
 			}
-//		else if (dialogName == "Wild Dogs Encounter")
+			else if (r.name == "condition2")
+			{
+				if (P.partySize == 1) nextNode = "2positive";
+				else nextNode = "2negative";
+			}
+		}
 
-		if (r.jump != "") dialogNode = BigBase.Instance.dialogs.Get(dialogName).nodes[r.jump];
+		if (nextNode != "") dialogNode = BigBase.Instance.dialogs.Get(dialogName).nodes[nextNode];
 		else MyGame.Instance.gameState = MyGame.GameState.Global;
 	}
 
