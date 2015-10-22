@@ -60,6 +60,7 @@
     <Compile Include="MyXml.cs" />
     <Compile Include="NamedObject.cs" />
     <Compile Include="Palette.cs" />
+    <Compile Include="Party.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -87,8 +88,11 @@
     <Content Include="bin\WindowsGL\Debug\Data\Battlefields\Custom Mountain.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\classes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\codex.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\creepShapes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\creeps.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\gObjects.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="bin\WindowsGL\Debug\Data\gTiles.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\gTileTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\lTiles.xml" />
@@ -96,7 +100,9 @@
     <Content Include="bin\WindowsGL\Debug\Data\palettes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\races.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\tips.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\world.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\world.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <!-- Specify the search path explicitly so the ResolveAssemblyReferences task picks the right ones -->
   <Target Name="BeforeResolveReferences">

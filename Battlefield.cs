@@ -17,6 +17,8 @@ class Battlefield
 
 	public Queue<RMove> scaleAnimations = new Queue<RMove>();
 
+	private Player P { get { return World.Instance.player; } }
+
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 
 	public LTile this[ZPoint p]
@@ -59,13 +61,7 @@ class Battlefield
 		else return null;
 	}
 
-	public Creature CurrentCreature
-	{
-		get
-		{
-			return currentLObject as Creature;
-		}
-	}
+	public Creature CurrentCreature { get { return currentLObject as Creature; } }
 
 	public bool IsWalkable(ZPoint p)
 	{
@@ -88,11 +84,21 @@ class Battlefield
 		return new ZPoint(0, 0);
 	}
 
-	private void AddCreeps(string type, bool inParty, bool aiControlled, int quantity)
+	private void AddCreature(PartyCreature pc, bool isInParty, bool isAIControlled)
 	{
-		for (int i = 0; i < quantity; i++)
+		if (pc.uniqueName == P.Name)
 		{
-			Creep item = new Creep(type, inParty, aiControlled);
+			LPlayer item = new LPlayer(pc as PartyCharacter);
+			lObjects.Add(item);
+		}
+		else if (pc is PartyCharacter)
+		{
+			Character item = new Character(pc as PartyCharacter, isInParty, isAIControlled);
+			lObjects.Add(item);
+		}
+		else if (pc is PartyCreep)
+		{
+			Creep item = new Creep(pc as PartyCreep, isInParty, isAIControlled);
 			lObjects.Add(item);
 		}
 	}
@@ -106,10 +112,8 @@ class Battlefield
 		Load(battlefieldName);
 
 		lObjects.Clear();
-		lObjects.Add(new LPlayer());
-		AddCreeps("Morlock", true, false, World.Instance.player.partySize);
-		if (g.name == "Morlocks") AddCreeps("Morlock", false, true, 2);
-		else if (g.name == "Wild Dogs") AddCreeps("Wild Dog", false, true, 3);
+		foreach (PartyCreature member in World.Instance.player.party) AddCreature(member, true, false);
+		foreach (PartyCreature member in g.party) AddCreature(member, false, true);
 
 		LObject item = new LObject("Tree");
 		lObjects.Add(item);
@@ -126,12 +130,6 @@ class Battlefield
 
 		currentLObject = NextLObject;
 		MyGame.Instance.gameState = MyGame.GameState.Local;
-	}
-
-	public void CheckForEvents()
-	{
-		var aliveMonsters = from c in lObjects where c is Creature && c.isActive && !(c as Creature).isInParty select c;
-		if (aliveMonsters.Count() == 0) MyGame.Instance.gameState = MyGame.GameState.Global;
 	}
 
 	private void Load(string name)
@@ -217,6 +215,24 @@ class Battlefield
 			var query = from l in lObjects where l.isActive orderby -l.initiative select l;
 			if (query.Count() != 0) return query.First();
 			else return null;
+		}
+	}
+
+	public void CheckForEvents()
+	{
+		var aliveMonsters = from c in lObjects where c is Creature && c.isActive && !(c as Creature).isInParty select c;
+		if (aliveMonsters.Count() == 0)
+		{
+			P.party.Clear();
+			var aliveParty = from c in lObjects where c is Creature && c.isActive && (c as Creature).isInParty orderby c.Importance select c;
+
+			foreach (Creature c in aliveParty)
+			{
+				c.partyCreature.hp = c.HP;
+				P.party.Add(c.partyCreature);
+			}
+
+			MyGame.Instance.gameState = MyGame.GameState.Global;
 		}
 	}
 }

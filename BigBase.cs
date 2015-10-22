@@ -9,6 +9,8 @@
 	public GeneralBase<GTile> gTiles = new GeneralBase<GTile>();
 	public GeneralBase<LTile> lTiles = new GeneralBase<LTile>();
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
+
+	public GeneralBase<GObjectShape> gShapes = new GeneralBase<GObjectShape>();
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
 
 	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
@@ -25,10 +27,12 @@
 		gTiles.Load("gTiles.xml");
 		lTiles.Load("lTiles.xml");
 		palettes.Load("palettes.xml");
+
+		gShapes.Load("gObjects.xml");
 		dialogs.Load("dialogs.xml");
 
 		textures.Load("textures.xml");
-		creepShapes.Load("creepShapes.xml");
+		creepShapes.Load("creeps.xml");
 		classes.Load("classes.xml");
 		races.Load("races.xml");
 

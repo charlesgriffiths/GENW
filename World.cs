@@ -11,7 +11,7 @@ class World
 		
 	public Map map = new Map();
 	public Battlefield battlefield = new Battlefield();
-	public Player player = new Player();
+	public Player player;// = new Player();
 	public Collection<GObject> gObjects = new Collection<GObject>();
 
 	public ZPoint viewRadius = new ZPoint(16, 8);
@@ -34,21 +34,30 @@ class World
 
 		xnode = xnode.NextSibling;
 		camera = new ZPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y"));
+
+		player = new Player();
 		player.SetPosition(camera, 60.0f);
 		player.UpdateVisitedLocations();
+
+		xnode = xnode.NextSibling.FirstChild; // заменить на FOR!!!
+		while (xnode != null)
+		{
+			GObject item = new GObject(BigBase.Instance.gShapes.Get(MyXml.GetString(xnode, "name")));
+			item.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 60.0f);
+			gObjects.Add(item);
+			xnode = xnode.NextSibling;
+		}
+
 		Log.WriteLine("OK");
 
-		gObjects.Add(new GObject("Wild Dogs", new HexPoint(20, 16)));
-		gObjects.Add(new GObject("Wild Dogs", new HexPoint(15, 19)));
-		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(16, 18)));
-		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(24, 15)));
-		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(19, 20)));
+		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(20, 16)));
+		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(15, 19)));
 	}
 
 	public void LoadTextures()
 	{
 		player.LoadTexture();
-		foreach (GObject gObject in gObjects) gObject.LoadTexture();
+		//foreach (GObject gObject in gObjects) gObject.LoadTexture();
 		battlefield.LoadTextures();
 	}
 

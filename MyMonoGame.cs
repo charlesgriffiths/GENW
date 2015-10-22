@@ -36,13 +36,15 @@ public class MyMonoGame : Game
 	{
 		MainScreen.Instance.Init(this);
 		BigBase.Instance.Load();
-		World.Instance.Load();
-		
+
 		MainScreen.Instance.LoadTextures();
         GTile.LoadTextures();
 		LTile.LoadTextures();
+		GObjectShape.LoadTextures();
 		Texture.LoadTextures();
 		CreepShape.LoadTextures();
+
+		World.Instance.Load();
 		World.Instance.LoadTextures();
 	}
 

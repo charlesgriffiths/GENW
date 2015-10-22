@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 class Player : GObject
 {
@@ -7,29 +8,53 @@ class Player : GObject
 	public bool FOVEnabled = true;
 	public bool[,] visitedLocations;
 
-	public int partySize;
+	//public int partySize;
 
 	private MainScreen M { get { return MainScreen.Instance; } }
 
 	public Player()
 	{
-		name = "player";
-		speed = 1.0f;
-		partySize = 0;
+		shape = new GObjectShape();
+		shape.name = "Karl";
+		shape.speed = 1.0f;
+		shape.isActive = true;
+		//name = "player";
+		//speed = 1.0f;
+		////partySize = 0;
+
+		PartyCharacter playerCharacter = new PartyCharacter(shape.name, "Morlock", "Fighter");
+		party.Add(playerCharacter);
+		//party.Add(new PartyCreep("Krokar"));
+		party.Add(new PartyCreep("Krokar"));
 	}
 
-	public override void LoadTexture()
+	public void LoadTexture()
 	{
-		texture = M.game.Content.Load<Texture2D>("other/player");
+		Texture = M.game.Content.Load<Texture2D>("other/player");
 		textureHidden = M.game.Content.Load<Texture2D>("other/playerHidden");
+	}
+
+	private void DrawParty(ZPoint position)
+	{
+		const int length = 110, height = 400;
+		Screen screen = new Screen(position, new ZPoint(length, height));
+
+		foreach (PartyCreature member in party)
+		{
+			int i = party.IndexOf(member);
+			screen.Draw(member.texture, new ZPoint(0, i * 40));
+			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), 
+				new ZPoint(32, -(int)((1 - (float)member.hp / (float)member.MaxHP) * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
+		}
 	}
 
 	public override void Draw()
 	{
 		rPosition.Update();
 		if (W.map[position].type.name != BigBase.Instance.gTileTypes.SafeName("forest"))
-			M.spriteBatch.Draw(texture, M.GraphicCoordinates(rPosition));
+			M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
 		else M.spriteBatch.Draw(textureHidden, M.GraphicCoordinates(rPosition));
+		if (MyGame.Instance.gameState != MyGame.GameState.Local) DrawParty(new ZPoint(1100, 50));
 	}
 
 	public override void Kill()
@@ -42,8 +67,9 @@ class Player : GObject
 
 	public override void ProcessCollisions(GObject g)
 	{
-		if (g.name == "Morlocks") StartDialog("Morlocks Encounter", g);
-		else if (g.name == "Wild Dogs") StartDialog("Wild Dogs Encounter", g);
+		//if (g.name == "Morlocks") StartDialog("Morlocks Encounter", g);
+		if (g.Name == "Wild Dogs Small Pack" || g.Name == "Wild Dogs Large Pack") StartDialog("Wild Dogs Encounter", g); // перенести это в gObjects.xml!
+		// И уникальные встречи тоже аккуратно перенести в данные!
 	}
 
 	public override void Move(HexPoint.HexDirection d)

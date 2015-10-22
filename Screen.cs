@@ -21,7 +21,22 @@ class Screen
 
 	public void DrawRectangle(ZPoint p, ZPoint s, Color color)
 	{
-		M.spriteBatch.Draw(M.universalTexture, new Rectangle(position.x + p.x, position.y + p.y, s.x, s.y), color);
+		ZPoint realPosition = p;
+		ZPoint realSize = s;
+
+		if (s.x < 0)
+		{
+			realPosition.x = p.x + s.x;
+			realSize.x = -s.x;
+		}
+		if (s.y < 0)
+		{
+			realPosition.y = p.y + s.y;
+			realSize.y = -s.y;
+		}
+
+		Rectangle rectangle = new Rectangle(position.x + realPosition.x, position.y + realPosition.y, realSize.x, realSize.y);
+        M.spriteBatch.Draw(M.universalTexture, rectangle, color);
 	}
 
 	public void Fill(Color color)

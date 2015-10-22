@@ -54,12 +54,12 @@ class DialogScreen
 		{
 			if (r.name == "condition1")
 			{
-				if (P.partySize == 0) nextNode = "1positive";
+				if (P.party.Count <= 1) nextNode = "1positive";
 				else nextNode = "1negative";
 			}
 			else if (r.name == "condition2")
 			{
-				if (P.partySize == 1) nextNode = "2positive";
+				if (P.party.Count <= 2) nextNode = "2positive";
 				else nextNode = "2negative";
 			}
 		}

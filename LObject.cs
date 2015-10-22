@@ -54,6 +54,8 @@ class LObject
 		M.rPoints.Add(rInitiative);
 	}
 
+	public virtual int Importance { get { return 4; } }
+
 	public void SetPosition(ZPoint p, float speed, bool commonQueue)
 	{
 		if (commonQueue) rPosition.Add(position, p, speed, M.rMoves);
@@ -66,6 +68,12 @@ class LObject
 		rInitiative.Add(new Vector2(initiative, 0), new Vector2(initiativei, 0), speed, B.scaleAnimations);
 		initiative = initiativei;
 	}
+
+	//public bool IsPlayer()
+	//{
+		//if (name == World.Instance.player.Name) return true;
+		//else return false;
+	//}
 
 	public virtual void Kill()
 	{

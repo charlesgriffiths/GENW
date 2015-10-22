@@ -60,7 +60,7 @@ class MainScreen : Screen
 		HexPoint hexMouse = HexCoordinates(mouse);
         if (MyGame.Instance.gameState == MyGame.GameState.Global) spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
 		spriteBatch.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
-		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.partySize, new Vector2(10, 30), Color.Yellow);
+		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.party.Count, new Vector2(10, 30), Color.Yellow);
 
 		editor.Draw();
 		dialogScreen.Draw();

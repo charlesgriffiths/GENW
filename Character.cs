@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 class CharacterRace : NamedObject
 {
 	public CharacterClass defaultClass;
-	public Ability raceAbility;
+	//public Ability raceAbility;
 
 	public override void Load(XmlNode xnode)
 	{
@@ -15,7 +15,7 @@ class CharacterRace : NamedObject
 
 class CharacterClass : NamedObject
 {
-	public Ability classAbility;
+	//public Ability classAbility;
 
 	public override void Load(XmlNode xnode)
 	{
@@ -25,33 +25,55 @@ class CharacterClass : NamedObject
 
 class Character : Creature
 {
-	public CharacterRace characterRace;
-	public CharacterClass characterClass;
-
-	private int level = 1;
-
-	protected override void Init()
-	{
-		base.Init();
-		texture = MainScreen.Instance.game.Content.Load<Texture2D>("characters/" + characterRace.name + " " + characterClass.name);
-	}
+	//protected PartyCharacter partyCharacter;
 
 	public override float MovementSpeed { get { return 0.2f; } }
 	public override float AttackSpeed { get { return 0.2f; } }
 	public override int Damage { get { return 10; } }
-	public override int MaxHP { get { return 100; } }
+	public override int MaxHP { get { return Member.MaxHP; } }
+
+	public override int Importance { get { return 2; } }
+
+	public PartyCharacter Member { get { return partyCreature as PartyCharacter; } }
+
+	public Character() {}
+	public Character(PartyCharacter pc, bool isInPartyi, bool isAIControlledi)
+	{
+		//partyCharacter = pc;
+		partyCreature = pc;
+		name = pc.uniqueName;
+		isInParty = isInPartyi;
+		isAIControlled = isAIControlledi;
+		texture = pc.texture;
+		Init();
+	}
+
+	protected override void Init()
+	{
+		base.Init();
+		texture = MainScreen.Instance.game.Content.Load<Texture2D>("characters/" +
+			Member.characterRace.name + " " + Member.characterClass.name);
+	}
 }
 
 class LPlayer : Character
 {
-	public LPlayer()
+	public override int Importance { get { return 1; } }
+
+	public LPlayer(PartyCharacter pc)
 	{
-		characterRace = BigBase.Instance.races.Get("Dark Eloi");
-		characterClass = BigBase.Instance.classes.Get("Psionic");
+		//partyCharacter = pc;
+		partyCreature = pc;
+		name = pc.uniqueName;
 		isInParty = true;
 		isAIControlled = false;
-		base.Init();
+		texture = pc.texture;
+		Init();
 	}
 
-	public override void Kill() { World.Instance.player.Kill(); }
+	public override void Kill()
+	{
+		World.Instance.player.Kill();
+		base.Kill();
+	}
 }

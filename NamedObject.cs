@@ -11,7 +11,9 @@ abstract class NamedObject
 class GeneralBase<T> where T : NamedObject, new ()
 {
 	public Collection<T> data;
-	public bool loaded;
+
+	private bool loaded;
+	private string filename;
 
 	public GeneralBase()
 	{
@@ -34,19 +36,20 @@ class GeneralBase<T> where T : NamedObject, new ()
 			if (d.name == name) return d;
 		}
 
-		Log.Error("No name " + name + " found in base");
+		Log.Error("No name " + name + " found in the base " + filename);
 		return null;
 	}
 
 	public string SafeName(string name)
 	{
 		foreach (T t in data) if (t.name == name) return name;
-		Log.Error("No name " + name + " found in base");
+		Log.Error("No name " + name + " found in the base " + filename);
 		return name;
 	}
 
-	public void Load(string filename)
+	public void Load(string filenamei)
 	{
+		filename = filenamei;
 		XmlNode xnode = MyXml.SecondChild("Data/" + filename);
 
 		while (xnode != null)
