@@ -5,7 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 class DialogScreen
 {
 	private DialogNode dialogNode;
-	private string dialogName;
+	//private string dialogName;
+	private Dialog dialog;
 	private GObject gObject;
 
 	public Screen screen;
@@ -22,7 +23,7 @@ class DialogScreen
 	{
 		if (MyGame.Instance.gameState != MyGame.GameState.Dialog) return;
 
-		screen.Fill(new Color(0.2f, 0.2f, 0.2f));
+		screen.Fill(new Color(0.2f, 0.2f, 0.2f, 0.9f));
 		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.White, 45);
 
 		for (int i = 0; i < dialogNode.responses.Count; i++)
@@ -50,7 +51,12 @@ class DialogScreen
 
 		if (r.name == "fight") { World.Instance.battlefield.StartBattle(gObject); return; }
 
-		if (dialogName == "Wild Dogs Encounter")
+		if (dialog.name == "The First Dialog")
+		{
+			if (r.name == "Boo-Boo") P.party.Add(new PartyCreep("Krokar", "Boo-Boo"));
+			else if (r.name == "escherian shard") { }
+		}
+		else if (dialog.name == "Wild Dogs Encounter")
 		{
 			if (r.name == "condition1")
 			{
@@ -64,7 +70,7 @@ class DialogScreen
 			}
 		}
 
-		if (nextNode != "") dialogNode = BigBase.Instance.dialogs.Get(dialogName).nodes[nextNode];
+		if (nextNode != "") dialogNode = dialog.nodes[nextNode];
 		else MyGame.Instance.gameState = MyGame.GameState.Global;
 	}
 
@@ -74,11 +80,19 @@ class DialogScreen
 		if (k > 0 && k <= dialogNode.responses.Count) Press(dialogNode.responses[k-1]);
 	}
 
-	public void StartDialog(string name, GObject g)
+	public void StartDialog(string dialogName)
 	{
-		dialogName = name;
-		dialogNode = BigBase.Instance.dialogs.Get(name).nodes["entry"];
+		StartDialog(BigBase.Instance.dialogs.Get(dialogName), null);
+	}
+
+	public void StartDialog(Dialog d, GObject g)
+	{
+		dialog = d;
+		if (d.isUnique && d.happened) return;
+
+		dialogNode = d.nodes["entry"];
 		gObject = g;
+		d.happened = true;
 		MyGame.Instance.gameState = MyGame.GameState.Dialog;
 	}
 }

@@ -13,10 +13,10 @@ class PartyCreep : PartyCreature
 {
 	public CreepShape shape;
 
-	public PartyCreep(string namei)
+	public PartyCreep(string namei, string uniqueNamei = "")
 	{
 		name = namei;
-		uniqueName = namei;
+		uniqueName = uniqueNamei;
 		shape = BigBase.Instance.creepShapes.Get(name);
 		hp = MaxHP;
 		texture = shape.texture;

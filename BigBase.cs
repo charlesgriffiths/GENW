@@ -28,8 +28,8 @@
 		lTiles.Load("lTiles.xml");
 		palettes.Load("palettes.xml");
 
-		gShapes.Load("gObjects.xml");
 		dialogs.Load("dialogs.xml");
+		gShapes.Load("gObjects.xml");
 
 		textures.Load("textures.xml");
 		creepShapes.Load("creeps.xml");

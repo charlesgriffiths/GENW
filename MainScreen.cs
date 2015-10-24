@@ -17,7 +17,7 @@ class MainScreen : Screen
 
 	public Texture2D universalTexture;
 	private Texture2D hexSelectionTexture;
-	private SpriteFont ambientFont;
+	public SpriteFont ambientFont, smallFont;
 
 	public Collection<RPoint> rPoints = new Collection<RPoint>();
 	public Queue<RMove> rMoves = new Queue<RMove>();
@@ -46,8 +46,10 @@ class MainScreen : Screen
 		dialogScreen = new DialogScreen(new ZPoint(200, 200), new ZPoint(600, 400));
 
 		hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
-		ambientFont = game.Content.Load<SpriteFont>("fAmbient");
-		dialogScreen.dialogFont = game.Content.Load<SpriteFont>("fDialog");
+
+		ambientFont = game.Content.Load<SpriteFont>("fonts/fAmbient");
+		smallFont = game.Content.Load<SpriteFont>("fonts/fSmall");
+		dialogScreen.dialogFont = game.Content.Load<SpriteFont>("fonts/fDialog");
 	}
 
 	public void Draw(Vector2 mouse)

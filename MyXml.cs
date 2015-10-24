@@ -37,6 +37,8 @@ static class MyXml
 
 	public static bool GetBool(XmlNode xmlNode, string attribute)
 	{
-		return bool.Parse(GetString(xmlNode, attribute));
+		string s = GetString(xmlNode, attribute);
+		if (s == "") return false;
+        else return bool.Parse(s);
 	}
 }

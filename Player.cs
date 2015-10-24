@@ -3,35 +3,27 @@ using Microsoft.Xna.Framework.Graphics;
 
 class Player : GObject
 {
-	public Texture2D textureHidden;
-
 	public bool FOVEnabled = true;
 	public bool[,] visitedLocations;
-
-	//public int partySize;
 
 	private MainScreen M { get { return MainScreen.Instance; } }
 
 	public Player()
 	{
 		shape = new GObjectShape();
-		shape.name = "Karl";
+		shape.name = "player";
 		shape.speed = 1.0f;
 		shape.isActive = true;
-		//name = "player";
-		//speed = 1.0f;
-		////partySize = 0;
 
 		PartyCharacter playerCharacter = new PartyCharacter(shape.name, "Morlock", "Fighter");
 		party.Add(playerCharacter);
+
 		//party.Add(new PartyCreep("Krokar"));
-		party.Add(new PartyCreep("Krokar"));
 	}
 
-	public void LoadTexture()
+	public void LoadTextures()
 	{
 		Texture = M.game.Content.Load<Texture2D>("other/player");
-		textureHidden = M.game.Content.Load<Texture2D>("other/playerHidden");
 	}
 
 	private void DrawParty(ZPoint position)
@@ -51,9 +43,7 @@ class Player : GObject
 	public override void Draw()
 	{
 		rPosition.Update();
-		if (W.map[position].type.name != BigBase.Instance.gTileTypes.SafeName("forest"))
-			M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
-		else M.spriteBatch.Draw(textureHidden, M.GraphicCoordinates(rPosition));
+		 M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
 		if (MyGame.Instance.gameState != MyGame.GameState.Local) DrawParty(new ZPoint(1100, 50));
 	}
 
@@ -63,13 +53,9 @@ class Player : GObject
 		MainScreen.Instance.game.Exit();
 	}
 
-	private void StartDialog(string name, GObject g) { M.dialogScreen.StartDialog(name, g);	}
-
 	public override void ProcessCollisions(GObject g)
 	{
-		//if (g.name == "Morlocks") StartDialog("Morlocks Encounter", g);
-		if (g.Name == "Wild Dogs Small Pack" || g.Name == "Wild Dogs Large Pack") StartDialog("Wild Dogs Encounter", g); // перенести это в gObjects.xml!
-		// И уникальные встречи тоже аккуратно перенести в данные!
+		if (g.dialog != null) M.dialogScreen.StartDialog(g.dialog, g);
 	}
 
 	public override void Move(HexPoint.HexDirection d)

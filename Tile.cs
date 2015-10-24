@@ -15,9 +15,10 @@ class GTileType : NamedObject
 
 class GTile : NamedObject
 {
-	public Texture2D texture;
+	public Texture2D texture, topTexture;
 	public string picture;
 	public GTileType type;
+	public bool hasTop;
 	
 	public bool IsWalkable { get { return type.isWalkable; } }
 	public bool IsFlat { get { return type.isFlat; } }
@@ -27,12 +28,16 @@ class GTile : NamedObject
 		name = MyXml.GetString(xnode, "name");
 		type = BigBase.Instance.gTileTypes.Get(MyXml.GetString(xnode, "type"));
 		picture = MyXml.GetString(xnode, "picture");
+		hasTop = MyXml.GetBool(xnode, "top");
 	}
 
 	public static void LoadTextures()
 	{
-		foreach (GTile gTile in BigBase.Instance.gTiles.data)
-			gTile.texture = MainScreen.Instance.game.Content.Load<Texture2D>("terrain/" + gTile.picture);
+		foreach (GTile t in BigBase.Instance.gTiles.data)
+		{
+			t.texture = MainScreen.Instance.game.Content.Load<Texture2D>("terrain/" + t.picture);
+			if (t.hasTop) t.topTexture = MainScreen.Instance.game.Content.Load<Texture2D>("terrain/" + t.picture + " Top");
+		}
 	}
 }
 

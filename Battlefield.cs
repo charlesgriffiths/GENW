@@ -13,6 +13,7 @@ class Battlefield
 	private Collection<LObject> lObjects = new Collection<LObject>();
 
 	public LObject currentLObject;
+	private GObject gObject;
 	private Texture2D currentLObjectSymbol, zSelectionTexture;
 
 	public Queue<RMove> scaleAnimations = new Queue<RMove>();
@@ -55,7 +56,6 @@ class Battlefield
 
 	public Creature GetCreature(ZPoint p)
 	{
-		//foreach (Creature c in lObjects) if (c.position.TheSameAs(p) && c.isActive) return c;
 		var query = from l in lObjects where l is Creature && l.position.TheSameAs(p) && l.isActive select l;
 		if (query.Count() > 0) return query.First() as Creature;
 		else return null;
@@ -105,6 +105,7 @@ class Battlefield
 
 	public void StartBattle(GObject g)
 	{
+		gObject = g;
 		GTile gTile = World.Instance.map[g.position];
 		string battlefieldName;
 		if (gTile.type.name == "mountainPass") battlefieldName = "Custom Mountain";
@@ -232,6 +233,7 @@ class Battlefield
 				P.party.Add(c.partyCreature);
 			}
 
+			gObject.Kill();
 			MyGame.Instance.gameState = MyGame.GameState.Global;
 		}
 	}

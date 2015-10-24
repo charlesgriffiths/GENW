@@ -38,9 +38,13 @@ class Dialog : NamedObject
 {
 	public Dictionary<string, DialogNode> nodes = new Dictionary<string, DialogNode>();
 
+	public bool isUnique;
+	public bool happened = false;
+
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
+		isUnique = MyXml.GetBool(xnode, "unique");
 
 		XmlNode node = xnode.FirstChild;
 		while (node != null)

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Xml;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 class GObjectShape : NamedObject
@@ -9,6 +11,7 @@ class GObjectShape : NamedObject
 	public Texture2D texture;
 	public float speed;
 	public bool isActive;
+	public Dialog dialog;
 
 	public Dictionary<string, int> partyShape = new Dictionary<string, int>();
 
@@ -18,15 +21,15 @@ class GObjectShape : NamedObject
 		textureName = MyXml.GetString(xnode, "icon");
 		if (textureName == "") textureName = name;
 		isActive = MyXml.GetBool(xnode, "active");
+
 		if (isActive) speed = MyXml.GetFloat(xnode, "speed");
 		else speed = 1.0f;
 
-		xnode = xnode.FirstChild;
-		while (xnode != null)
-		{
+		string dialogName = MyXml.GetString(xnode, "dialog");
+		if (dialogName != "") dialog = BigBase.Instance.dialogs.Get(dialogName);
+
+		for (xnode = xnode.FirstChild; xnode != null; xnode = xnode.NextSibling)
 			partyShape.Add(MyXml.GetString(xnode, "name"), MyXml.GetInt(xnode, "quantity"));
-			xnode = xnode.NextSibling;
-		}
 	}
 
 	public static void LoadTextures()
@@ -45,13 +48,13 @@ class GObject
 
 	public Collection<PartyCreature> party = new Collection<PartyCreature>();
 
-	//public string name;
-	//public string uniqueName;
-	public float initiative = -5.0f;// speed = 3.0f;
-	//public Texture2D texture;
+	public string uniqueName;
+	public float initiative = -5.0f;
+	public Dialog dialog;
 
 	public string Name { get { return shape.name; } }
 	public float Speed { get { return shape.speed; } }
+	public bool IsActive { get { return shape.isActive; } }
 	public Texture2D Texture
 	{
 		get { return shape.texture; }
@@ -59,18 +62,14 @@ class GObject
 	}
 
 	protected World W { get { return World.Instance; } }
+	protected MainScreen M { get { return MainScreen.Instance; } }
 
-	//public GObject() { name = ""; position = new HexPoint(); }
-	//public GObject(string namei, HexPoint p)
-	//{
-	//name = namei;
-	//SetPosition (p, 100.0f);
-	//}
-
-	public GObject() {}
+	protected GObject() {}
 	public GObject(GObjectShape shapei)
 	{
 		shape = shapei;
+		dialog = shapei.dialog;
+
 		foreach (KeyValuePair<string, int> pair in shape.partyShape)
 		{
 			for (int i = 0; i < pair.Value; i++)
@@ -81,16 +80,28 @@ class GObject
 		}
 	}
 
-	//public virtual void LoadTexture() // !!!
-	//{
-		//texture = MainScreen.Instance.game.Content.Load<Texture2D>("global/g" + name);
-	//}
+	private bool IsVisible()
+	{
+		if (!W.player.FOVEnabled) return true;
+		else if (IsActive) return W.map.IsInView(W.player.position, position);
+		else return W.player[position];
+    }
+
+	public void DrawAnnotation()
+	{
+		if (IsVisible() && uniqueName != "")
+		{
+			Vector2 offset = M.smallFont.MeasureString(uniqueName);
+			Vector2 v = M.GraphicCoordinates(rPosition) + new Vector2(24 - offset.X / 2, 48);
+			M.DrawRectangle(new ZPoint(v), new ZPoint(offset), new Color(0.0f, 0.0f, 0.0f, 0.8f));
+			M.DrawString(M.smallFont, uniqueName, new ZPoint(v), Color.White);
+		}
+	}
 
 	public virtual void Draw()
 	{
 		rPosition.Update();
-		if (!W.player.FOVEnabled || W.map.IsInView(W.player.position, position))
-			MainScreen.Instance.spriteBatch.Draw(Texture, MainScreen.Instance.GraphicCoordinates(rPosition));
+		if (IsVisible()) M.Draw(Texture, M.GraphicCoordinates(rPosition));
 	}
 
 	public virtual void Kill()
@@ -100,17 +111,19 @@ class GObject
 
 	public virtual void ProcessCollisions(GObject g)
 	{
-		/*if (MyMath.SamePairs("Morlocks", "Wild Dogs", name, g.name))
-		{
-			Kill();
-			g.Kill();
-		}*/
+		//if (MyMath.SamePairs("Morlocks", "Wild Dogs", name, g.name)) { Kill(); g.Kill(); }
 	}
 
 	public static void ProcessCollisions(Collection<GObject> c)
 	{
 		if (c.Count == 2) c[0].ProcessCollisions(c[1]);
 		else if (c.Count > 2) Log.WriteLine("That is an interesting development!");
+	}
+
+	public static void CheckForEvents()
+	{
+		var query = from pc in World.Instance.player.party where pc.uniqueName == "Boo-Boo" select pc;
+		if (query.Count() == 0 && World.Instance.random.Next(10) == 0) MainScreen.Instance.dialogScreen.StartDialog("Boo-Boo Died");
 	}
 
 	public virtual void Move(HexPoint.HexDirection d)
@@ -127,7 +140,9 @@ class GObject
 
 	public void PassTurn(float time)
 	{
+		CheckForEvents();
 		ProcessCollisions(W[position]);
+
 		initiative -= time;
 		W.NextGObject.Run();
 	}

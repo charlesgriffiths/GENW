@@ -11,7 +11,7 @@ class World
 		
 	public Map map = new Map();
 	public Battlefield battlefield = new Battlefield();
-	public Player player;// = new Player();
+	public Player player;
 	public Collection<GObject> gObjects = new Collection<GObject>();
 
 	public ZPoint viewRadius = new ZPoint(16, 8);
@@ -39,33 +39,37 @@ class World
 		player.SetPosition(camera, 60.0f);
 		player.UpdateVisitedLocations();
 
-		xnode = xnode.NextSibling.FirstChild; // заменить на FOR!!!
-		while (xnode != null)
+		for (xnode = xnode.NextSibling.FirstChild; xnode != null; xnode = xnode.NextSibling)
 		{
 			GObject item = new GObject(BigBase.Instance.gShapes.Get(MyXml.GetString(xnode, "name")));
+			item.uniqueName = MyXml.GetString(xnode, "uniqueName");
+
+			string dialogName = MyXml.GetString(xnode, "dialog");
+			if (dialogName != "") item.dialog = BigBase.Instance.dialogs.Get(dialogName);
+
 			item.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 60.0f);
 			gObjects.Add(item);
-			xnode = xnode.NextSibling;
 		}
 
 		Log.WriteLine("OK");
-
-		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(20, 16)));
-		//gObjects.Add(new GObject("Wild Dogs", new HexPoint(15, 19)));
 	}
 
 	public void LoadTextures()
 	{
-		player.LoadTexture();
-		//foreach (GObject gObject in gObjects) gObject.LoadTexture();
+		map.LoadTextures();
+		player.LoadTextures();
 		battlefield.LoadTextures();
 	}
 
 	public void Draw(Vector2 mouse)
 	{
-		map.Draw();
+		map.Draw(false);
 		foreach (GObject g in gObjects) g.Draw();
 		player.Draw();
+		map.Draw(true);
+		foreach (GObject g in gObjects) g.DrawAnnotation();
+		map.DrawMask();
+
 		battlefield.Draw(mouse);
 	}
 
@@ -74,7 +78,7 @@ class World
 		get
 		{
 			GObject result = player;
-			foreach (GObject g in gObjects) if (g.initiative > result.initiative) result = g;
+			foreach (GObject g in gObjects) if (g.initiative > result.initiative && g.IsActive) result = g;
 			return result;
 		}
 	}
