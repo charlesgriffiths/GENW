@@ -42,14 +42,16 @@ class GObjectShape : NamedObject
 class GObject
 {
 	public HexPoint position = new HexPoint();
+
 	public RPoint rPosition = new RPoint();
+	public AnimationQueue movementAnimations = new AnimationQueue();
 
 	protected GObjectShape shape;
 
 	public Collection<PartyCreature> party = new Collection<PartyCreature>();
 
 	public string uniqueName;
-	public float initiative = -5.0f;
+	public float initiative;// = -5.0f;
 	public Dialog dialog;
 
 	public string Name { get { return shape.name; } }
@@ -78,6 +80,8 @@ class GObject
 				party.Add(item);
 			}
 		}
+
+		initiative = -0.1f;
 	}
 
 	private bool IsVisible()
@@ -100,7 +104,7 @@ class GObject
 
 	public virtual void Draw()
 	{
-		rPosition.Update();
+		movementAnimations.Draw();
 		if (IsVisible()) M.Draw(Texture, M.GraphicCoordinates(rPosition));
 	}
 
@@ -123,7 +127,7 @@ class GObject
 	public static void CheckForEvents()
 	{
 		var query = from pc in World.Instance.player.party where pc.uniqueName == "Boo-Boo" select pc;
-		if (query.Count() == 0 && World.Instance.random.Next(10) == 0) MainScreen.Instance.dialogScreen.StartDialog("Boo-Boo Died");
+		if (query.Count() == 0 && World.Instance.random.Next(30) == 0) MainScreen.Instance.dialogScreen.StartDialog("Boo-Boo Died");
 	}
 
 	public virtual void Move(HexPoint.HexDirection d)
@@ -149,7 +153,7 @@ class GObject
 
 	public void SetPosition(HexPoint p, float speed)
 	{
-		rPosition.Add((ZPoint)position, (ZPoint)p, speed);
+		movementAnimations.Add(new RMove(rPosition, (ZPoint)p - position, speed));
 		position = p;
 	}
 }

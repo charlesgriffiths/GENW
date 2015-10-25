@@ -19,8 +19,8 @@ class MainScreen : Screen
 	private Texture2D hexSelectionTexture;
 	public SpriteFont ambientFont, smallFont;
 
-	public Collection<RPoint> rPoints = new Collection<RPoint>();
-	public Queue<RMove> rMoves = new Queue<RMove>();
+	//public Collection<RPoint> rPoints = new Collection<RPoint>();
+	//public Queue<RMove> rMoves = new Queue<RMove>();
 
 	private MainScreen()
 	{
@@ -54,15 +54,15 @@ class MainScreen : Screen
 
 	public void Draw(Vector2 mouse)
 	{
-		RPoint.Update(rMoves);
-		foreach (RPoint p in rPoints) p.Update();
+		//RPoint.Update(rMoves);
+		//foreach (RPoint p in rPoints) p.Update();
 
 		World.Instance.Draw(mouse);
 
 		HexPoint hexMouse = HexCoordinates(mouse);
-        if (MyGame.Instance.gameState == MyGame.GameState.Global) spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
-		spriteBatch.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red);
-		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.party.Count, new Vector2(10, 30), Color.Yellow);
+        if (MyGame.Instance.gameState == MyGame.GameState.Global) spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse)); // испправить!!!
+		spriteBatch.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red); // испправить!!!
+		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.party.Count, new Vector2(10, 30), Color.Yellow); // испправить!!!
 
 		editor.Draw();
 		dialogScreen.Draw();

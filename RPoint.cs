@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿/*
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 class RMove
@@ -18,7 +19,8 @@ class RMove
 		rPoint = p;
 	}
 }
-
+*/
+/*
 class RPoint
 {
 	private Vector2 data = new Vector2();
@@ -59,3 +61,4 @@ class RPoint
 
 	public static implicit operator Vector2(RPoint p) { return new Vector2(p.x, p.y); }
 }
+*/

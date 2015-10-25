@@ -6,7 +6,7 @@ class Player : GObject
 	public bool FOVEnabled = true;
 	public bool[,] visitedLocations;
 
-	private MainScreen M { get { return MainScreen.Instance; } }
+	//private MainScreen M { get { return MainScreen.Instance; } }
 
 	public Player()
 	{
@@ -42,8 +42,8 @@ class Player : GObject
 
 	public override void Draw()
 	{
-		rPosition.Update();
-		 M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
+		movementAnimations.Draw();
+		M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
 		if (MyGame.Instance.gameState != MyGame.GameState.Local) DrawParty(new ZPoint(1100, 50));
 	}
 

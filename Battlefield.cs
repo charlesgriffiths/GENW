@@ -16,7 +16,9 @@ class Battlefield
 	private GObject gObject;
 	private Texture2D currentLObjectSymbol, zSelectionTexture;
 
-	public Queue<RMove> scaleAnimations = new Queue<RMove>();
+	//public Queue<RMove> scaleAnimations = new Queue<RMove>();
+	public AnimationQueue scaleAnimationsTest = new AnimationQueue();
+	public AnimationQueue combatAnimations = new AnimationQueue();
 
 	private Player P { get { return World.Instance.player; } }
 
@@ -122,8 +124,8 @@ class Battlefield
 		foreach (LObject l in lObjects)
 		{
 			l.SetPosition(RandomFreeTile(), 60.0f, false);
-			if (l is LPlayer) l.SetInitiative(0.1f, 60.0f);
-			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 60.0f);
+			if (l is LPlayer) l.SetInitiative(0.1f, 6.0f);
+			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 6.0f);
 		}
 
 		if(NextLObject is Creature) { if ((NextLObject as Creature).isAIControlled) NextLObject.Run(); }
@@ -148,7 +150,7 @@ class Battlefield
 		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) data[i, j] = dataLines[j][i];
 	}
 
-	private Vector2 GraphicCoordinates(RPoint p)
+	public Vector2 GraphicCoordinates(RPoint p)
 	{
 		return new Vector2(100, 100) + new Vector2(32 * p.x, 32 * p.y);
 	}
@@ -178,7 +180,8 @@ class Battlefield
 			Color color = Color.White;
 			if (c.position.TheSameAs(zMouse)) color = c.RelationshipColor;
 
-			if (scaleAnimations.Count == 0 || scaleAnimations.Peek().rPoint != c.rInitiative)
+			//if (scaleAnimationsTest.Count == 0 || scaleAnimationsTest.First.rPoint != c.rInitiative)
+			if (scaleAnimationsTest.CurrentTarget != c.rInitiative)
 				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
 
 			screen.Draw(c.texture, new ZPoint(rInitiative + 1, y));
@@ -187,22 +190,25 @@ class Battlefield
 
 	public void Draw(Vector2 mouse)
 	{
-		RPoint.Update(scaleAnimations);
-
+		//RPoint.Update(scaleAnimations);
 		MainScreen M = MainScreen.Instance;
+		foreach (LObject l in lObjects) l.movementAnimations.Draw();
+
 		if (MyGame.Instance.gameState != MyGame.GameState.Local) return;
 
 		for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++)
 		{
 			ZPoint p = new ZPoint(i, j);
-			M.spriteBatch.Draw(this[p].texture, GraphicCoordinates(p));
-		}
+			M.spriteBatch.Draw(this[p].texture, GraphicCoordinates(p)); // исправить!!!
+			}
 
 		var query = from l in lObjects orderby l.isActive select l;
-		foreach (LObject l in query) M.spriteBatch.Draw(l.texture, GraphicCoordinates(l.rPosition));
+		foreach (LObject l in query) M.spriteBatch.Draw(l.texture, GraphicCoordinates(l.rPosition)); // исправить!!!
 
-		M.spriteBatch.Draw(currentLObjectSymbol, GraphicCoordinates(currentLObject.rPosition) - new Vector2(0, 12));
+		combatAnimations.Draw();
+		scaleAnimationsTest.Draw();
 
+		M.spriteBatch.Draw(currentLObjectSymbol, GraphicCoordinates(currentLObject.rPosition) - new Vector2(0, 12)); // исправить!!!
 		ZPoint zMouse = ZCoordinates(mouse);
 		M.Draw(zSelectionTexture, GraphicCoordinates(zMouse));
 

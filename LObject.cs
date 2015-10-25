@@ -1,31 +1,13 @@
-﻿using System;
-using System.Xml;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-class Texture : NamedObject
-{
-	public Texture2D data;
-
-	public override void Load(XmlNode xnode)
-	{
-		name = MyXml.GetString(xnode, "name");
-	}
-
-	public static void LoadTextures()
-	{
-		foreach (Texture t in BigBase.Instance.textures.data)
-		{
-			t.data = MainScreen.Instance.game.Content.Load<Texture2D>("local/" + t.name);
-		}
-	}
-}
 
 class LObject
 {
 	public ZPoint position = new ZPoint();
-	public RPoint rPosition = new RPoint();
+	
 	public RPoint rInitiative = new RPoint();
+	public RPoint rPosition = new RPoint();
+	public AnimationQueue movementAnimations = new AnimationQueue();
 
 	public bool isActive;
 	public float initiative;
@@ -49,31 +31,23 @@ class LObject
 	protected virtual void Init()
 	{
 		initiative = 0.0f;
-
-		M.rPoints.Add(rPosition);
-		M.rPoints.Add(rInitiative);
 	}
 
 	public virtual int Importance { get { return 4; } }
 
 	public void SetPosition(ZPoint p, float speed, bool commonQueue)
 	{
-		if (commonQueue) rPosition.Add(position, p, speed, M.rMoves);
-		else rPosition.Add(position, p, speed);
+		RMove rMove = new RMove(rPosition, p - position, speed);
+		if (commonQueue) B.combatAnimations.Add(rMove);
+		else movementAnimations.Add(rMove);
 		position = p;
 	}
 
 	public void SetInitiative(float initiativei, float speed)
 	{
-		rInitiative.Add(new Vector2(initiative, 0), new Vector2(initiativei, 0), speed, B.scaleAnimations);
+		B.scaleAnimationsTest.Add(new RMove(rInitiative, new Vector2(initiativei - initiative, 0), speed));
 		initiative = initiativei;
 	}
-
-	//public bool IsPlayer()
-	//{
-		//if (name == World.Instance.player.Name) return true;
-		//else return false;
-	//}
 
 	public virtual void Kill()
 	{

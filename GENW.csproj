@@ -40,6 +40,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Ability.cs" />
+    <Compile Include="Animation.cs" />
     <Compile Include="Battlefield.cs" />
     <Compile Include="BigBase.cs" />
     <Compile Include="Character.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPoint.cs" />
     <Compile Include="Screen.cs" />
+    <Compile Include="Texture.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="World.cs" />
     <Compile Include="ZPoint.cs" />
