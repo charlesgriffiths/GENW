@@ -127,7 +127,7 @@ class GObject
 	public static void CheckForEvents()
 	{
 		var query = from pc in World.Instance.player.party where pc.uniqueName == "Boo-Boo" select pc;
-		if (query.Count() == 0 && World.Instance.random.Next(30) == 0) MainScreen.Instance.dialogScreen.StartDialog("Boo-Boo Died");
+		if (query.Count() == 0 && World.Instance.random.Next(300) == 0) MainScreen.Instance.dialogScreen.StartDialog("Boo-Boo Died");
 	}
 
 	public virtual void Move(HexPoint.HexDirection d)

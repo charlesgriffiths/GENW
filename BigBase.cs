@@ -10,14 +10,20 @@
 	public GeneralBase<LTile> lTiles = new GeneralBase<LTile>();
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
 
+	public GeneralBase<Skill> skills = new GeneralBase<Skill>();
+	public GeneralBase<Ability> abilities = new GeneralBase<Ability>();
+	public GeneralBase<Gift> gifts = new GeneralBase<Gift>();
+	public GeneralBase<Origin> origins = new GeneralBase<Origin>();
+	public GeneralBase<Background> backgrounds = new GeneralBase<Background>();
+
 	public GeneralBase<GObjectShape> gShapes = new GeneralBase<GObjectShape>();
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
 
 	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
 	public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
-	public GeneralBase<CharacterClass> classes = new GeneralBase<CharacterClass>();
-	public GeneralBase<CharacterRace> races = new GeneralBase<CharacterRace>();
-
+	public GeneralBase<Race> races = new GeneralBase<Race>();
+	public GeneralBase<CClass> classes = new GeneralBase<CClass>();
+	
 	public void Load()
 	{
 		Log.Write("loading all databases... ");
@@ -28,14 +34,20 @@
 		lTiles.Load("lTiles.xml");
 		palettes.Load("palettes.xml");
 
+		skills.Load("skills.xml");
+		abilities.Load("abilities.xml");
+		gifts.Load("gifts.xml");
+		origins.Load("origins.xml");
+		backgrounds.Load("backgrounds.xml");
+
 		dialogs.Load("dialogs.xml");
 		gShapes.Load("gObjects.xml");
 
 		textures.Load("textures.xml");
 		creepShapes.Load("creeps.xml");
-		classes.Load("classes.xml");
 		races.Load("races.xml");
-
+		classes.Load("classes.xml");
+		
 		Log.WriteLine("OK");
 	}
 }

@@ -44,6 +44,7 @@
     <Compile Include="Battlefield.cs" />
     <Compile Include="BigBase.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="Console.cs" />
     <Compile Include="Creature.cs" />
     <Compile Include="Creep.cs" />
     <Compile Include="Dialog.cs" />
@@ -67,6 +68,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPoint.cs" />
     <Compile Include="Screen.cs" />
+    <Compile Include="Skill.cs" />
+    <Compile Include="Stuff.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="World.cs" />
@@ -86,12 +89,18 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\WindowsGL\Debug\Data\abilities.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\abilities.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="bin\WindowsGL\Debug\Data\backgrounds.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\Battlefields\Custom Mountain.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\classes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\classes.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="bin\WindowsGL\Debug\Data\codex.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\creeps.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\gifts.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\gObjects.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -99,8 +108,14 @@
     <Content Include="bin\WindowsGL\Debug\Data\gTileTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\lTiles.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\lTileTypes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\origins.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\palettes.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\races.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\races.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="bin\WindowsGL\Debug\Data\skills.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="bin\WindowsGL\Debug\Data\tips.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\world.xml">
       <SubType>Designer</SubType>

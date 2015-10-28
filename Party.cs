@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using System.Collections.ObjectModel;
+using Microsoft.Xna.Framework.Graphics;
 
 abstract class PartyCreature
 {
@@ -7,6 +8,11 @@ abstract class PartyCreature
 	public int hp;
 
 	public virtual int MaxHP { get { return 10; } }
+	public virtual int Damage { get { return 1; } }
+	public virtual int Attack { get { return 0; } }
+	public virtual int Defence { get { return 0; } }
+
+	public virtual Collection<Ability> Abilities { get { return new Collection<Ability>(); } }
 }
 
 class PartyCreep : PartyCreature
@@ -27,18 +33,41 @@ class PartyCreep : PartyCreature
 
 class PartyCharacter : PartyCreature
 {
-	public CharacterRace characterRace;
-	public CharacterClass characterClass;
+	public Gift gift;
+	public Race race;
+	public CClass cClass;
+	public Origin origin;
+	public Background background;
 
-	//public int level = 1;
-	public override int MaxHP { get { return 10; } }
+	public override int MaxHP { get { return 10 + gift.bonus.hp + race.bonus.hp; } }
+	public override int Damage { get { return 1 + gift.bonus.damage + race.bonus.damage; } }
+	public override int Attack { get { return gift.bonus.attack + race.bonus.attack; } }
+	public override int Defence { get {	return gift.bonus.defence + race.bonus.defence; } }
 
-	public PartyCharacter(string uniqueNamei, string raceName, string className)
+	public override Collection<Ability> Abilities
 	{
+		get
+		{
+			Collection<Ability> result = new Collection<Ability>();
+			result.Add(race.ability);
+			foreach (Ability a in cClass.abilities) result.Add(a);
+			return result;
+		}
+	}
+
+	public PartyCharacter(string uniqueNamei, string giftName, string raceName, string className, string originName, string backgroundName)
+	{
+		BigBase b = BigBase.Instance;
+
 		uniqueName = uniqueNamei;
 		name = raceName + " " + className;
-		characterRace = BigBase.Instance.races.Get(raceName);
-		characterClass = BigBase.Instance.classes.Get(className);
+
+		gift = b.gifts.Get(giftName);
+		race = b.races.Get(raceName);
+		cClass = b.classes.Get(className);
+		origin = b.origins.Get(originName);
+		background = b.backgrounds.Get(backgroundName);
+
 		texture = MainScreen.Instance.game.Content.Load<Texture2D>("characters/" + name);
 		hp = MaxHP;
     }

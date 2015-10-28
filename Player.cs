@@ -6,16 +6,14 @@ class Player : GObject
 	public bool FOVEnabled = true;
 	public bool[,] visitedLocations;
 
-	//private MainScreen M { get { return MainScreen.Instance; } }
-
 	public Player()
 	{
 		shape = new GObjectShape();
-		shape.name = "player";
+		shape.name = "Karl";
 		shape.speed = 1.0f;
 		shape.isActive = true;
 
-		PartyCharacter playerCharacter = new PartyCharacter(shape.name, "Morlock", "Fighter");
+		PartyCharacter playerCharacter = new PartyCharacter(shape.name, "Agile", "Morlock", "Fighter", "The Scorch", "Merchant");
 		party.Add(playerCharacter);
 
 		//party.Add(new PartyCreep("Krokar"));
@@ -44,7 +42,7 @@ class Player : GObject
 	{
 		movementAnimations.Draw();
 		M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
-		if (MyGame.Instance.gameState != MyGame.GameState.Local) DrawParty(new ZPoint(1100, 50));
+		if (!MyGame.Instance.battle) DrawParty(new ZPoint(1100, 50));
 	}
 
 	public override void Kill()

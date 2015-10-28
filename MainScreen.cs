@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 class MainScreen : Screen
@@ -18,9 +16,6 @@ class MainScreen : Screen
 	public Texture2D universalTexture;
 	private Texture2D hexSelectionTexture;
 	public SpriteFont ambientFont, smallFont;
-
-	//public Collection<RPoint> rPoints = new Collection<RPoint>();
-	//public Queue<RMove> rMoves = new Queue<RMove>();
 
 	private MainScreen()
 	{
@@ -54,18 +49,15 @@ class MainScreen : Screen
 
 	public void Draw(Vector2 mouse)
 	{
-		//RPoint.Update(rMoves);
-		//foreach (RPoint p in rPoints) p.Update();
-
 		World.Instance.Draw(mouse);
 
 		HexPoint hexMouse = HexCoordinates(mouse);
-        if (MyGame.Instance.gameState == MyGame.GameState.Global) spriteBatch.Draw(hexSelectionTexture, GraphicCoordinates(hexMouse)); // испправить!!!
-		spriteBatch.DrawString(ambientFont, "Mouse: " + hexMouse, new Vector2(10, 10), Color.Red); // испправить!!!
-		spriteBatch.DrawString(ambientFont, "Party size: " + World.Instance.player.party.Count, new Vector2(10, 30), Color.Yellow); // испправить!!!
+        if (!MyGame.Instance.dialog && !MyGame.Instance.battle) Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
+		if (MyGame.Instance.debug) DrawString(ambientFont, "Mouse: " + hexMouse, new ZPoint(10, 10), Color.Red);
 
 		editor.Draw();
 		dialogScreen.Draw();
+		MyGame.Instance.console.Draw(this);
 	}
 
 	public Vector2 ZeroGraphicCoordinates { get { return new Vector2(size.x * 0.5f, size.y * 0.5f); } }
@@ -75,7 +67,6 @@ class MainScreen : Screen
 		Vector2 result = new Vector2();
 
 		result.X = (p.x - World.Instance.camera.x) * 40;
-		//result.Y = (p.y - World.Instance.camera.y) * 48 /*+ MyMath.IsOdd(p.x) * 24*/ - MyMath.IsOdd(World.Instance.camera.x) * 24;
 		result.Y = (p.y - World.Instance.camera.y) * 48 + MyMath.SawFunction(p.x) * 24 - MyMath.IsOdd(World.Instance.camera.x) * 24;
 		result = result + ZeroGraphicCoordinates - new Vector2(26, 24);
 

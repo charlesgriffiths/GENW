@@ -24,24 +24,4 @@ static class MyMath
 	{
 		return Math.Abs(v1.X - v2.X) + Math.Abs(v1.Y - v2.Y);
 	}
-
-	public static string Split(string s, int length)
-	{
-		string result = s;
-		int line = 1, k = 0;
-
-		for (int i = 0; i < s.Length; i++)
-		{
-			if (s[i] == ' ') k = i + 2*(line-1);
-			if (i > length * line)
-			{
-				result = result.Insert(k+1, "\n\r");
-				line++;
-			}
-		}
-
-		return result;
-	}
-
-	public static Color DarkDarkGray { get { return new Color(0.2f, 0.2f, 0.2f); } }
 }

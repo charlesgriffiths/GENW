@@ -21,7 +21,7 @@ class DialogScreen
 
 	public void Draw()
 	{
-		if (MyGame.Instance.gameState != MyGame.GameState.Dialog) return;
+		if (MyGame.Instance.dialog == false) return;
 
 		screen.Fill(new Color(0.2f, 0.2f, 0.2f, 0.9f));
 		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.White, 45);
@@ -49,7 +49,7 @@ class DialogScreen
 	{
 		string nextNode = r.jump;
 
-		if (r.name == "fight") { World.Instance.battlefield.StartBattle(gObject); return; }
+		if (r.name == "fight") World.Instance.battlefield.StartBattle(gObject);
 
 		if (dialog.name == "The First Dialog")
 		{
@@ -71,7 +71,8 @@ class DialogScreen
 		}
 
 		if (nextNode != "") dialogNode = dialog.nodes[nextNode];
-		else MyGame.Instance.gameState = MyGame.GameState.Global;
+		//else MyGame.Instance.gameState = MyGame.GameState.Global;
+		else MyGame.Instance.dialog = false;
 	}
 
 	public void Press(KeyboardState keyboardState)
@@ -93,6 +94,7 @@ class DialogScreen
 		dialogNode = d.nodes["entry"];
 		gObject = g;
 		d.happened = true;
-		MyGame.Instance.gameState = MyGame.GameState.Dialog;
+		//MyGame.Instance.gameState = MyGame.GameState.Dialog;
+		MyGame.Instance.dialog = true;
 	}
 }

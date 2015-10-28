@@ -11,6 +11,7 @@ public class MyMonoGame : Game
 	private World W { get { return World.Instance; } }
 	private MainScreen M { get { return MainScreen.Instance; } }
 	private Battlefield B { get { return World.Instance.battlefield; } }
+	private MyGame G { get { return MyGame.Instance; } }
 
 	public MyMonoGame()
 	{
@@ -40,6 +41,7 @@ public class MyMonoGame : Game
 		MainScreen.Instance.LoadTextures();
         GTile.LoadTextures();
 		LTile.LoadTextures();
+		Ability.LoadTextures();
 		GObjectShape.LoadTextures();
 		Texture.LoadTextures();
 		CreepShape.LoadTextures();
@@ -53,6 +55,7 @@ public class MyMonoGame : Game
 		Content.Unload();
 	}
 
+	private bool KeyPressed() {	return keyboardState != previousKeyboardState; }
 	private bool KeyPressed(Keys key)
 	{
 		if (keyboardState.IsKeyDown(key) && !previousKeyboardState.IsKeyDown(key)) return true;
@@ -71,23 +74,27 @@ public class MyMonoGame : Game
 		mouseState = Mouse.GetState();
 
 		if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
+		if (KeyPressed(Keys.OemTilde)) G.input = !G.input;
 
-		if (MyGame.Instance.gameState == MyGame.GameState.Dialog && keyboardState != previousKeyboardState) M.dialogScreen.Press(keyboardState);
-		else if (MyGame.Instance.gameState == MyGame.GameState.Local)
+		if (G.input && KeyPressed()) G.console.Press(keyboardState);
+		else if (G.dialog && KeyPressed()) M.dialogScreen.Press(keyboardState);
+		else if (G.battle)
 		{
 			if (KeyPressed(Keys.Right)) B.CurrentCreature.TryToMove(ZPoint.Direction.Right, keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Up)) B.CurrentCreature.TryToMove(ZPoint.Direction.Up, keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Left)) B.CurrentCreature.TryToMove(ZPoint.Direction.Left, keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Down)) B.CurrentCreature.TryToMove(ZPoint.Direction.Down, keyboardState.IsKeyDown(Keys.LeftControl));
 
-			if (mouseState.ScrollWheelValue > previousMouseState.ScrollWheelValue) M.editor.GoLeft();
-			else if (mouseState.ScrollWheelValue < previousMouseState.ScrollWheelValue) M.editor.GoRight();
-
-			if (mouseState.LeftButton == ButtonState.Pressed)
+			if (G.editor)
 			{
-				ZPoint p = B.ZCoordinates(mouseState.Position.ToVector2());
-				//B[p] = B.palette[M.editor.LocalBrush];
-				B.SetTile(p, M.editor.LocalBrush);
+				if (mouseState.ScrollWheelValue > previousMouseState.ScrollWheelValue) M.editor.GoLeft();
+				else if (mouseState.ScrollWheelValue < previousMouseState.ScrollWheelValue) M.editor.GoRight();
+
+				if (mouseState.LeftButton == ButtonState.Pressed)
+				{
+					ZPoint p = B.ZCoordinates(mouseState.Position.ToVector2());
+					B.SetTile(p, M.editor.LocalBrush);
+				}
 			}
 		}
 		else
@@ -98,17 +105,17 @@ public class MyMonoGame : Game
 			else if (KeyPressed(Keys.Delete)) W.player.Move(HexPoint.HexDirection.SW);
 			else if (KeyPressed(Keys.PageUp)) W.player.Move(HexPoint.HexDirection.NE);
 			else if (KeyPressed(Keys.PageDown)) W.player.Move(HexPoint.HexDirection.SE);
-			
-			else if (KeyPressed(Keys.S)) W.map.Save();
-			else if (KeyPressed(Keys.F)) W.player.FOVEnabled = !W.player.FOVEnabled;
 
-			if (mouseState.ScrollWheelValue > previousMouseState.ScrollWheelValue) M.editor.GoLeft();
-			else if (mouseState.ScrollWheelValue < previousMouseState.ScrollWheelValue) M.editor.GoRight();
-
-			if (mouseState.LeftButton == ButtonState.Pressed)
+			if (G.editor)
 			{
-				HexPoint p = M.HexCoordinates(mouseState.Position.ToVector2());
-				W.map[p] = M.editor.GlobalBrush;
+				if (mouseState.ScrollWheelValue > previousMouseState.ScrollWheelValue) M.editor.GoLeft();
+				else if (mouseState.ScrollWheelValue < previousMouseState.ScrollWheelValue) M.editor.GoRight();
+
+				if (mouseState.LeftButton == ButtonState.Pressed)
+				{
+					HexPoint p = M.HexCoordinates(mouseState.Position.ToVector2());
+					W.map[p] = M.editor.GlobalBrush;
+				}
 			}
 		}
 

@@ -63,6 +63,6 @@ class Screen
 
 	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, int length)
 	{
-		MainScreen.Instance.spriteBatch.DrawString(font, MyMath.Split(text, length), position + p, color);
+		MainScreen.Instance.spriteBatch.DrawString(font, Stuff.Split(text, length), position + p, color);
 	}
 }

@@ -27,12 +27,16 @@ static class MyXml
 
 	public static int GetInt(XmlNode xmlNode, string attribute)
 	{
-        return int.Parse(GetString(xmlNode, attribute));
+		string s = GetString(xmlNode, attribute);
+		if (s == "") return 0;
+        else return int.Parse(s);
 	}
 
 	public static float GetFloat(XmlNode xmlNode, string attribute)
 	{
-		return float.Parse(GetString(xmlNode, attribute));
+		string s = GetString(xmlNode, attribute);
+		if (s == "") return 0.0f;
+		else return float.Parse(s);
 	}
 
 	public static bool GetBool(XmlNode xmlNode, string attribute)
