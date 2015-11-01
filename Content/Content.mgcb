@@ -1124,24 +1124,6 @@
 /processorParam:TextureFormat=Color
 /build:terrain/Light Autumn Forest Top.png
 
-#begin fonts/fAmbient.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:fonts/fAmbient.spritefont
-
-#begin fonts/fDialog.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:fonts/fDialog.spritefont
-
-#begin fonts/fSmall.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:fonts/fSmall.spritefont
-
 #begin other/mask.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1592,4 +1574,28 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:TextureFormat=Color
 /build:abilities/True Strike.png
+
+#begin fonts/ambient.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:fonts/ambient.spritefont
+
+#begin fonts/small.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:fonts/small.spritefont
+
+#begin fonts/verdana.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:fonts/verdana.spritefont
+
+#begin fonts/verdanaBold.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:fonts/verdanaBold.spritefont
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Xml;
 using System.Linq;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,13 +9,13 @@ class Battlefield
 {
 	private char[,] data;
 	public Palette palette;
-	private Collection<LObject> lObjects = new Collection<LObject>();
+	private Collection<LObject> objects = new Collection<LObject>();
 
-	public LObject currentLObject;
+	public LObject currentObject, spotlightObject;
 	private GObject gObject;
-	private Texture2D currentLObjectSymbol, zSelectionTexture;
+	private Texture2D currentObjectSymbol, zSelectionTexture;
 
-	public AnimationQueue scaleAnimationsTest = new AnimationQueue();
+	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
 
 	private Player P { get { return World.Instance.player; } }
@@ -40,7 +39,7 @@ class Battlefield
 
 	public void LoadTextures()
 	{
-		currentLObjectSymbol = MainScreen.Instance.game.Content.Load<Texture2D>("other/currentObject");
+		currentObjectSymbol = MainScreen.Instance.game.Content.Load<Texture2D>("other/currentObject");
 		zSelectionTexture = MainScreen.Instance.game.Content.Load<Texture2D>("other/zSelection");
 	}
 
@@ -51,18 +50,18 @@ class Battlefield
 
 	public LObject GetLObject(ZPoint p)
 	{
-		foreach (LObject l in lObjects) if (l.position.TheSameAs(p)) return l;
+		foreach (LObject l in objects) if (l.position.TheSameAs(p)) return l;
 		return null;
 	}
 
 	public Creature GetCreature(ZPoint p)
 	{
-		var query = from l in lObjects where l is Creature && l.position.TheSameAs(p) && l.isActive select l;
+		var query = from l in objects where l is Creature && l.position.TheSameAs(p) && l.isActive select l;
 		if (query.Count() > 0) return query.First() as Creature;
 		else return null;
 	}
 
-	public Creature CurrentCreature { get { return currentLObject as Creature; } }
+	public Creature CurrentCreature { get { return currentObject as Creature; } }
 
 	public bool IsWalkable(ZPoint p)
 	{
@@ -90,17 +89,17 @@ class Battlefield
 		if (pc.uniqueName == P.Name)
 		{
 			LPlayer item = new LPlayer(pc as PartyCharacter);
-			lObjects.Add(item);
+			objects.Add(item);
 		}
 		else if (pc is PartyCharacter)
 		{
 			Character item = new Character(pc as PartyCharacter, isInParty, isAIControlled);
-			lObjects.Add(item);
+			objects.Add(item);
 		}
 		else if (pc is PartyCreep)
 		{
 			Creep item = new Creep(pc as PartyCreep, isInParty, isAIControlled);
-			lObjects.Add(item);
+			objects.Add(item);
 		}
 	}
 
@@ -113,25 +112,25 @@ class Battlefield
 		else battlefieldName = "Custom Mountain";
 		Load(battlefieldName);
 
-		lObjects.Clear();
+		objects.Clear();
 		foreach (PartyCreature member in World.Instance.player.party) AddCreature(member, true, false);
 		foreach (PartyCreature member in g.party) AddCreature(member, false, true);
 
 		LObject item = new LObject("Tree");
-		lObjects.Add(item);
+		objects.Add(item);
 
-		foreach (LObject l in lObjects)
+		foreach (LObject l in objects)
 		{
 			l.SetPosition(RandomFreeTile(), 60.0f, false);
-			if (l is LPlayer) l.SetInitiative(0.1f, 6.0f);
-			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 6.0f);
+			if (l is LPlayer) l.SetInitiative(0.1f, 60.0f, false);
+			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 60.0f, false);
 		}
 
 		if(NextLObject is Creature) { if ((NextLObject as Creature).isAIControlled) NextLObject.Run(); }
 		else NextLObject.Run();
 
-		currentLObject = NextLObject;
-		//MyGame.Instance.gameState = MyGame.GameState.Local;
+		currentObject = NextLObject;
+		spotlightObject = currentObject;
 		MyGame.Instance.battle = true;
 	}
 
@@ -161,6 +160,12 @@ class Battlefield
 		return new ZPoint((int)logical.X, (int)logical.Y);
 	}
 
+	public void SetSpotlight(ZPoint p)
+	{
+		var query = from o in objects where o is Creature && o.position.TheSameAs(p) && o.isActive orderby o.Importance select o;
+		if (query.Count() > 0) spotlightObject = query.First();
+	}
+
 	private void DrawScale(ZPoint position, ZPoint zMouse)
 	{
 		int length = 500, height = 20;
@@ -168,7 +173,7 @@ class Battlefield
 
 		screen.Fill(Stuff.DarkDarkGray);
 
-		var query = from l in lObjects where l.isActive orderby l.rInitiative.x select l;
+		var query = from l in objects where l.isActive orderby l.rInitiative.x select l;
 		float zeroInitiative = -query.Last().rInitiative.x;
 
 		foreach (Creature c in query)
@@ -180,7 +185,7 @@ class Battlefield
 			Color color = Color.White;
 			if (c.position.TheSameAs(zMouse)) color = c.RelationshipColor;
 
-			if (scaleAnimationsTest.CurrentTarget != c.rInitiative)
+			if (scaleAnimations.CurrentTarget != c.rInitiative)
 				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
 
 			screen.Draw(c.texture, new ZPoint(rInitiative + 1, y));
@@ -190,26 +195,46 @@ class Battlefield
 	private void DrawAbilities(Creature c, Screen screen, ZPoint position)
 	{
 		foreach (Ability a in c.partyCreature.Abilities)
-			screen.Draw(a.texture, position + new ZPoint(58 * c.partyCreature.Abilities.IndexOf(a), 0));
+			screen.Draw(a.texture, position + new ZPoint(48 * c.partyCreature.Abilities.IndexOf(a), 0));
 	}
 
-	private void DrawInfo(LObject l, ZPoint position)
+	private void DrawInfo(Creature c, ZPoint position)
 	{
-		int length = 400, height = 300;
+		int length = 288, height = 108;
 		Screen screen = new Screen(position, new ZPoint(length, height));
+		screen.Fill(Color.Black);
 
-		screen.Fill(Stuff.DarkDarkGray);
-		screen.DrawString(MainScreen.Instance.smallFont, l.name, new ZPoint(10, 15), Color.White);
-		if (l is Creature) DrawAbilities(l as Creature, screen, new ZPoint(10, 100));
+		float hpFraction = (float)c.HP / c.MaxHP;
+		float enduranceFraction = (float)c.Endurance / c.MaxHP;
+
+		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(hpFraction * length), 20), new Color(0.2f, 0, 0));
+		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(enduranceFraction * length), 20), new Color(0.4f, 0, 0));
+		for (int i = 1; i <= c.MaxHP; i++) screen.DrawRectangle(new ZPoint((int)(i * (float)length / c.MaxHP), 0), new ZPoint(1, 20), Color.Black);
+
+		SpriteFont font = MainScreen.Instance.verdanaBoldFont;
+
+		string name = c.Name;
+		if (c.UniqueName != "") name = c.UniqueName + ", " + c.Name;
+        screen.DrawString(font, name, 23, Color.White);
+
+		screen.DrawString(font, c.Damage.ToString(), new ZPoint(5, 43), Color.White);
+		screen.DrawString(font, c.Attack.ToString() + "/" + c.Defence, 43, Color.White);
+		screen.DrawString(font, c.Armor.ToString(), new ZPoint(length - 12, 43), Color.White);
+
+		DrawAbilities(c, screen, new ZPoint(0, height - 48));
+
+		//screen.DrawRectangle(new ZPoint(0, height), new ZPoint(length, -(int)(missingEndurance * height)), new Color(0.2f, 0, 0, 0.2f));
+		//screen.DrawRectangle(new ZPoint(0, height), new ZPoint(length, -(int)(missingHP * height)), new Color(0.2f, 0, 0, 0.2f));
 	}
 
 	public void Draw(Vector2 mouse)
 	{
 		MainScreen M = MainScreen.Instance;
-		foreach (LObject l in lObjects) l.movementAnimations.Draw();
-
-		//if (MyGame.Instance.gameState != MyGame.GameState.Local) return;
-		if (MyGame.Instance.battle == false) return;
+		foreach (LObject l in objects)
+		{
+			l.movementAnimations.Draw();
+			l.scaleAnimations.Draw();
+		}
 
 		for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++)
 		{
@@ -217,25 +242,30 @@ class Battlefield
 			M.Draw(this[p].texture, GraphicCoordinates(p));
 		}
 
-		var query = from l in lObjects orderby l.isActive select l;
+		var query = from l in objects orderby l.isActive select l;
 		foreach (LObject l in query) M.Draw(l.texture, GraphicCoordinates(l.rPosition));
 
 		combatAnimations.Draw();
-		scaleAnimationsTest.Draw();
+		scaleAnimations.Draw();
 
-		M.Draw(currentLObjectSymbol, GraphicCoordinates(currentLObject.rPosition) - new Vector2(0, 12));
+		Vector2 cPosition = GraphicCoordinates(currentObject.rPosition);
+		if (!combatAnimations.IsEmpty) cPosition = combatAnimations.Peek.Position;
+		M.Draw(currentObjectSymbol, cPosition - new Vector2(0, 12));
+
 		ZPoint zMouse = ZCoordinates(mouse);
 		if (InRange(zMouse)) M.Draw(zSelectionTexture, GraphicCoordinates(zMouse));
+		if (spotlightObject != null && spotlightObject != currentObject) M.Draw(zSelectionTexture, GraphicCoordinates(spotlightObject.rPosition));
 
 		DrawScale(new ZPoint(100, 650), zMouse);
-		DrawInfo(currentLObject, new ZPoint(750, 400));
+
+		DrawInfo(spotlightObject as Creature, new ZPoint(750, 400));
 	}
 
 	public LObject NextLObject
 	{
 		get
 		{
-			var query = from l in lObjects where l.isActive orderby -l.initiative select l;
+			var query = from l in objects where l.isActive orderby -l.initiative select l;
 			if (query.Count() != 0) return query.First();
 			else return null;
 		}
@@ -243,20 +273,21 @@ class Battlefield
 
 	public void CheckForEvents()
 	{
-		var aliveMonsters = from c in lObjects where c is Creature && c.isActive && !(c as Creature).isInParty select c;
+		var aliveMonsters = from c in objects where c is Creature && c.isActive && !(c as Creature).isInParty select c;
 		if (aliveMonsters.Count() == 0)
 		{
 			P.party.Clear();
-			var aliveParty = from c in lObjects where c is Creature && c.isActive && (c as Creature).isInParty orderby c.Importance select c;
+			var aliveParty = from c in objects where c is Creature && c.isActive && (c as Creature).isInParty orderby c.Importance select c;
 
 			foreach (Creature c in aliveParty)
 			{
 				c.partyCreature.hp = c.HP;
+				c.partyCreature.endurance = c.Endurance;
+
 				P.party.Add(c.partyCreature);
 			}
 
 			gObject.Kill();
-			//MyGame.Instance.gameState = MyGame.GameState.Global;
 			MyGame.Instance.battle = false;
 		}
 	}

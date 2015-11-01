@@ -80,6 +80,10 @@ public class MyMonoGame : Game
 		else if (G.dialog && KeyPressed()) M.dialogScreen.Press(keyboardState);
 		else if (G.battle)
 		{
+			ZPoint zMouse = B.ZCoordinates(mouseState.Position.ToVector2());
+
+			if (mouseState.LeftButton == ButtonState.Pressed) B.SetSpotlight(zMouse);
+
 			if (KeyPressed(Keys.Right)) B.CurrentCreature.TryToMove(ZPoint.Direction.Right, keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Up)) B.CurrentCreature.TryToMove(ZPoint.Direction.Up, keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Left)) B.CurrentCreature.TryToMove(ZPoint.Direction.Left, keyboardState.IsKeyDown(Keys.LeftControl));
@@ -90,11 +94,7 @@ public class MyMonoGame : Game
 				if (mouseState.ScrollWheelValue > previousMouseState.ScrollWheelValue) M.editor.GoLeft();
 				else if (mouseState.ScrollWheelValue < previousMouseState.ScrollWheelValue) M.editor.GoRight();
 
-				if (mouseState.LeftButton == ButtonState.Pressed)
-				{
-					ZPoint p = B.ZCoordinates(mouseState.Position.ToVector2());
-					B.SetTile(p, M.editor.LocalBrush);
-				}
+				if (mouseState.LeftButton == ButtonState.Pressed) B.SetTile(zMouse, M.editor.LocalBrush);
 			}
 		}
 		else

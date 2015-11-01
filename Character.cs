@@ -16,7 +16,7 @@ class Character : Creature
 	public Character(PartyCharacter pc, bool isInPartyi, bool isAIControlledi)
 	{
 		partyCreature = pc;
-		name = pc.uniqueName;
+		//name = pc.uniqueName;
 		isInParty = isInPartyi;
 		isAIControlled = isAIControlledi;
 		texture = pc.texture;
@@ -38,7 +38,7 @@ class LPlayer : Character
 	public LPlayer(PartyCharacter pc)
 	{
 		partyCreature = pc;
-		name = pc.uniqueName;
+		//name = pc.uniqueName;
 		isInParty = true;
 		isAIControlled = false;
 		texture = pc.texture;

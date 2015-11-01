@@ -15,7 +15,7 @@ class MainScreen : Screen
 
 	public Texture2D universalTexture;
 	private Texture2D hexSelectionTexture;
-	public SpriteFont ambientFont, smallFont;
+	public SpriteFont ambientFont, smallFont, verdanaFont, verdanaBoldFont;
 
 	private MainScreen()
 	{
@@ -42,9 +42,10 @@ class MainScreen : Screen
 
 		hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
 
-		ambientFont = game.Content.Load<SpriteFont>("fonts/fAmbient");
-		smallFont = game.Content.Load<SpriteFont>("fonts/fSmall");
-		dialogScreen.dialogFont = game.Content.Load<SpriteFont>("fonts/fDialog");
+		ambientFont = game.Content.Load<SpriteFont>("fonts/ambient");
+		smallFont = game.Content.Load<SpriteFont>("fonts/small");
+		verdanaFont = game.Content.Load<SpriteFont>("fonts/verdana");
+		verdanaBoldFont = game.Content.Load<SpriteFont>("fonts/verdanaBold");
 	}
 
 	public void Draw(Vector2 mouse)

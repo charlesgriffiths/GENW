@@ -24,7 +24,7 @@ class Player : GObject
 		Texture = M.game.Content.Load<Texture2D>("other/player");
 	}
 
-	private void DrawParty(ZPoint position)
+	public void DrawParty(ZPoint position)
 	{
 		const int length = 110, height = 400;
 		Screen screen = new Screen(position, new ZPoint(length, height));
@@ -33,8 +33,12 @@ class Player : GObject
 		{
 			int i = party.IndexOf(member);
 			screen.Draw(member.texture, new ZPoint(0, i * 40));
-			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), 
-				new ZPoint(32, -(int)((1 - (float)member.hp / (float)member.MaxHP) * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
+
+			float hpMissing = 1 - (float)member.hp / member.MaxHP;
+			float enduranceMissing = 1 - (float)member.endurance / member.MaxHP;
+
+			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), new ZPoint(32, -(int)(enduranceMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
+			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), new ZPoint(32, -(int)(hpMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 		}
 	}
 
@@ -42,7 +46,7 @@ class Player : GObject
 	{
 		movementAnimations.Draw();
 		M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
-		if (!MyGame.Instance.battle) DrawParty(new ZPoint(1100, 50));
+		//if (!MyGame.Instance.battle) DrawParty(new ZPoint(1100, 50));
 	}
 
 	public override void Kill()

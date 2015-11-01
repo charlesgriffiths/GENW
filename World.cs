@@ -70,7 +70,8 @@ class World
 		foreach (GObject g in gObjects) g.DrawAnnotation();
 		map.DrawMask();
 
-		battlefield.Draw(mouse);
+		if (MyGame.Instance.battle) battlefield.Draw(mouse);
+		else player.DrawParty(new ZPoint(1100, 50));
 	}
 
 	public GObject NextGObject

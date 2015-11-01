@@ -10,7 +10,7 @@ class Ability : NamedObject
 
 	public enum TargetType { Passive, None, Direction, Point, Object, Creature };
 
-	private static TargetType GetTargetType(string s) // учитывая, что мы это сделаем и в обратную сторону, это нужно как-то автоматизировать! Вроде, это возможно.
+	private static TargetType GetTargetType(string s)
 	{
 		if (s == "passive") return TargetType.Passive;
 		else if (s == "none") return TargetType.None;

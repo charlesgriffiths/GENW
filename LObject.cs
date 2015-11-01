@@ -7,13 +7,13 @@ class LObject
 	
 	public RPoint rInitiative = new RPoint();
 	public RPoint rPosition = new RPoint();
+
 	public AnimationQueue movementAnimations = new AnimationQueue();
+	public AnimationQueue scaleAnimations = new AnimationQueue();
 
 	public bool isActive;
 	public float initiative;
-	
 	public Texture2D texture;
-	public string name;
 
 	private Battlefield B { get { return World.Instance.battlefield; } }
 	private MainScreen M { get { return MainScreen.Instance; } }
@@ -21,12 +21,13 @@ class LObject
 	public LObject() {}
 	public LObject(string namei)
 	{
-		name = namei;
 		isActive = false;
-		texture = BigBase.Instance.textures.Get(name).data;
+		texture = BigBase.Instance.textures.Get(namei).data;
 
 		Init();
 	}
+
+	public virtual string Name { get { return ""; } }
 
 	protected virtual void Init()
 	{
@@ -43,9 +44,11 @@ class LObject
 		position = p;
 	}
 
-	public void SetInitiative(float initiativei, float speed)
+	public void SetInitiative(float initiativei, float speed, bool commonQueue)
 	{
-		B.scaleAnimationsTest.Add(new RMove(rInitiative, new Vector2(initiativei - initiative, 0), speed));
+		RMove rMove = new RMove(rInitiative, new Vector2(initiativei - initiative, 0), speed);
+		if (commonQueue) B.scaleAnimations.Add(rMove);
+		else scaleAnimations.Add(rMove);
 		initiative = initiativei;
 	}
 
@@ -60,7 +63,7 @@ class LObject
 	protected void ContinueTurn(float time)
 	{
 		Log.Assert(time > 0, "time <= 0");
-		SetInitiative(initiative - time, 1.0f / time);
+		SetInitiative(initiative - time, 2.0f / time, true);
 		B.CheckForEvents();
 	}
 

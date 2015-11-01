@@ -4,8 +4,11 @@ using Microsoft.Xna.Framework.Graphics;
 abstract class PartyCreature
 {
 	public Texture2D texture;
-	public string name, uniqueName;
-	public int hp;
+	//public string name;
+	public string uniqueName;
+	public int endurance, hp;
+
+	public virtual string Name { get { return ""; } }
 
 	public virtual int MaxHP { get { return 10; } }
 	public virtual int Damage { get { return 1; } }
@@ -21,12 +24,15 @@ class PartyCreep : PartyCreature
 
 	public PartyCreep(string namei, string uniqueNamei = "")
 	{
-		name = namei;
+		//name = namei;
 		uniqueName = uniqueNamei;
-		shape = BigBase.Instance.creepShapes.Get(name);
+		shape = BigBase.Instance.creepShapes.Get(namei);
 		hp = MaxHP;
+		endurance = MaxHP;
 		texture = shape.texture;
 	}
+
+	public override string Name { get { return shape.name; } }
 
 	public override int MaxHP {	get	{ return shape.maxHP; }	}
 }
@@ -38,6 +44,8 @@ class PartyCharacter : PartyCreature
 	public CClass cClass;
 	public Origin origin;
 	public Background background;
+
+	public override string Name { get { return race.name + " " + cClass.name; } }
 
 	public override int MaxHP { get { return 10 + gift.bonus.hp + race.bonus.hp; } }
 	public override int Damage { get { return 1 + gift.bonus.damage + race.bonus.damage; } }
@@ -60,7 +68,7 @@ class PartyCharacter : PartyCreature
 		BigBase b = BigBase.Instance;
 
 		uniqueName = uniqueNamei;
-		name = raceName + " " + className;
+		//name = raceName + " " + className;
 
 		gift = b.gifts.Get(giftName);
 		race = b.races.Get(raceName);
@@ -68,7 +76,9 @@ class PartyCharacter : PartyCreature
 		origin = b.origins.Get(originName);
 		background = b.backgrounds.Get(backgroundName);
 
-		texture = MainScreen.Instance.game.Content.Load<Texture2D>("characters/" + name);
+		texture = MainScreen.Instance.game.Content.Load<Texture2D>("characters/" + Name);
+
 		hp = MaxHP;
+		endurance = MaxHP;
     }
 }

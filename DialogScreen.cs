@@ -5,12 +5,10 @@ using Microsoft.Xna.Framework.Graphics;
 class DialogScreen
 {
 	private DialogNode dialogNode;
-	//private string dialogName;
 	private Dialog dialog;
 	private GObject gObject;
 
 	public Screen screen;
-	public SpriteFont dialogFont;
 
 	private Player P { get { return World.Instance.player; } }
 
@@ -22,12 +20,14 @@ class DialogScreen
 	public void Draw()
 	{
 		if (MyGame.Instance.dialog == false) return;
-
+		
 		screen.Fill(new Color(0.2f, 0.2f, 0.2f, 0.9f));
-		screen.DrawString(dialogFont, dialogNode.text, new ZPoint(10, 10), Color.White, 45);
+
+		SpriteFont font = MainScreen.Instance.verdanaFont;
+        screen.DrawString(font, dialogNode.text, new ZPoint(10, 10), Color.White, 45);
 
 		for (int i = 0; i < dialogNode.responses.Count; i++)
-			screen.DrawString(dialogFont, (i+1) + ". " + dialogNode.responses[i].text, 
+			screen.DrawString(font, (i+1) + ". " + dialogNode.responses[i].text, 
 				new ZPoint(10, 170 + i*20), Color.White, 47);
 	}
 
@@ -71,7 +71,6 @@ class DialogScreen
 		}
 
 		if (nextNode != "") dialogNode = dialog.nodes[nextNode];
-		//else MyGame.Instance.gameState = MyGame.GameState.Global;
 		else MyGame.Instance.dialog = false;
 	}
 
@@ -94,7 +93,6 @@ class DialogScreen
 		dialogNode = d.nodes["entry"];
 		gObject = g;
 		d.happened = true;
-		//MyGame.Instance.gameState = MyGame.GameState.Dialog;
 		MyGame.Instance.dialog = true;
 	}
 }
