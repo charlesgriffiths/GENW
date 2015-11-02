@@ -40,6 +40,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Ability.cs" />
+    <Compile Include="AI.cs" />
     <Compile Include="Animation.cs" />
     <Compile Include="Battlefield.cs" />
     <Compile Include="BigBase.cs" />

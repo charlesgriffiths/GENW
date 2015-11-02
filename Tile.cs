@@ -4,12 +4,14 @@ using Microsoft.Xna.Framework.Graphics;
 class GTileType : NamedObject
 {
 	public bool isWalkable, isFlat;
+	public float travelTime;
 
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
 		isWalkable = MyXml.GetBool(xnode, "walkable");
 		isFlat = MyXml.GetBool(xnode, "flat");
+		travelTime = MyXml.GetFloat(xnode, "time");
 	}
 }
 

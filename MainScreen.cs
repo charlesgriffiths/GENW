@@ -17,6 +17,9 @@ class MainScreen : Screen
 	private Texture2D hexSelectionTexture;
 	public SpriteFont ambientFont, smallFont, verdanaFont, verdanaBoldFont;
 
+	private MyGame G { get { return MyGame.Instance; } }
+	private World W { get { return World.Instance; } }
+
 	private MainScreen()
 	{
 		windowPosition = new ZPoint(200, 150);
@@ -50,15 +53,15 @@ class MainScreen : Screen
 
 	public void Draw(Vector2 mouse)
 	{
-		World.Instance.Draw(mouse);
+		W.Draw(mouse);
 
 		HexPoint hexMouse = HexCoordinates(mouse);
-        if (!MyGame.Instance.dialog && !MyGame.Instance.battle) Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
-		if (MyGame.Instance.debug) DrawString(ambientFont, "Mouse: " + hexMouse, new ZPoint(10, 10), Color.Red);
+        if (!G.dialog && !G.battle && (!W.player.FOVEnabled || W.player[hexMouse]))	Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
+		if (G.debug) DrawString(ambientFont, "Mouse: " + hexMouse, new ZPoint(10, 10), Color.Red);
 
 		editor.Draw();
 		dialogScreen.Draw();
-		MyGame.Instance.console.Draw(this);
+		G.console.Draw(this);
 	}
 
 	public Vector2 ZeroGraphicCoordinates { get { return new Vector2(size.x * 0.5f, size.y * 0.5f); } }

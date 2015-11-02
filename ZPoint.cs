@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 
 class ZPoint
@@ -28,6 +29,19 @@ class ZPoint
 		else if (i == 1) return Direction.Up;
 		else if (i == 2) return Direction.Left;
 		else return Direction.Down;
+	}
+
+	public static Collection<Direction> Directions
+	{
+		get
+		{
+			Collection<Direction> result = new Collection<Direction>();
+			result.Add(Direction.Right);
+			result.Add(Direction.Up);
+			result.Add(Direction.Left);
+			result.Add(Direction.Down);
+			return result;
+		}
 	}
 
 	public static ZPoint Min(ZPoint p1, ZPoint p2)
@@ -86,13 +100,6 @@ class ZPoint
 		if (x < p1.x || y < p1.y || x > p2.x || y > p2.y) return false;
 		else return true;
 	}
-}
 
-/*
-class ZRectangle
-{
-	public ZPoint p, size;
-
-	public ZPoint q { get { return p + size; } }
+	public bool IsAdjacent(ZPoint p) { return MyMath.ManhattanDistance(this, p) == 1; }
 }
-*/

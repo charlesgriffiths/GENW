@@ -24,4 +24,9 @@ static class MyMath
 	{
 		return Math.Abs(v1.X - v2.X) + Math.Abs(v1.Y - v2.Y);
 	}
+
+	public static int ManhattanDistance(ZPoint p1, ZPoint p2)
+	{
+		return Math.Abs(p1.x - p2.x) + Math.Abs(p1.y - p2.y);
+	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 
 class HexPoint
 {
@@ -8,6 +9,31 @@ class HexPoint
 	public HexPoint(int xi, int yi) { x = xi; y = yi; }
 
 	public enum HexDirection { S, SE, NE, N, NW, SW };
+
+	public static Collection<HexDirection> Directions
+	{
+		get
+		{
+			Collection<HexDirection> result = new Collection<HexDirection>();
+			result.Add(HexDirection.S);
+			result.Add(HexDirection.SE);
+			result.Add(HexDirection.NE);
+			result.Add(HexDirection.N);
+			result.Add(HexDirection.NW);
+			result.Add(HexDirection.SW);
+			return result;
+		}
+	}
+
+	public static HexDirection Opposite(HexDirection d)
+	{
+		if (d == HexDirection.N) return HexDirection.S;
+		else if (d == HexDirection.S) return HexDirection.N;
+		else if (d == HexDirection.SE) return HexDirection.NW;
+		else if (d == HexDirection.NE) return HexDirection.SW;
+		else if (d == HexDirection.SW) return HexDirection.NE;
+		else return HexDirection.SE;
+	}
 
 	public HexPoint Shift(HexDirection d)
 	{

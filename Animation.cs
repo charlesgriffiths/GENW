@@ -33,17 +33,6 @@ class AnimationQueue
 		}
 	}
 
-	/*	
-		public void Draw()
-		{
-			if (data.Count == 0) return;
-
-			Animation a = data[0];
-			if (a.IsFinished) data.Remove(a);
-			else a.Draw();
-		}
-	*/
-
 	public void Draw()
 	{
 		Collection<Animation> animationsToDraw = new Collection<Animation>();

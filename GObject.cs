@@ -133,8 +133,9 @@ class GObject
 	public virtual void Move(HexPoint.HexDirection d)
 	{
 		ZPoint destination = position.Shift(d);
-		if (W.map.IsWalkable(destination)) SetPosition(destination, 4.0f);
-		PassTurn(Speed);
+		float travelTime = Speed * W.map[position].type.travelTime;
+        if (W.map.IsWalkable(destination)) SetPosition(destination, 4.0f / travelTime);
+		PassTurn(travelTime);
 	}
 
 	public virtual void Run()

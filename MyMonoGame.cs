@@ -99,6 +99,10 @@ public class MyMonoGame : Game
 		}
 		else
 		{
+			HexPoint hMouse = M.HexCoordinates(mouseState.Position.ToVector2());
+
+			if (mouseState.RightButton == ButtonState.Pressed && previousMouseState.RightButton != ButtonState.Pressed) W.player.GoTo(hMouse);
+
 			if (KeyPressed(Keys.Home)) W.player.Move(HexPoint.HexDirection.N);
 			else if (KeyPressed(Keys.End)) W.player.Move(HexPoint.HexDirection.S);
 			else if (KeyPressed(Keys.Insert)) W.player.Move(HexPoint.HexDirection.NW);
@@ -111,11 +115,7 @@ public class MyMonoGame : Game
 				if (mouseState.ScrollWheelValue > previousMouseState.ScrollWheelValue) M.editor.GoLeft();
 				else if (mouseState.ScrollWheelValue < previousMouseState.ScrollWheelValue) M.editor.GoRight();
 
-				if (mouseState.LeftButton == ButtonState.Pressed)
-				{
-					HexPoint p = M.HexCoordinates(mouseState.Position.ToVector2());
-					W.map[p] = M.editor.GlobalBrush;
-				}
+				if (mouseState.LeftButton == ButtonState.Pressed) W.map[hMouse] = M.editor.GlobalBrush;
 			}
 		}
 

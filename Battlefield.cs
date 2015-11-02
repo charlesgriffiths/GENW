@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml;
 using System.Linq;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +10,7 @@ class Battlefield
 {
 	private char[,] data;
 	public Palette palette;
-	private Collection<LObject> objects = new Collection<LObject>();
+	public Collection<LObject> objects = new Collection<LObject>();
 
 	public LObject currentObject, spotlightObject;
 	private GObject gObject;
@@ -18,9 +19,13 @@ class Battlefield
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
 
+	private MainScreen M { get { return MainScreen.Instance; } }
 	private Player P { get { return World.Instance.player; } }
 
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
+
+	public List<Creature> Creatures	{ get {	return (from c in objects where c is Creature select c as Creature).Cast<Creature>().ToList(); } }
+	public List<Creature> AliveCreatures { get { return (from c in Creatures where c.isActive select c).Cast<Creature>().ToList(); } }
 
 	public LTile this[ZPoint p]
 	{
@@ -222,14 +227,39 @@ class Battlefield
 		screen.DrawString(font, c.Armor.ToString(), new ZPoint(length - 12, 43), Color.White);
 
 		DrawAbilities(c, screen, new ZPoint(0, height - 48));
+	}
 
-		//screen.DrawRectangle(new ZPoint(0, height), new ZPoint(length, -(int)(missingEndurance * height)), new Color(0.2f, 0, 0, 0.2f));
-		//screen.DrawRectangle(new ZPoint(0, height), new ZPoint(length, -(int)(missingHP * height)), new Color(0.2f, 0, 0, 0.2f));
+	private Collection<ZPoint> Zone(int radius)
+	{
+		Collection<ZPoint> result = new Collection<ZPoint>();
+
+		result.Add(currentObject.position);
+		for (int i = 0; i < radius; i++)
+		{
+			List<ZPoint> copy = (from item in result select item).Cast<ZPoint>().ToList();
+			foreach (ZPoint p in copy)
+				foreach (ZPoint.Direction d in ZPoint.Directions)
+				{
+					ZPoint candidate = p.Shift(d);
+					var query = from q in result where q.TheSameAs(candidate) select q;
+					if (IsWalkable(candidate) && query.Count() == 0) result.Add(candidate);
+				}
+		}
+
+		return result;
+	}
+
+	private void DrawZones()
+	{
+		var greenZone = Zone(CurrentCreature.controlMovementCounter);
+		var yellowZone = Zone(CurrentCreature.controlMovementCounter + 1).Except(Zone(CurrentCreature.controlMovementCounter));
+
+		foreach (ZPoint p in yellowZone) M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0.5f, 0, 0, 0.5f));
+		//foreach (ZPoint p in greenZone) M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0, 0.5f, 0, 0.5f));
 	}
 
 	public void Draw(Vector2 mouse)
 	{
-		MainScreen M = MainScreen.Instance;
 		foreach (LObject l in objects)
 		{
 			l.movementAnimations.Draw();
@@ -242,22 +272,21 @@ class Battlefield
 			M.Draw(this[p].texture, GraphicCoordinates(p));
 		}
 
+		DrawZones();
+
 		var query = from l in objects orderby l.isActive select l;
 		foreach (LObject l in query) M.Draw(l.texture, GraphicCoordinates(l.rPosition));
 
 		combatAnimations.Draw();
 		scaleAnimations.Draw();
 
-		Vector2 cPosition = GraphicCoordinates(currentObject.rPosition);
-		if (!combatAnimations.IsEmpty) cPosition = combatAnimations.Peek.Position;
-		M.Draw(currentObjectSymbol, cPosition - new Vector2(0, 12));
+		if (combatAnimations.IsEmpty) M.Draw(currentObjectSymbol, GraphicCoordinates(currentObject.rPosition) - new Vector2(0, 12));
 
 		ZPoint zMouse = ZCoordinates(mouse);
 		if (InRange(zMouse)) M.Draw(zSelectionTexture, GraphicCoordinates(zMouse));
 		if (spotlightObject != null && spotlightObject != currentObject) M.Draw(zSelectionTexture, GraphicCoordinates(spotlightObject.rPosition));
 
 		DrawScale(new ZPoint(100, 650), zMouse);
-
 		DrawInfo(spotlightObject as Creature, new ZPoint(750, 400));
 	}
 
