@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
 
 abstract partial class Creature : LObject
 {
@@ -15,8 +16,11 @@ abstract partial class Creature : LObject
 		Creature target = viableTargets.Last() as Creature;
 		if (position.IsAdjacent(target.position)) return new AAttack(target);
 
-		var viableDirections = from d in ZPoint.Directions where B.IsWalkable(position.Shift(d)) orderby MyMath.ManhattanDistance(position.Shift(d), target.position) select d;
-		if (viableDirections.Count() > 0) return new AMove(viableDirections.First());
+		//var viableDirections = from d in ZPoint.Directions where B.IsWalkable(position.Shift(d)) orderby MyMath.ManhattanDistance(position.Shift(d), target.position) select d;
+		//if (viableDirections.Count() > 0) return new AMove();
+
+		List<ZPoint.Direction> path = B.Path(position, target.position);
+		if (path != null) return new AMove(path.First());
 		else return new AWait();
     }
 }

@@ -109,7 +109,7 @@ class Player : GObject
 
 		FramedHexPoint item = new FramedHexPoint(hexPoint, d, true, costSoFar + W.map[hexPoint].type.travelTime);
 
-		var query = from p in list where p.p.TheSameAs(item.p) select p;
+		var query = from p in list where p.data.TheSameAs(item.data) select p;
 
 		if (query.Count() == 0) list.Add(item);
 		else
@@ -123,14 +123,9 @@ class Player : GObject
 		}
 	}
 
-	public void GoTo(HexPoint destination)
+	public void GoTo()
 	{
-		/*		for (int i = 0; i < 10 && !position.TheSameAs(destination); i++)
-				{
-					var viableDirections = from d in HexPoint.Directions where W.map.IsWalkable(position.Shift(d)) orderby HexPoint.Distance(position.Shift(d), destination) select d;
-					if (viableDirections.Count() > 0) Move(viableDirections.First());
-				}
-		*/
+		HexPoint destination = M.Mouse;
 
 		if (!W.map.IsWalkable(destination)) return;
 		if (!W.player[destination]) return;
@@ -140,23 +135,23 @@ class Player : GObject
 
 		while (true)
 		{
-			List<FramedHexPoint> frontier = (from p in visited where p.onFrontier orderby p.cost + 0.5f * HexPoint.Distance(p.p, position) select p).Cast<FramedHexPoint>().ToList();
+			List<FramedHexPoint> frontier = (from p in visited where p.onFrontier orderby p.cost + 0.5f * HexPoint.Distance(p.data, position) select p).Cast<FramedHexPoint>().ToList();
 			if (frontier.Count() == 0) return;
 
 			foreach (FramedHexPoint p in frontier)
 			{
 				p.onFrontier = false;
 				foreach (HexPoint.HexDirection d in HexPoint.Directions)
-					AddToFrontier(visited, p.p.Shift(d), HexPoint.Opposite(d), p.cost);
+					AddToFrontier(visited, p.data.Shift(d), HexPoint.Opposite(d), p.cost);
 			}
 
-			var isFinished = from p in visited where p.p.TheSameAs(position) && !p.onFrontier select p;
+			var isFinished = from p in visited where p.data.TheSameAs(position) && !p.onFrontier select p;
 			if (isFinished.Count() > 0) break;
 		}
 
 		for (int i = 0; i < 20 && !position.TheSameAs(destination); i++)
 		{
-			HexPoint.HexDirection d = (from p in visited where p.p.TheSameAs(position) select p).Single().d;
+			HexPoint.HexDirection d = (from p in visited where p.data.TheSameAs(position) select p).Single().d;
 			Move(d);
 		}
 	}
@@ -164,11 +159,11 @@ class Player : GObject
 
 class FramedHexPoint
 {
-	public HexPoint p;
+	public HexPoint data;
 	public HexPoint.HexDirection d;
 	public bool onFrontier;
 	public float cost;
 	
-	public FramedHexPoint(HexPoint pi, HexPoint.HexDirection di, bool onFrontieri, float costi)
-		{ p = pi; d = di; onFrontier = onFrontieri; cost = costi; }
+	public FramedHexPoint(HexPoint datai, HexPoint.HexDirection di, bool onFrontieri, float costi)
+		{ data = datai; d = di; onFrontier = onFrontieri; cost = costi; }
 }

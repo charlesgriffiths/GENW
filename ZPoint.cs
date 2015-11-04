@@ -1,26 +1,45 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 
-class ZPoint
+public class ZPoint
 {
 	public int x, y;
 
 	public ZPoint() { x = y = 0; }
 	public ZPoint(int xi, int yi) { x = xi; y = yi; }
 	public ZPoint(Vector2 v) { x = (int)v.X; y = (int)v.Y; }
+
+	public ZPoint(Direction d)
+	{
+		if (d == Direction.Right) { x = 1; y = 0; }
+		else if (d == Direction.Up) { x = 0; y = -1; }
+		else if (d == Direction.Left) { x = -1; y = 0; }
+		else { x = 0; y = 1; }
+	}
+
 	public static ZPoint Zero { get { return new ZPoint(0, 0); } }
 
 	public enum Direction { Right, Up, Left, Down };
 
-	public ZPoint Shift(Direction d)
+	public static float Angle(Direction d)
 	{
+		if (d == Direction.Right) return 0.0f;
+		else if (d == Direction.Up) return 1.5f * MyMath.PI;
+		else if (d == Direction.Left) return MyMath.PI;
+		else return 0.5f * MyMath.PI;
+	}
+
+	public ZPoint Shift(Direction d) { return this + new ZPoint(d); }
+/*	{
 		if (d == Direction.Right) return new ZPoint(x + 1, y);
 		else if (d == Direction.Up) return new ZPoint(x, y - 1);
 		else if (d == Direction.Left) return new ZPoint(x - 1, y);
 		else return new ZPoint(x, y + 1);
 	}
-
+*/
 	public static Direction GetDirection(int i)
 	{
 		Log.Assert(i >= 0 && i < 4, "wrong rectangular direction");
@@ -42,6 +61,14 @@ class ZPoint
 			result.Add(Direction.Down);
 			return result;
 		}
+	}
+
+	public static Direction Opposite(Direction d)
+	{
+		if (d == Direction.Right) return Direction.Left;
+		else if (d == Direction.Up) return Direction.Down;
+		else if (d == Direction.Left) return Direction.Right;
+		else return Direction.Up;
 	}
 
 	public static ZPoint Min(ZPoint p1, ZPoint p2)
@@ -74,6 +101,8 @@ class ZPoint
 		return new Vector2(p.x / f, p.y / f);
 	}
 
+	public static ZPoint operator *(int k, ZPoint p) { return new ZPoint(k * p.x, k * p.y); }
+
 	public static implicit operator HexPoint(ZPoint zPoint) { return new HexPoint(zPoint.x, zPoint.y); }
 	public static implicit operator RPoint(ZPoint zPoint) {	return new RPoint(zPoint.x, zPoint.y); }
 	public static implicit operator Vector2(ZPoint zPoint) { return new Vector2(zPoint.x, zPoint.y); }
@@ -102,4 +131,9 @@ class ZPoint
 	}
 
 	public bool IsAdjacent(ZPoint p) { return MyMath.ManhattanDistance(this, p) == 1; }
+
+	public bool IsIn(List<ZPoint> list)	{ return (from p in list where TheSameAs(p) select p).Count() > 0; }
+	public bool IsIn(List<FramedZPoint> list) {	return (from p in list where TheSameAs(p.data) select p).Count() > 0; }
+
+	public Direction GetDirection(List<FramedZPoint> list) { return (from p in list where TheSameAs(p.data) select p.d).Single(); }
 }

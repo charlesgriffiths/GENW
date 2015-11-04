@@ -67,7 +67,6 @@
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RPoint.cs" />
     <Compile Include="Screen.cs" />
     <Compile Include="Skill.cs" />
     <Compile Include="Stuff.cs" />

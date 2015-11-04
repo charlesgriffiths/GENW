@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 
-class HexPoint
+public class HexPoint
 {
 	public int x, y;
 

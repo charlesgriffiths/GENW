@@ -111,7 +111,7 @@ class DamageAnimation : Animation
 	}
 }
 
-class RPoint
+public class RPoint
 {
 	public float x, y;
 

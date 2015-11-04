@@ -1,4 +1,7 @@
-﻿public static class Log
+﻿using System.Linq;
+using System.Collections.Generic;
+
+public static class Log
 {
 	public static void Write(string message)
 	{

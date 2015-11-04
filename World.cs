@@ -61,7 +61,7 @@ class World
 		battlefield.LoadTextures();
 	}
 
-	public void Draw(Vector2 mouse)
+	public void Draw()
 	{
 		map.Draw(false);
 		foreach (GObject g in gObjects) g.Draw();
@@ -70,7 +70,7 @@ class World
 		foreach (GObject g in gObjects) g.DrawAnnotation();
 		map.DrawMask();
 
-		if (MyGame.Instance.battle) battlefield.Draw(mouse);
+		if (MyGame.Instance.battle) battlefield.Draw();
 		else player.DrawParty(new ZPoint(1100, 50));
 	}
 

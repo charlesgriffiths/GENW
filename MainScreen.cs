@@ -20,6 +20,8 @@ class MainScreen : Screen
 	private MyGame G { get { return MyGame.Instance; } }
 	private World W { get { return World.Instance; } }
 
+	public HexPoint Mouse { get { return HexCoordinates(G.mouseState.Position.ToVector2()); } }
+
 	private MainScreen()
 	{
 		windowPosition = new ZPoint(200, 150);
@@ -51,13 +53,13 @@ class MainScreen : Screen
 		verdanaBoldFont = game.Content.Load<SpriteFont>("fonts/verdanaBold");
 	}
 
-	public void Draw(Vector2 mouse)
+	public void Draw()
 	{
-		W.Draw(mouse);
+		W.Draw();
 
-		HexPoint hexMouse = HexCoordinates(mouse);
-        if (!G.dialog && !G.battle && (!W.player.FOVEnabled || W.player[hexMouse]))	Draw(hexSelectionTexture, GraphicCoordinates(hexMouse));
-		if (G.debug) DrawString(ambientFont, "Mouse: " + hexMouse, new ZPoint(10, 10), Color.Red);
+		//HexPoint hexMouse = HexCoordinates(mouse);
+        if (!G.dialog && !G.battle && (!W.player.FOVEnabled || W.player[Mouse])) Draw(hexSelectionTexture, GraphicCoordinates(Mouse));
+		if (G.debug) DrawString(ambientFont, "Mouse: " + Mouse, new ZPoint(10, 10), Color.Red);
 
 		editor.Draw();
 		dialogScreen.Draw();

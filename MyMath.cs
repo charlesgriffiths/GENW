@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework;
 
 static class MyMath
 {
+	public static float PI { get { return 3.14159265f; } }
+
 	public static int IsOdd(int n) { return Math.Abs(n) % 2; }
 	public static int IsEven(int n) { return 1 - IsOdd(n); }
 
