@@ -1,7 +1,7 @@
 ﻿using System.Xml;
 using System.Collections.ObjectModel;
 
-abstract class NamedObject
+public abstract class NamedObject
 {
 	public string name;
 

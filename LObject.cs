@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class LObject
+public class LObject
 {
 	public ZPoint position = new ZPoint();
 	

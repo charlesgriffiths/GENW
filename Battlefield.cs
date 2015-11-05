@@ -13,8 +13,9 @@ class Battlefield
 	public Collection<LObject> objects = new Collection<LObject>();
 
 	public LObject currentObject, spotlightObject;
+	public Ability ability = null;
 	private GObject gObject;
-	private Texture2D currentObjectSymbol, zSelectionTexture, arrowTexture;
+	private Texture2D zSelectionTexture, arrowTexture, targetTexture;
 
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
@@ -48,9 +49,9 @@ class Battlefield
 
 	public void LoadTextures()
 	{
-		currentObjectSymbol = M.game.Content.Load<Texture2D>("other/currentObject");
 		zSelectionTexture = M.game.Content.Load<Texture2D>("other/zSelection");
 		arrowTexture = M.game.Content.Load<Texture2D>("other/arrow");
+		targetTexture = M.game.Content.Load<Texture2D>("other/target");
 	}
 
 	private bool InRange(ZPoint p)
@@ -177,6 +178,9 @@ class Battlefield
 		if (query.Count() > 0) spotlightObject = query.First();
 	}
 
+	private void Draw(Texture2D texture, ZPoint zPosition)
+	{ M.Draw(texture, GraphicCoordinates(zPosition)); }
+
 	private void DrawScale(ZPoint position, ZPoint zMouse)
 	{
 		int length = 500, height = 20;
@@ -187,26 +191,55 @@ class Battlefield
 		var query = from l in objects where l.isActive orderby l.rInitiative.x select l;
 		float zeroInitiative = -query.Last().rInitiative.x;
 
+		MouseTriggerCreature trigger = null;
 		foreach (Creature c in query)
 		{
 			int rInitiative = (int)(100.0f * (-c.rInitiative.x - zeroInitiative)) + 1;
 			int y = -32, z = -32;
 			if (c.isInParty) { y = height; z = 0; }
 
+			ZPoint iconPosition = new ZPoint(rInitiative + 1, y);
+			MouseTriggerCreature.Set(c, screen.position + iconPosition, new ZPoint(32, 32));
+			trigger = MouseTriggerCreature.GetUnderMouse();
+
 			Color color = Color.White;
-			if (c.position.TheSameAs(zMouse)) color = c.RelationshipColor;
+			if (c.position.TheSameAs(zMouse) || (trigger != null && c == trigger.creature)) color = c.RelationshipColor;
 
 			if (scaleAnimations.CurrentTarget != c.rInitiative)
 				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
-
-			screen.Draw(c.texture, new ZPoint(rInitiative + 1, y));
+			
+            screen.Draw(c.texture, iconPosition);
 		}
+
+		if (trigger != null) Draw(zSelectionTexture, trigger.creature.position);
+		MouseTriggerCreature.Clear();
 	}
 
 	private void DrawAbilities(Creature c, Screen screen, ZPoint position)
 	{
+		for (int i = 0; i < 6; i++) MouseTriggerKeyword.Set("Ability", i, screen.position + position + new ZPoint(48 * i, 0), new ZPoint(48, 48));
+
 		foreach (Ability a in c.partyCreature.Abilities)
-			screen.Draw(a.texture, position + new ZPoint(48 * c.partyCreature.Abilities.IndexOf(a), 0));
+		{
+			int i = c.partyCreature.Abilities.IndexOf(a);
+			MouseTriggerKeyword t = MouseTriggerKeyword.Get("Ability", i);
+			M.Draw(a.texture, t.position);
+
+			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(t.position, t.size, new Color(0, 0, 0, 0.7f));
+			else if (c == CurrentCreature) M.DrawStringWithShading(M.smallFont, Stuff.AbilityHotkeys[i].ToString(), t.position + new ZPoint(37, 33), Color.White);
+		}
+
+		MouseTriggerKeyword forDescription = MouseTriggerKeyword.GetUnderMouse("Ability");
+		if (forDescription != null && forDescription.parameter < c.partyCreature.Abilities.Count)
+		{
+			Ability a = c.partyCreature.Abilities[forDescription.parameter];
+			M.Draw(a.texture, forDescription.position, Color.Red);
+
+			foreach (MouseTriggerKeyword t in MouseTriggerKeyword.GetAll("Ability"))
+				if (t.parameter != forDescription.parameter) M.DrawRectangle(t.position, t.size, new Color(0, 0, 0, 0.8f));
+
+			screen.DrawString(M.smallFont, a.name + ". " + a.description, position, Color.White, screen.size.x);
+		}
 	}
 
 	private void DrawInfo(Creature c, ZPoint position)
@@ -280,8 +313,6 @@ class Battlefield
 		return result;
 	}
 
-	//private void Draw(Texture2D texture, ZPoint zPosition) { M.Draw(texture, GraphicCoordinates(zPosition)); }
-
 	private void DrawPath(ZPoint start, List<ZPoint.Direction> path, Creature c)
 	{
 		ZPoint position = start;
@@ -332,34 +363,22 @@ class Battlefield
 
 	private void DrawZones()
 	{
-/*		List<FramedZPoint> visited = new List<FramedZPoint>();
-		visited.Add(new FramedZPoint(CurrentCreature.position, true));
-
-		for (int i = 0; i <= CurrentCreature.controlMovementCounter; i++)
+		if (ability == null)
 		{
-			List<FramedZPoint> frontier = (from p in visited where p.onFrontier select p).Cast<FramedZPoint>().ToList();
-			foreach (FramedZPoint p in frontier)
-			{
-				p.onFrontier = false;
-				foreach (ZPoint.Direction d in ZPoint.Directions) AddToFrontier(visited, p.data.Shift(d));
-			}
+			foreach (ZPoint p in GreenZone) M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0, 0.3f, 0, 0.1f));
+			foreach (ZPoint p in YellowZone) M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0.3f, 0.3f, 0, 0.1f));
+
+			foreach (ZPoint p in ReachableCreaturePositions)
+				M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0.3f, 0.3f, 0, 0.1f));
+
+			if (Mouse.IsIn(TotalZone)) DrawPath(CurrentCreature.position, Path(CurrentCreature.position, Mouse), null);
+			else if (Mouse.IsIn(ReachableCreaturePositions)) DrawPath(CurrentCreature.position, Path(CurrentCreature.position, Mouse), GetCreature(Mouse));
 		}
-*/
-		//List<ZPoint> totalZone = (from p in visited select p.data).Cast<ZPoint>().ToList();
-		//List<ZPoint> greenZone = (from p in visited where !p.onFrontier select p.data).Cast<ZPoint>().ToList();
-		//List<ZPoint> yellowZone = (from p in visited where p.onFrontier select p.data).Cast<ZPoint>().ToList();
-
-		foreach (ZPoint p in GreenZone) M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0, 0.3f, 0, 0.1f));
-		foreach (ZPoint p in YellowZone) M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0.3f, 0.3f, 0, 0.1f));
-
-		//List<Creature> reachableCreatures = (from c in AliveCreatures where !c.isInParty && c.IsAdjacentTo(GreenZone) select c).Cast<Creature>().ToList();
-		foreach (ZPoint p in ReachableCreaturePositions)
-			M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0.3f, 0.3f, 0, 0.1f));
-
-		if (Mouse.IsIn(TotalZone)) DrawPath(CurrentCreature.position, Path(CurrentCreature.position, Mouse), null);
-		else if (Mouse.IsIn(ReachableCreaturePositions)) DrawPath(CurrentCreature.position, Path(CurrentCreature.position, Mouse), GetCreature(Mouse));
-		//var query = from c in reachableCreatures where c.position.TheSameAs(Mouse) select c;
-		//if (query.Count() > 0) ...
+		else
+		{
+			foreach (ZPoint p in AbilityZone)
+				M.DrawRectangle(new ZPoint(GraphicCoordinates(p)), new ZPoint(32, 32), new Color(0, 0.3f, 0, 0.1f));
+		}
 	}
 
 	public void GoTo()
@@ -392,8 +411,6 @@ class Battlefield
 
 		combatAnimations.Draw();
 		scaleAnimations.Draw();
-
-		//if (combatAnimations.IsEmpty) M.Draw(currentObjectSymbol, GraphicCoordinates(currentObject.rPosition) - new Vector2(0, 12));
 
 		if (InRange(Mouse)) M.Draw(zSelectionTexture, GraphicCoordinates(Mouse));
 		if (spotlightObject != null && spotlightObject != currentObject) M.Draw(zSelectionTexture, GraphicCoordinates(spotlightObject.rPosition));
@@ -433,6 +450,31 @@ class Battlefield
 
 			gObject.Kill();
 			MyGame.Instance.battle = false;
+		}
+	}
+
+	public List<ZPoint> EveryPoint
+	{
+		get
+		{
+			List<ZPoint> result = new List<ZPoint>();
+			for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++) result.Add(new ZPoint(i, j));
+			return result;
+		}
+	}
+
+	public List<ZPoint> AbilityZone
+	{
+		get
+		{
+			System.Collections.IEnumerable query = from p in EveryPoint where false select p;
+
+			if (ability.name == "Leap")
+				query = from p in EveryPoint where IsWalkable(p) && MyMath.ManhattanDistance(p, CurrentCreature.position) == 2 select p;
+			else if (ability.name == "Pommel Strike")
+				query = from c in AliveCreatures where c.position.IsAdjacent(CurrentCreature.position) select c.position;
+
+			return query.Cast<ZPoint>().ToList();
 		}
 	}
 }

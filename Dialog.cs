@@ -1,6 +1,7 @@
 ﻿using System.Xml;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.Xna.Framework.Graphics;
 
 class DialogResponse
 {
@@ -16,13 +17,14 @@ class DialogResponse
 
 class DialogNode
 {
-	public string text, name;
+	public string text, name, description;
 	public Collection<DialogResponse> responses = new Collection<DialogResponse>();
 
 	public DialogNode(XmlNode node)
 	{
 		text = MyXml.GetString(node, "text");
 		name = MyXml.GetString(node, "name");
+		description = MyXml.GetString(node, "description");
 
 		XmlNode xnode = node.FirstChild;
 		while (xnode != null)
@@ -41,10 +43,14 @@ class Dialog : NamedObject
 	public bool isUnique;
 	public bool happened = false;
 
+	private string picture;
+	public Texture2D texture;
+
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
 		isUnique = MyXml.GetBool(xnode, "unique");
+		picture = MyXml.GetString(xnode, "picture");		
 
 		XmlNode node = xnode.FirstChild;
 		while (node != null)
@@ -53,5 +59,11 @@ class Dialog : NamedObject
 			nodes.Add(temp.name, temp);
 			node = node.NextSibling;
 		}
+	}
+
+	public static void LoadTextures()
+	{
+		foreach (Dialog d in BigBase.Instance.dialogs.data)
+			d.texture = MainScreen.Instance.game.Content.Load<Texture2D>(d.picture);
 	}
 }

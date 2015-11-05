@@ -13,8 +13,6 @@ class Texture : NamedObject
 	public static void LoadTextures()
 	{
 		foreach (Texture t in BigBase.Instance.textures.data)
-		{
 			t.data = MainScreen.Instance.game.Content.Load<Texture2D>("local/" + t.name);
-		}
 	}
 }

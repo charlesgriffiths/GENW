@@ -86,7 +86,7 @@ class GObject
 
 	private bool IsVisible()
 	{
-		if (!W.player.FOVEnabled) return true;
+		if (!MyGame.Instance.FOVEnabled) return true;
 		else if (IsActive) return W.map.IsInView(W.player.position, position);
 		else return W.player[position];
     }

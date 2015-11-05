@@ -1,10 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
-abstract class PartyCreature
+public abstract class PartyCreature
 {
 	public Texture2D texture;
-	//public string name;
 	public string uniqueName;
 	public int endurance, hp;
 
@@ -15,7 +14,7 @@ abstract class PartyCreature
 	public virtual int Attack { get { return 0; } }
 	public virtual int Defence { get { return 0; } }
 
-	public virtual Collection<Ability> Abilities { get { return new Collection<Ability>(); } }
+	public virtual List<Ability> Abilities { get { return new List<Ability>(); } }
 }
 
 class PartyCreep : PartyCreature
@@ -24,7 +23,6 @@ class PartyCreep : PartyCreature
 
 	public PartyCreep(string namei, string uniqueNamei = "")
 	{
-		//name = namei;
 		uniqueName = uniqueNamei;
 		shape = BigBase.Instance.creepShapes.Get(namei);
 		hp = MaxHP;
@@ -35,6 +33,8 @@ class PartyCreep : PartyCreature
 	public override string Name { get { return shape.name; } }
 
 	public override int MaxHP {	get	{ return shape.maxHP; }	}
+
+	public override List<Ability> Abilities {	get	{ return shape.abilities; } }
 }
 
 class PartyCharacter : PartyCreature
@@ -52,11 +52,11 @@ class PartyCharacter : PartyCreature
 	public override int Attack { get { return gift.bonus.attack + race.bonus.attack; } }
 	public override int Defence { get {	return gift.bonus.defence + race.bonus.defence; } }
 
-	public override Collection<Ability> Abilities
+	public override List<Ability> Abilities
 	{
 		get
 		{
-			Collection<Ability> result = new Collection<Ability>();
+			List<Ability> result = new List<Ability>();
 			result.Add(race.ability);
 			foreach (Ability a in cClass.abilities) result.Add(a);
 			return result;

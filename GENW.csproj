@@ -51,6 +51,7 @@
     <Compile Include="Dialog.cs" />
     <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />
+    <Compile Include="MouseTrigger.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="MyMonoGame.cs" />
     <Compile Include="GObject.cs" />

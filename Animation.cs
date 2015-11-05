@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-abstract class Animation
+public abstract class Animation
 {
 	protected int time, maxTime;
 
@@ -13,7 +13,7 @@ abstract class Animation
 	public virtual Vector2 Position { get { return Vector2.Zero; } }
 }
 
-class AnimationQueue
+public class AnimationQueue
 {
 	private List<Animation> data = new List<Animation>();
 

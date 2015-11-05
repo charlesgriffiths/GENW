@@ -1,12 +1,13 @@
 ﻿using System.Xml;
 using Microsoft.Xna.Framework.Graphics;
 
-class Ability : NamedObject
+public class Ability : NamedObject
 {
 	public Texture2D texture;
 	public string description;
 	public TargetType targetType;
 	public int cost;
+	public float castTime;
 
 	public enum TargetType { Passive, None, Direction, Point, Object, Creature };
 
@@ -30,6 +31,7 @@ class Ability : NamedObject
 		name = MyXml.GetString(xnode, "name");
 		targetType = GetTargetType(MyXml.GetString(xnode, "target"));
 		cost = MyXml.GetInt(xnode, "cost");
+		castTime = MyXml.GetFloat(xnode, "castTime");
 		description = MyXml.GetString(xnode, "description");
 	}
 

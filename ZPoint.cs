@@ -33,13 +33,7 @@ public class ZPoint
 	}
 
 	public ZPoint Shift(Direction d) { return this + new ZPoint(d); }
-/*	{
-		if (d == Direction.Right) return new ZPoint(x + 1, y);
-		else if (d == Direction.Up) return new ZPoint(x, y - 1);
-		else if (d == Direction.Left) return new ZPoint(x - 1, y);
-		else return new ZPoint(x, y + 1);
-	}
-*/
+
 	public static Direction GetDirection(int i)
 	{
 		Log.Assert(i >= 0 && i < 4, "wrong rectangular direction");
@@ -48,6 +42,19 @@ public class ZPoint
 		else if (i == 1) return Direction.Up;
 		else if (i == 2) return Direction.Left;
 		else return Direction.Down;
+	}
+
+	public static Direction GetDirection(ZPoint p)
+	{
+		if (p.x == 1 && p.y == 0) return Direction.Right;
+		else if (p.x == 0 && p.y == -1) return Direction.Up;
+		else if (p.x == -1 && p.y == 0) return Direction.Left;
+		else if (p.x == 0 && p.y == 1) return Direction.Down;
+		else
+		{
+			Log.Error("unacceptable parameter in GetDirection(ZPoint p)");
+			return Direction.Right;
+		}
 	}
 
 	public static Collection<Direction> Directions
@@ -106,6 +113,7 @@ public class ZPoint
 	public static implicit operator HexPoint(ZPoint zPoint) { return new HexPoint(zPoint.x, zPoint.y); }
 	public static implicit operator RPoint(ZPoint zPoint) {	return new RPoint(zPoint.x, zPoint.y); }
 	public static implicit operator Vector2(ZPoint zPoint) { return new Vector2(zPoint.x, zPoint.y); }
+	public static implicit operator Point(ZPoint zPoint) { return new Point(zPoint.x, zPoint.y); }
 
 	public override string ToString()
 	{
@@ -134,6 +142,7 @@ public class ZPoint
 
 	public bool IsIn(List<ZPoint> list)	{ return (from p in list where TheSameAs(p) select p).Count() > 0; }
 	public bool IsIn(List<FramedZPoint> list) {	return (from p in list where TheSameAs(p.data) select p).Count() > 0; }
+	public bool IsIn(MouseTrigger t) { return x >= t.position.x && y >= t.position.y && x <= t.position.x + t.size.x && y <= t.position.y + t.size.y; }
 
 	public Direction GetDirection(List<FramedZPoint> list) { return (from p in list where TheSameAs(p.data) select p.d).Single(); }
 }

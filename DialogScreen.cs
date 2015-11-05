@@ -23,12 +23,17 @@ class DialogScreen
 		
 		screen.Fill(new Color(0.2f, 0.2f, 0.2f, 0.9f));
 
-		SpriteFont font = MainScreen.Instance.verdanaFont;
-        screen.DrawString(font, dialogNode.text, new ZPoint(10, 10), Color.White, 45);
+		screen.Draw(dialog.texture, new ZPoint(10, 10));
 
+		screen.offset = 10;
+		SpriteFont font = MainScreen.Instance.verdanaFont;
+        screen.DrawString(font, dialogNode.text, new ZPoint(52, screen.offset), Color.White, screen.size.x - 62);
+		screen.DrawString(font, dialogNode.description, new ZPoint(52, screen.offset), Color.Gray, screen.size.x - 62);
+
+		screen.offset = 110;
 		for (int i = 0; i < dialogNode.responses.Count; i++)
 			screen.DrawString(font, (i+1) + ". " + dialogNode.responses[i].text, 
-				new ZPoint(10, 170 + i*20), Color.White, 47);
+				new ZPoint(10, screen.offset), Color.White, screen.size.x - 20);
 	}
 
 	private static int KeyCode(KeyboardState k)

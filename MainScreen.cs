@@ -43,7 +43,7 @@ class MainScreen : Screen
 	public void LoadTextures()
 	{
 		editor = new Editor(size - new ZPoint(66, 62), new ZPoint(56, 52));
-		dialogScreen = new DialogScreen(new ZPoint(200, 200), new ZPoint(600, 400));
+		dialogScreen = new DialogScreen(new ZPoint(200, 200), new ZPoint(400, 300));
 
 		hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
 
@@ -58,7 +58,7 @@ class MainScreen : Screen
 		W.Draw();
 
 		//HexPoint hexMouse = HexCoordinates(mouse);
-        if (!G.dialog && !G.battle && (!W.player.FOVEnabled || W.player[Mouse])) Draw(hexSelectionTexture, GraphicCoordinates(Mouse));
+        if (!G.dialog && !G.battle && (!G.FOVEnabled || W.player[Mouse])) Draw(hexSelectionTexture, GraphicCoordinates(Mouse));
 		if (G.debug) DrawString(ambientFont, "Mouse: " + Mouse, new ZPoint(10, 10), Color.Red);
 
 		editor.Draw();

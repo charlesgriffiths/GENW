@@ -1,9 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class Screen
+public class Screen
 {
 	public ZPoint position, size;
+	public int offset = 0;
 
 	private MainScreen M { get { return MainScreen.Instance; } }
 
@@ -59,6 +60,13 @@ class Screen
 	public void DrawString(SpriteFont font, string text, ZPoint p, Color color)
 	{
 		MainScreen.Instance.spriteBatch.DrawString(font, text, position + p, color);
+		offset += (int)font.MeasureString(text).Y;
+	}
+
+	public void DrawStringWithShading(SpriteFont font, string text, ZPoint p, Color color)
+	{
+		DrawRectangle(p - new ZPoint(3, 0), new ZPoint(font.MeasureString(text)) + new ZPoint(6, 0), new Color(0, 0, 0, 0.8f));
+		DrawString(font, text, p, color);
 	}
 
 	public void DrawString(SpriteFont font, string text, int y, Color color)
@@ -69,6 +77,8 @@ class Screen
 
 	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, int length)
 	{
-		MainScreen.Instance.spriteBatch.DrawString(font, Stuff.Split(text, length), position + p, color);
-	}
+		//MainScreen.Instance.spriteBatch.DrawString(font, Stuff.Split(text, font, length), position + p, color);
+		string splittedText = Stuff.Split(text, font, length);
+		DrawString(font, splittedText, p, color);
+    }
 }

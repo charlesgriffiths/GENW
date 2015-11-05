@@ -5,8 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 class Player : GObject
 {
-	public bool FOVEnabled = true;
 	public bool[,] visitedLocations;
+	private List<GObject> visibleObjects = new List<GObject>();
 
 	public Player()
 	{
@@ -15,7 +15,7 @@ class Player : GObject
 		shape.speed = 1.0f;
 		shape.isActive = true;
 
-		PartyCharacter playerCharacter = new PartyCharacter(shape.name, "Agile", "Morlock", "Fighter", "The Scorch", "Merchant");
+		PartyCharacter playerCharacter = new PartyCharacter(shape.name, "Agile", "Ratling", "Assassin", "The Scorch", "Merchant");
 		party.Add(playerCharacter);
 
 		party.Add(new PartyCreep("Krokar"));
@@ -67,6 +67,16 @@ class Player : GObject
 		UpdateVisitedLocations();
 	}
 
+	private bool NewObjectsVisible()
+	{
+		List<GObject> newVisibleObjects = (from o in W.gObjects where W.map.IsInView(position, o.position) select o).Cast<GObject>().ToList();
+		List<GObject> query = (from o in newVisibleObjects where !visibleObjects.Contains(o) select o).Cast<GObject>().ToList();
+//		Log.Write(visibleObjects.Count.ToString() + " < ");
+//		Log.WriteLine(newVisibleObjects.Count.ToString());
+		visibleObjects = newVisibleObjects;
+		return query.Count > 0;
+	}
+
 	public override void Run(){}
 
 	public bool this[ZPoint p]
@@ -105,7 +115,7 @@ class Player : GObject
 	private void AddToFrontier(List<FramedHexPoint> list, HexPoint hexPoint, HexPoint.HexDirection d, float costSoFar)
 	{
 		if (!W.map.IsWalkable(hexPoint)) return;
-		if (HexPoint.Distance(hexPoint, position) > 10) return;
+		if (HexPoint.Distance(hexPoint, position) > 15) return;
 
 		FramedHexPoint item = new FramedHexPoint(hexPoint, d, true, costSoFar + W.map[hexPoint].type.travelTime);
 
@@ -135,7 +145,7 @@ class Player : GObject
 
 		while (true)
 		{
-			List<FramedHexPoint> frontier = (from p in visited where p.onFrontier orderby p.cost + 0.5f * HexPoint.Distance(p.data, position) select p).Cast<FramedHexPoint>().ToList();
+			List<FramedHexPoint> frontier = (from p in visited where p.onFrontier orderby p.cost + HexPoint.Distance(p.data, position) select p).Cast<FramedHexPoint>().ToList();
 			if (frontier.Count() == 0) return;
 
 			foreach (FramedHexPoint p in frontier)
@@ -153,6 +163,8 @@ class Player : GObject
 		{
 			HexPoint.HexDirection d = (from p in visited where p.data.TheSameAs(position) select p).Single().d;
 			Move(d);
+
+			if (NewObjectsVisible()) break;
 		}
 	}
 }

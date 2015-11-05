@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -43,6 +44,7 @@ public class MyMonoGame : Game
 		GObjectShape.LoadTextures();
 		Texture.LoadTextures();
 		CreepShape.LoadTextures();
+		Dialog.LoadTextures();
 
 		World.Instance.Load();
 		World.Instance.LoadTextures();
@@ -71,20 +73,34 @@ public class MyMonoGame : Game
 		G.keyboardState = Keyboard.GetState();
 		G.mouseState = Mouse.GetState();
 
-		if (G.keyboardState.IsKeyDown(Keys.Escape)) Exit();
+		if (G.keyboardState.IsKeyDown(Keys.F1)) Exit();
 		if (KeyPressed(Keys.OemTilde)) G.input = !G.input;
 
 		if (G.input && KeyPressed()) G.console.Press(G.keyboardState);
 		else if (G.dialog && KeyPressed()) M.dialogScreen.Press(G.keyboardState);
-		else if (G.battle)
+		else if (G.battle && B.ability != null)
+		{
+			if (G.mouseState.LeftButton == ButtonState.Pressed && G.Mouse.IsIn(B.AbilityZone))
+				B.CurrentCreature.UseAbility(B.ability, G.Mouse);
+        }
+		else if (G.battle && B.ability == null)
 		{
 			if (G.mouseState.LeftButton == ButtonState.Pressed) B.SetSpotlight();
 			if (G.RightMouseButtonClicked) B.GoTo();
 
-			if (KeyPressed(Keys.Right)) B.CurrentCreature.TryToMove(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			if (KeyPressed(Keys.Space)) B.CurrentCreature.Wait();
+
+			else if (KeyPressed(Keys.Right)) B.CurrentCreature.TryToMove(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Up)) B.CurrentCreature.TryToMove(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Left)) B.CurrentCreature.TryToMove(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Down)) B.CurrentCreature.TryToMove(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
+
+			foreach (char key in Stuff.AbilityHotkeys)
+			{
+				int index = Stuff.AbilityHotkeys.IndexOf(key);
+				List<Ability> abilities = B.CurrentCreature.partyCreature.Abilities;
+				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.CurrentCreature.UseAbility(abilities[index]);
+			}
 
 			if (G.editor)
 			{
@@ -96,7 +112,6 @@ public class MyMonoGame : Game
 		}
 		else
 		{
-			//if (G.mouseState.RightButton == ButtonState.Pressed && G.previousMouseState.RightButton != ButtonState.Pressed) W.player.GoTo(M.Mouse);
 			if (G.RightMouseButtonClicked) W.player.GoTo();
 
 			if (KeyPressed(Keys.Home)) W.player.Move(HexPoint.HexDirection.N);
