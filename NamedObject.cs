@@ -8,11 +8,11 @@ public abstract class NamedObject
 	public abstract void Load(XmlNode xnode);
 }
 
-class GeneralBase<T> where T : NamedObject, new ()
+public class GeneralBase<T> where T : NamedObject, new ()
 {
 	public Collection<T> data;
 
-	private bool loaded;
+	public bool loaded;
 	private string filename;
 
 	public GeneralBase()

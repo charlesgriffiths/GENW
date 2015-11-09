@@ -1,62 +1,26 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Xml;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class GObjectShape : NamedObject
+partial class GObject
 {
-	private string textureName;
-	public Texture2D texture;
-	public float speed;
-	public bool isActive;
-	public Dialog dialog;
+	protected GObjectShape shape;
+	public List<Creature> party = new List<Creature>();
+	public Inventory inventory = new Inventory(24);
 
-	public Dictionary<string, int> partyShape = new Dictionary<string, int>();
-
-	public override void Load(XmlNode xnode)
-	{
-		name = MyXml.GetString(xnode, "name");
-		textureName = MyXml.GetString(xnode, "icon");
-		if (textureName == "") textureName = name;
-		isActive = MyXml.GetBool(xnode, "active");
-
-		if (isActive) speed = MyXml.GetFloat(xnode, "speed");
-		else speed = 1.0f;
-
-		string dialogName = MyXml.GetString(xnode, "dialog");
-		if (dialogName != "") dialog = BigBase.Instance.dialogs.Get(dialogName);
-
-		for (xnode = xnode.FirstChild; xnode != null; xnode = xnode.NextSibling)
-			partyShape.Add(MyXml.GetString(xnode, "name"), MyXml.GetInt(xnode, "quantity"));
-	}
-
-	public static void LoadTextures()
-	{
-		foreach (GObjectShape s in BigBase.Instance.gShapes.data)
-			s.texture = MainScreen.Instance.game.Content.Load<Texture2D>("global/" + s.textureName);
-	}
-}
-
-class GObject
-{
 	public HexPoint position = new HexPoint();
-
 	public RPoint rPosition = new RPoint();
 	public AnimationQueue movementAnimations = new AnimationQueue();
 
-	protected GObjectShape shape;
-
-	public Collection<PartyCreature> party = new Collection<PartyCreature>();
-
 	public string uniqueName;
-	public float initiative;// = -5.0f;
+	public float initiative;
 	public Dialog dialog;
 
 	public string Name { get { return shape.name; } }
 	public float Speed { get { return shape.speed; } }
 	public bool IsActive { get { return shape.isActive; } }
+
 	public Texture2D Texture
 	{
 		get { return shape.texture; }
@@ -67,22 +31,6 @@ class GObject
 	protected MainScreen M { get { return MainScreen.Instance; } }
 
 	protected GObject() {}
-	public GObject(GObjectShape shapei)
-	{
-		shape = shapei;
-		dialog = shapei.dialog;
-
-		foreach (KeyValuePair<string, int> pair in shape.partyShape)
-		{
-			for (int i = 0; i < pair.Value; i++)
-			{
-				PartyCreep item = new PartyCreep(pair.Key);
-				party.Add(item);
-			}
-		}
-
-		initiative = -0.1f;
-	}
 
 	private bool IsVisible()
 	{
@@ -118,7 +66,7 @@ class GObject
 		//if (MyMath.SamePairs("Morlocks", "Wild Dogs", name, g.name)) { Kill(); g.Kill(); }
 	}
 
-	public static void ProcessCollisions(Collection<GObject> c)
+	public static void ProcessCollisions(List<GObject> c)
 	{
 		if (c.Count == 2) c[0].ProcessCollisions(c[1]);
 		else if (c.Count > 2) Log.WriteLine("That is an interesting development!");
@@ -133,7 +81,7 @@ class GObject
 	public virtual void Move(HexPoint.HexDirection d)
 	{
 		ZPoint destination = position.Shift(d);
-		float travelTime = Speed * W.map[position].type.travelTime;
+		float travelTime = Speed * W.map[destination].type.travelTime;
         if (W.map.IsWalkable(destination)) SetPosition(destination, 4.0f / travelTime);
 		PassTurn(travelTime);
 	}
@@ -149,7 +97,7 @@ class GObject
 		ProcessCollisions(W[position]);
 
 		initiative -= time;
-		W.NextGObject.Run();
+		if (!MyGame.Instance.dialog) W.NextGObject.Run();
 	}
 
 	public void SetPosition(HexPoint p, float speed)

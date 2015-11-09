@@ -11,6 +11,7 @@
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
 
 	public GeneralBase<Skill> skills = new GeneralBase<Skill>();
+	public GeneralBase<Effect> effects = new GeneralBase<Effect>();
 	public GeneralBase<Ability> abilities = new GeneralBase<Ability>();
 	public GeneralBase<Gift> gifts = new GeneralBase<Gift>();
 	public GeneralBase<Origin> origins = new GeneralBase<Origin>();
@@ -23,6 +24,7 @@
 	public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
 	public GeneralBase<Race> races = new GeneralBase<Race>();
 	public GeneralBase<CClass> classes = new GeneralBase<CClass>();
+	public ItemBase items = new ItemBase();
 	
 	public void Load()
 	{
@@ -35,6 +37,7 @@
 		palettes.Load("palettes.xml");
 
 		skills.Load("skills.xml");
+		effects.Load("effects.xml");
 		abilities.Load("abilities.xml");
 		gifts.Load("gifts.xml");
 		origins.Load("origins.xml");
@@ -47,6 +50,7 @@
 		creepShapes.Load("creeps.xml");
 		races.Load("races.xml");
 		classes.Load("classes.xml");
+		items.Load("items.xml");
 		
 		Log.WriteLine("OK");
 	}

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 class Player : GObject
 {
+	//Inventory inventory = new Inventory();
 	public bool[,] visitedLocations;
 	private List<GObject> visibleObjects = new List<GObject>();
 
@@ -15,10 +16,13 @@ class Player : GObject
 		shape.speed = 1.0f;
 		shape.isActive = true;
 
-		PartyCharacter playerCharacter = new PartyCharacter(shape.name, "Agile", "Ratling", "Assassin", "The Scorch", "Merchant");
-		party.Add(playerCharacter);
+		Character playerCharacter = new Character(shape.name, "Agile", "Morlock", "Fighter", "The Scorch", "Merchant");
+		//playerCharacter.Add("Rope");
 
-		party.Add(new PartyCreep("Krokar"));
+		party.Add(playerCharacter);
+		party.Add(new Creep("Krokar"));
+
+		inventory.Add("Rope");
 	}
 
 	public void LoadTextures()
@@ -28,10 +32,9 @@ class Player : GObject
 
 	public void DrawParty(ZPoint position)
 	{
-		const int length = 110, height = 400;
-		Screen screen = new Screen(position, new ZPoint(length, height));
+		Screen screen = new Screen(position, new ZPoint(10, 10));
 
-		foreach (PartyCreature member in party)
+		foreach (Creature member in party)
 		{
 			int i = party.IndexOf(member);
 			screen.Draw(member.texture, new ZPoint(0, i * 40));
@@ -42,6 +45,10 @@ class Player : GObject
 			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), new ZPoint(32, -(int)(enduranceMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), new ZPoint(32, -(int)(hpMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 		}
+
+		var characters = from c in party where c is Character select c;
+		foreach (Character c in characters) c.inventory.Draw(position + new ZPoint(42, party.IndexOf(c) * 40));
+		inventory.Draw(position + new ZPoint(42, (from c in party where c is Character select c).Count() * 40));
 	}
 
 	public override void Draw()
@@ -71,8 +78,6 @@ class Player : GObject
 	{
 		List<GObject> newVisibleObjects = (from o in W.gObjects where W.map.IsInView(position, o.position) select o).Cast<GObject>().ToList();
 		List<GObject> query = (from o in newVisibleObjects where !visibleObjects.Contains(o) select o).Cast<GObject>().ToList();
-//		Log.Write(visibleObjects.Count.ToString() + " < ");
-//		Log.WriteLine(newVisibleObjects.Count.ToString());
 		visibleObjects = newVisibleObjects;
 		return query.Count > 0;
 	}

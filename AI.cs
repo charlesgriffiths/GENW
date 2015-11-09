@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 
-abstract partial class Creature : LObject
+abstract partial class LCreature : LObject
 {
-	private int AITargetRank(Creature c)
+	private int AITargetRank(LCreature c)
 	{
 		return 10 - MyMath.ManhattanDistance(position, c.position);
 	} 
@@ -13,8 +13,8 @@ abstract partial class Creature : LObject
 		var viableTargets = from c in B.AliveCreatures where IsEnemyTo(c) orderby AITargetRank(c) select c;
 		if (viableTargets.Count() == 0) return new AWait();
 
-		Creature target = viableTargets.Last() as Creature;
-		if (position.IsAdjacent(target.position)) return new AAttack(target);
+		LCreature target = viableTargets.Last() as LCreature;
+		if (IsAdjacentTo(target)) return new AAttack(target);
 
 		List<ZPoint.Direction> path = B.Path(position, target.position);
 		if (path != null) return new AMove(path.First());
@@ -24,14 +24,14 @@ abstract partial class Creature : LObject
 
 abstract class Action
 {
-	public virtual void Run(Creature c) {}
+	public virtual void Run(LCreature c) {}
 }
 
 class AWait : Action
 {
 	public AWait() {}
 
-	public override void Run(Creature c)
+	public override void Run(LCreature c)
 	{
 		c.Wait();
 	}
@@ -43,7 +43,7 @@ class AMove : Action
 
 	public AMove(ZPoint.Direction d) { direction = d; }
 
-	public override void Run(Creature c)
+	public override void Run(LCreature c)
 	{
 		c.Move(direction, false);
 	}
@@ -51,11 +51,11 @@ class AMove : Action
 
 class AAttack : Action
 {
-	public Creature creature;
+	public LCreature creature;
 
-	public AAttack(Creature c) { creature = c; }
+	public AAttack(LCreature c) { creature = c; }
 
-	public override void Run(Creature c)
+	public override void Run(LCreature c)
 	{
 		c.DoAttack(creature);
 	}

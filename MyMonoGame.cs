@@ -40,10 +40,12 @@ public class MyMonoGame : Game
 		MainScreen.Instance.LoadTextures();
         GTile.LoadTextures();
 		LTile.LoadTextures();
+		Effect.LoadTextures();
 		Ability.LoadTextures();
 		GObjectShape.LoadTextures();
 		Texture.LoadTextures();
 		CreepShape.LoadTextures();
+		ItemShape.LoadTextures();
 		Dialog.LoadTextures();
 
 		World.Instance.Load();
@@ -80,26 +82,28 @@ public class MyMonoGame : Game
 		else if (G.dialog && KeyPressed()) M.dialogScreen.Press(G.keyboardState);
 		else if (G.battle && B.ability != null)
 		{
-			if (G.mouseState.LeftButton == ButtonState.Pressed && G.Mouse.IsIn(B.AbilityZone))
-				B.CurrentCreature.UseAbility(B.ability, G.Mouse);
+			if (G.mouseState.LeftButton == ButtonState.Pressed && B.Mouse.IsIn(B.AbilityZone))
+				B.CurrentLCreature.UseAbility(B.ability, B.Mouse);
+
+			if (KeyPressed(Keys.Escape)) B.ability = null;
         }
 		else if (G.battle && B.ability == null)
 		{
 			if (G.mouseState.LeftButton == ButtonState.Pressed) B.SetSpotlight();
 			if (G.RightMouseButtonClicked) B.GoTo();
 
-			if (KeyPressed(Keys.Space)) B.CurrentCreature.Wait();
+			if (KeyPressed(Keys.Space)) B.CurrentLCreature.Wait();
 
-			else if (KeyPressed(Keys.Right)) B.CurrentCreature.TryToMove(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Up)) B.CurrentCreature.TryToMove(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Left)) B.CurrentCreature.TryToMove(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Down)) B.CurrentCreature.TryToMove(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Right)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Up)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Left)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Down)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
 
 			foreach (char key in Stuff.AbilityHotkeys)
 			{
 				int index = Stuff.AbilityHotkeys.IndexOf(key);
-				List<Ability> abilities = B.CurrentCreature.partyCreature.Abilities;
-				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.CurrentCreature.UseAbility(abilities[index]);
+				List<Ability> abilities = B.CurrentLCreature.data.Abilities;
+				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.CurrentLCreature.UseAbility(abilities[index]);
 			}
 
 			if (G.editor)

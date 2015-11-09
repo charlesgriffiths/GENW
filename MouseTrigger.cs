@@ -8,33 +8,33 @@ public abstract class MouseTrigger
 	protected static MyGame G { get { return MyGame.Instance; } }
 }
 
-public class MouseTriggerCreature : MouseTrigger
+public class MouseTriggerLCreature : MouseTrigger
 {
-	public Creature creature;
+	public LCreature creature;
 
-	private MouseTriggerCreature(Creature c, ZPoint positioni, ZPoint sizei)
+	private MouseTriggerLCreature(LCreature c, ZPoint positioni, ZPoint sizei)
 	{
 		creature = c;
 		position = positioni;
 		size = sizei;
 	}
 
-	public static void Clear() { G.mouseTriggerCreatures.Clear(); }
+	public static void Clear() { G.mouseTriggerLCreatures.Clear(); }
 
-	public static void Set(Creature creature, ZPoint position, ZPoint size)
+	public static void Set(LCreature creature, ZPoint position, ZPoint size)
 	{
-		var query = from t in G.mouseTriggerCreatures where t.creature == creature select t;
-		if (query.Count() == 0) G.mouseTriggerCreatures.Add(new MouseTriggerCreature(creature, position, size));
+		var query = from t in G.mouseTriggerLCreatures where t.creature == creature select t;
+		if (query.Count() == 0) G.mouseTriggerLCreatures.Add(new MouseTriggerLCreature(creature, position, size));
 		else
 		{
-			MouseTriggerCreature t = query.Single();
+			MouseTriggerLCreature t = query.Single();
 			t.position = position;
 		}
 	}
 
-	public static MouseTriggerCreature GetUnderMouse()
+	public static MouseTriggerLCreature GetUnderMouse()
 	{
-		var query = from t in G.mouseTriggerCreatures where G.Mouse.IsIn(t) select t;
+		var query = from t in G.mouseTriggerLCreatures where G.Mouse.IsIn(t) select t;
 		if (query.Count() > 0) return query.First();
 		else return null;
 	}

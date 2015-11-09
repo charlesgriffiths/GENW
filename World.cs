@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Xml;
-using System.Collections.ObjectModel;
-using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 class World
 {
@@ -12,7 +11,7 @@ class World
 	public Map map = new Map();
 	public Battlefield battlefield = new Battlefield();
 	public Player player;
-	public Collection<GObject> gObjects = new Collection<GObject>();
+	public List<GObject> gObjects = new List<GObject>();
 
 	public ZPoint viewRadius = new ZPoint(16, 8);
 	public ZPoint camera = new ZPoint();
@@ -71,7 +70,7 @@ class World
 		map.DrawMask();
 
 		if (MyGame.Instance.battle) battlefield.Draw();
-		else player.DrawParty(new ZPoint(1100, 50));
+		else player.DrawParty(new ZPoint(10, 10));
 	}
 
 	public GObject NextGObject
@@ -84,11 +83,11 @@ class World
 		}
 	}
 
-	public Collection<GObject> this[HexPoint p]
+	public List<GObject> this[HexPoint p]
 	{
 		get
 		{
-			Collection<GObject> result = new Collection<GObject>();
+			List<GObject> result = new List<GObject>();
 			if (player.position.TheSameAs(p)) result.Add(player);
 			foreach (GObject g in gObjects) if (g.position.TheSameAs(p)) result.Add(g);
 			return result;

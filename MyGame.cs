@@ -10,7 +10,7 @@ public class MyGame
 	public MouseState mouseState, previousMouseState;
 
 	public List<MouseTriggerKeyword> mouseTriggerKeywords = new List<MouseTriggerKeyword>();
-	public List<MouseTriggerCreature> mouseTriggerCreatures = new List<MouseTriggerCreature>();
+	public List<MouseTriggerLCreature> mouseTriggerLCreatures = new List<MouseTriggerLCreature>();
 
 	private static readonly MyGame instance = new MyGame();
 	public static MyGame Instance { get { return instance; } }

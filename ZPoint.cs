@@ -78,36 +78,12 @@ public class ZPoint
 		else return Direction.Up;
 	}
 
-	public static ZPoint Min(ZPoint p1, ZPoint p2)
-	{
-		return new ZPoint(Math.Min(p1.x, p2.x), Math.Min(p1.y, p2.y));
-	}
-
-	public static ZPoint Max(ZPoint p1, ZPoint p2)
-	{
-		return new ZPoint(Math.Max(p1.x, p2.x), Math.Max(p1.y, p2.y));
-	}
-
-	public static ZPoint operator +(ZPoint p1, ZPoint p2)
-	{
-		return new ZPoint(p1.x + p2.x, p1.y + p2.y);
-	}
-
-	public static Vector2 operator +(ZPoint p, Vector2 v)
-	{
-		return new Vector2(p.x + v.X, p.y + v.Y);
-	}
-
-	public static ZPoint operator -(ZPoint p1, ZPoint p2)
-	{
-		return new ZPoint(p1.x - p2.x, p1.y - p2.y);
-	}
-
-	public static Vector2 operator /(ZPoint p, float f)
-	{
-		return new Vector2(p.x / f, p.y / f);
-	}
-
+	public static ZPoint Min(ZPoint p1, ZPoint p2) { return new ZPoint(Math.Min(p1.x, p2.x), Math.Min(p1.y, p2.y));	}
+	public static ZPoint Max(ZPoint p1, ZPoint p2) { return new ZPoint(Math.Max(p1.x, p2.x), Math.Max(p1.y, p2.y));	}
+	public static ZPoint operator +(ZPoint p1, ZPoint p2) {	return new ZPoint(p1.x + p2.x, p1.y + p2.y); }
+	public static Vector2 operator +(ZPoint p, Vector2 v) { return new Vector2(p.x + v.X, p.y + v.Y); }
+	public static ZPoint operator -(ZPoint p1, ZPoint p2) {	return new ZPoint(p1.x - p2.x, p1.y - p2.y); }
+	public static Vector2 operator /(ZPoint p, float f) { return new Vector2(p.x / f, p.y / f);	}
 	public static ZPoint operator *(int k, ZPoint p) { return new ZPoint(k * p.x, k * p.y); }
 
 	public static implicit operator HexPoint(ZPoint zPoint) { return new HexPoint(zPoint.x, zPoint.y); }
@@ -115,16 +91,7 @@ public class ZPoint
 	public static implicit operator Vector2(ZPoint zPoint) { return new Vector2(zPoint.x, zPoint.y); }
 	public static implicit operator Point(ZPoint zPoint) { return new Point(zPoint.x, zPoint.y); }
 
-	public override string ToString()
-	{
-		return "(" + x + "," + y + ")";
-	}
-
-	public bool TheSameAs(ZPoint p)
-	{
-		if (x == p.x && y == p.y) return true;
-		else return false;
-	}
+	public override string ToString() {	return "(" + x + "," + y + ")"; }
 
 	public ZPoint Boundaries(ZPoint p1, ZPoint p2)
 	{
@@ -132,13 +99,9 @@ public class ZPoint
 		else return Min(p2, Max(p1, this));
 	}
 
-	public bool InBoundaries(ZPoint p1, ZPoint p2)
-	{
-		if (x < p1.x || y < p1.y || x > p2.x || y > p2.y) return false;
-		else return true;
-	}
-
-	public bool IsAdjacent(ZPoint p) { return MyMath.ManhattanDistance(this, p) == 1; }
+	public bool TheSameAs(ZPoint p) { return x == p.x && y == p.y; }
+	public bool InBoundaries(ZPoint p1, ZPoint p2) { return x >= p1.x && y >= p1.y && x <= p2.x && y <= p2.y; }
+	public bool IsAdjacentTo(ZPoint p) { return MyMath.ManhattanDistance(this, p) == 1; }
 
 	public bool IsIn(List<ZPoint> list)	{ return (from p in list where TheSameAs(p) select p).Count() > 0; }
 	public bool IsIn(List<FramedZPoint> list) {	return (from p in list where TheSameAs(p.data) select p).Count() > 0; }
