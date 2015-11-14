@@ -32,12 +32,41 @@ public class MouseTriggerLCreature : MouseTrigger
 		}
 	}
 
-	public static MouseTriggerLCreature GetUnderMouse()
+	public static MouseTriggerLCreature GetUnderMouse() //исправить, code repetition
 	{
 		var query = from t in G.mouseTriggerLCreatures where G.Mouse.IsIn(t) select t;
 		if (query.Count() > 0) return query.First();
 		else return null;
 	}
+}
+
+public class MouseTriggerInventory : MouseTrigger
+{
+	public Inventory inventory;
+	public int cell;
+
+	public MouseTriggerInventory(Inventory i, int celli, ZPoint positioni, ZPoint sizei)
+	{
+		inventory = i;
+		cell = celli;
+		position = positioni;
+		size = sizei;
+	}
+
+	public static void Set(Inventory inventory, int cell, ZPoint position, ZPoint size)
+	{
+		var query = from t in G.mouseTriggerInventories where t.inventory == inventory && t.cell == cell select t;
+		if (query.Count() == 0) G.mouseTriggerInventories.Add(new MouseTriggerInventory(inventory, cell, position, size));
+	}
+
+	public static MouseTriggerInventory GetUnderMouse()
+	{
+		var query = from t in G.mouseTriggerInventories where G.Mouse.IsIn(t) select t;
+		if (query.Count() > 0) return query.First();
+		else return null;
+	}
+
+	public Item GetItem() { return inventory[cell]; }
 }
 
 public class MouseTriggerKeyword : MouseTrigger

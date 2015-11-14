@@ -13,7 +13,7 @@ class MainScreen : Screen
 	public Editor editor;
 	public DialogScreen dialogScreen;
 
-	public Texture2D universalTexture;
+	public Texture2D universalTexture, zSelectionTexture;
 	private Texture2D hexSelectionTexture;
 	public SpriteFont ambientFont, smallFont, verdanaFont, verdanaBoldFont;
 
@@ -46,6 +46,7 @@ class MainScreen : Screen
 		dialogScreen = new DialogScreen(new ZPoint(200, 200), new ZPoint(400, 300));
 
 		hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
+		zSelectionTexture = game.Content.Load<Texture2D>("other/zSelection");
 
 		ambientFont = game.Content.Load<SpriteFont>("fonts/ambient");
 		smallFont = game.Content.Load<SpriteFont>("fonts/small");
@@ -57,9 +58,9 @@ class MainScreen : Screen
 	{
 		W.Draw();
 
-		//HexPoint hexMouse = HexCoordinates(mouse);
         if (!G.dialog && !G.battle && (!G.FOVEnabled || W.player[Mouse])) Draw(hexSelectionTexture, GraphicCoordinates(Mouse));
 		if (G.debug) DrawString(ambientFont, "Mouse: " + Mouse, new ZPoint(10, 10), Color.Red);
+		if (G.dndItem != null) Draw(G.dndItem.data.texture, G.Mouse - new ZPoint(16, 16));
 
 		editor.Draw();
 		dialogScreen.Draw();

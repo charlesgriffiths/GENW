@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 class Player : GObject
 {
-	//Inventory inventory = new Inventory();
 	public bool[,] visitedLocations;
 	private List<GObject> visibleObjects = new List<GObject>();
 
@@ -16,13 +15,28 @@ class Player : GObject
 		shape.speed = 1.0f;
 		shape.isActive = true;
 
-		Character playerCharacter = new Character(shape.name, "Agile", "Morlock", "Fighter", "The Scorch", "Merchant");
-		//playerCharacter.Add("Rope");
-
+		Character playerCharacter = new Character(shape.name, "Strong", "Floran", "Psionic", "Eden", "Merchant");
+		playerCharacter.inventory.Add("Club");
+		playerCharacter.inventory.Add("Leather Armor");
 		party.Add(playerCharacter);
-		party.Add(new Creep("Krokar"));
 
+		Character c2 = new Character("Bob", "Agile", "Morlock", "Fighter", "The Scorch", "Pitfighter");
+		c2.inventory.Add("Dagger");
+		c2.inventory.Add("Force Staff");
+		party.Add(c2);
+
+		//party.Add(new Creep("Krokar"));
+
+		inventory.Add("Net");
 		inventory.Add("Rope");
+		inventory.Add("Inperium Coins", 5);
+		inventory.Add("Alliance Coins", 7);
+		inventory.Add("Longbow", 2);
+		inventory.Add("Pickaxe", 3);
+		inventory.Add("Buckler");
+		inventory.Add("Chainmail");
+		inventory.Add("Banana", 4);
+		inventory.Add("Corpse Meat", 2);
 	}
 
 	public void LoadTextures()

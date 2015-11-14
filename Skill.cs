@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Xml;
 
-class Skill : NamedObject
+public class Skill : NamedObject
 {
 	public string description;
 
@@ -13,9 +13,10 @@ class Skill : NamedObject
 	}
 }
 
-class Bonus
+public class Bonus
 {
-	public int hp, damage, attack, defence;
+	public int hp, damage, attack, defence, armor;
+	public float movementTimeMultiplier, attackTimeMultiplier;
 	public Dictionary<Skill, float> skills = new Dictionary<Skill, float>();
 
 	public Bonus(XmlNode xnode)
@@ -24,13 +25,17 @@ class Bonus
 		damage = MyXml.GetInt(xnode, "damage");
 		attack = MyXml.GetInt(xnode, "attack");
 		defence = MyXml.GetInt(xnode, "defence");
+		armor = MyXml.GetInt(xnode, "armor");
+
+		movementTimeMultiplier = MyXml.GetFloat(xnode, "mtm");
+		attackTimeMultiplier = MyXml.GetFloat(xnode, "atm");
 
 		foreach (Skill skill in BigBase.Instance.skills.data)
 			skills.Add(skill, MyXml.GetFloat(xnode, skill.name));
 	}
 }
 
-class Gift : NamedObject
+public class Gift : NamedObject
 {
 	public Bonus bonus;
 
@@ -41,7 +46,7 @@ class Gift : NamedObject
 	}
 }
 
-class Origin : NamedObject
+public class Origin : NamedObject
 {
 	public Bonus bonus;
 	public string description;
@@ -54,7 +59,7 @@ class Origin : NamedObject
 	}
 }
 
-class Background : NamedObject
+public class Background : NamedObject
 {
 	public Bonus bonus;
 
@@ -65,7 +70,7 @@ class Background : NamedObject
 	}
 }
 
-class Race : NamedObject
+public class Race : NamedObject
 {
 	public Ability ability;
 	public Bonus bonus;
@@ -80,7 +85,7 @@ class Race : NamedObject
 	}
 }
 
-class CClass : NamedObject
+public class CClass : NamedObject
 {
 	public Collection<Ability> abilities = new Collection<Ability>();
 	public Bonus bonus;

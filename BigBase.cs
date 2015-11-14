@@ -24,7 +24,7 @@
 	public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
 	public GeneralBase<Race> races = new GeneralBase<Race>();
 	public GeneralBase<CClass> classes = new GeneralBase<CClass>();
-	public ItemBase items = new ItemBase();
+	public GeneralBase<ItemShape> items = new GeneralBase<ItemShape>();
 	
 	public void Load()
 	{

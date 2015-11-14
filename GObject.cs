@@ -7,7 +7,7 @@ partial class GObject
 {
 	protected GObjectShape shape;
 	public List<Creature> party = new List<Creature>();
-	public Inventory inventory = new Inventory(24);
+	public Inventory inventory = new Inventory(24, null);
 
 	public HexPoint position = new HexPoint();
 	public RPoint rPosition = new RPoint();

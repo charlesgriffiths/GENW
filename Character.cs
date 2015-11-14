@@ -1,11 +1,9 @@
-﻿//using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
-class Character : Creature
+public class Character : Creature
 {
-	//List<Item> inventory = new List<Item>();
-	public Inventory inventory = new Inventory(6);
+	public Inventory inventory;
 
 	public Gift gift;
 	public Race race;
@@ -47,6 +45,8 @@ class Character : Creature
 
 		hp = MaxHP;
 		endurance = MaxHP;
+
+		inventory = new Inventory(6, this);
 	}
 
 	//public void Add(string itemName) { inventory.Add(new Item(BigBase.Instance.items.Get(itemName))); }

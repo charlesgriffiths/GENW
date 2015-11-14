@@ -117,6 +117,46 @@ public class MyMonoGame : Game
 		else
 		{
 			if (G.RightMouseButtonClicked) W.player.GoTo();
+			if (G.LeftMouseButtonClicked)
+			{
+				MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
+				if (mti != null)
+				{
+					G.dndItem = new Item(mti.GetItem());
+					G.inventory = mti.inventory;
+					G.cell = mti.cell;
+
+					if (G.dndItem != null)
+					{
+						mti.inventory.Remove(mti.cell);
+						IsMouseVisible = false;
+					}
+				}
+			}
+
+			if (G.dndItem != null && G.LeftMouseButtonReleased)
+			{
+				MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
+				if (G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null)
+				{
+					G.inventory.Add(new Item(mti.GetItem()), G.cell);
+					G.inventory[G.cell].numberOfStacks = mti.GetItem().numberOfStacks;
+					mti.inventory.RemoveStack(mti.cell);
+					mti.inventory.Add(new Item(G.dndItem), mti.cell);
+				}
+				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell))
+				{
+					mti.inventory.Add(G.dndItem, mti.cell);
+                }
+				else
+				{
+					G.inventory.Add(G.dndItem, G.cell);
+				}
+
+				G.dndItem = null;
+				G.inventory = null;
+				IsMouseVisible = true;
+			}
 
 			if (KeyPressed(Keys.Home)) W.player.Move(HexPoint.HexDirection.N);
 			else if (KeyPressed(Keys.End)) W.player.Move(HexPoint.HexDirection.S);

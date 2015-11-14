@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-abstract class ItemShape : NamedObject
+public class ItemShape : NamedObject
 {
 	public Texture2D texture;
+	public Bonus bonus;
 	public float value, weight;
-	public string active, passive;
+	public string active;
 
-	public bool isStackable, isEquippable;
-	public int hands;
+	public bool isStackable, isEquippable, isArmor;
+	public int hands, nutritionalValue;
 
 	public override void Load(XmlNode xnode)
 	{
@@ -19,7 +20,17 @@ abstract class ItemShape : NamedObject
 		value = MyXml.GetFloat(xnode, "value");
 		weight = MyXml.GetFloat(xnode, "weight");
 		active = MyXml.GetString(xnode, "active");
-		passive = MyXml.GetString(xnode, "passive");
+		nutritionalValue = MyXml.GetInt(xnode, "nutritionalValue");
+		bonus = new Bonus(xnode);
+
+		isArmor = MyXml.GetBool(xnode, "isArmor");
+		hands = MyXml.GetInt(xnode, "hands");
+
+		isStackable = MyXml.GetBool(xnode, "stackable");
+		isEquippable = MyXml.GetBool(xnode, "equippable");
+
+		if (hands > 0 || isArmor) isEquippable = true;
+		if (nutritionalValue > 0) { isStackable = true; isEquippable = true; }
 	}
 
 	public static void LoadTextures()
@@ -29,101 +40,7 @@ abstract class ItemShape : NamedObject
 	}
 }
 
-class ItemBase
-{
-	public List<ItemShape> data = new List<ItemShape>();
-
-	public void Load(string filename)
-	{
-		for (XmlNode xnode = MyXml.SecondChild("Data/" + filename); xnode != null; xnode = xnode.NextSibling)
-		{
-			ItemShape item;
-			if (xnode.Name == "item") item = new ClassicItemShape();
-			else if (xnode.Name == "food") item = new Food();
-			else if (xnode.Name == "weapon") item = new Weapon();
-			else if (xnode.Name == "armor") item = new Armor();
-			else
-			{
-				Log.Error("wrong item type " + xnode.Name);
-				item = null;
-			}
-
-			item.Load(xnode);
-			data.Add(item);
-		}
-	}
-
-	public ItemShape Get(string name)
-	{ return (from i in data where i.name == name select i).Single(); }
-}
-
-class ClassicItemShape : ItemShape
-{
-	public override void Load(XmlNode xnode)
-	{
-		base.Load(xnode);
-		isStackable = MyXml.GetBool(xnode, "stackable");
-		isEquippable = MyXml.GetBool(xnode, "equippable");
-		if (isEquippable) hands = MyXml.GetInt(xnode, "hands");
-	}
-}
-
-class Food : ItemShape
-{
-	public int nutritionalValue;
-
-	public Food()
-	{
-		isStackable = true;
-		isEquippable = true;
-		hands = 0;
-	}
-
-	public override void Load(XmlNode xnode)
-	{
-		base.Load(xnode);
-		nutritionalValue = MyXml.GetInt(xnode, "nutritionalValue");
-	}
-}
-
-class Weapon : ItemShape
-{
-	public int damage;
-	public float speedMultiplier;
-
-	public Weapon()
-	{
-		isStackable = false;
-		isEquippable = true;
-	}
-
-	public override void Load(XmlNode xnode)
-	{
-		base.Load(xnode);
-		hands = MyXml.GetInt(xnode, "hands");
-		damage = MyXml.GetInt(xnode, "damage");
-	}
-}
-
-class Armor : ItemShape
-{
-	public int armor;
-
-	public Armor()
-	{
-		isStackable = false;
-		isEquippable = true;
-		hands = 0;
-	}
-
-	public override void Load(XmlNode xnode)
-	{
-		base.Load(xnode);
-		armor = MyXml.GetInt(xnode, "armor");
-	}
-}
-
-class Item
+public class Item
 {
 	public ItemShape data;
 	public int numberOfStacks;
@@ -133,27 +50,61 @@ class Item
 		data = shape;
 		numberOfStacks = 1;
 	}
+
+	public Item(Item item)
+	{
+		data = item.data;
+		numberOfStacks = 1;
+	}
 }
 
-class Inventory
+public class Inventory
 {
 	private Dictionary<int, Item> data = new Dictionary<int, Item>();
+	private Character character;
 
 	public int Size { get { return data.Count; } }
+	public Item this[int k] { get { return data[k]; } }
 
-	public Inventory(int size)
+	public Inventory(int size, Character c)
 	{
 		Log.Assert(size > 0 && size <= 100, "wrong inventory size");
 		for (int i = 0; i < size; i++) data.Add(i, null);
+		character = c;
 	}
 
-	public void Add(string name)
-	{
-		ItemShape shape = BigBase.Instance.items.Get(name);
+	public List<Item> Items { get { return (from pair in data where pair.Value != null select pair.Value).Cast<Item>().ToList(); } }
 
+	private bool HasRoomFor(ItemShape itemShape)
+	{
+		int totalHands = (from i in Items select i.data.hands).Sum() + itemShape.hands;
+		bool armorAlreadyEquipped = (from i in Items where i.data.isArmor select i).Count() > 0 && itemShape.isArmor;
+		return totalHands <= 2 && !armorAlreadyEquipped;
+	}
+
+	public bool CanAdd(Item item, int cell)
+	{
+		if (data[cell] == null)
+		{
+			if (character == null) return true;
+			else return item.data.isEquippable && HasRoomFor(item.data);
+		}
+		else if (data[cell].data == item.data && data[cell].data.isStackable) return true;
+		else return false;
+	}
+
+	public void Add(Item item, int cell)
+	{
+		if (item != null && item.data.nutritionalValue > 0 && character != null) character.AddEndurance(item.data.nutritionalValue);
+		else if (data[cell] == null) data[cell] = item;
+		else if (data[cell].data == item.data) data[cell].numberOfStacks++;
+	}
+
+	public void Add(ItemShape shape)
+	{
 		if (shape.isStackable)
 		{
-			var query = from i in data where i.Value != null && i.Value.data.name == name select i.Key;
+			var query = from i in data where i.Value != null && i.Value.data.name == shape.name select i.Key;
 			if (query.Count() > 0)
 			{
 				data[query.First()].numberOfStacks++;
@@ -165,17 +116,44 @@ class Inventory
 		if (EmptyCells.Count() > 0) data[EmptyCells.First()] = new Item(shape);
     }
 
-	//public bool Has(ItemShape i) { return (from j in inventory where j.data == i select j).Count() > 0; }
-	//public bool Has(string itemName) { return (from j in inventory where j.data.name == itemName select j).Count() > 0; }
+	public void Add(string name) { Add(BigBase.Instance.items.Get(name)); }
+	public void Add(string name, int number) { for (int i = 0; i < number; i++) Add(name); }
+
+	public void Remove(int cell)
+	{
+		if (data[cell] == null) return;
+		else if (data[cell].numberOfStacks > 1) data[cell].numberOfStacks--;
+		else data[cell] = null;
+	}
+
+	public void RemoveStack(int cell) {	data[cell] = null; }
+
+	private ZPoint CellPosition(int cell) { return new ZPoint((cell % 6) * 32, (cell / 6) * 32); }
 
 	public void Draw(ZPoint position)
 	{
 		Screen screen = new Screen(position, new ZPoint(6 * 32, 32));
 		if (Size > 6) screen.size = new ZPoint(6 * 32, 4 * 32);
 
-		screen.Fill(new Color(0, 0, 0, 0.9f));
+		screen.Fill(new Color(0, 0, 0, 0.8f));
 
 		for (int i = 0; i < Size; i++)
-			if (data[i] != null) screen.Draw(data[i].data.texture, new ZPoint(i * 32, 0));
+		{
+			Color color = new Color(0.3f, 0.3f, 0.3f, 0.8f);
+			ZPoint p = CellPosition(i);
+            screen.DrawRectangle(p, new ZPoint(32, 1), color);
+			screen.DrawRectangle(p, new ZPoint(1, 32), color);
+			MouseTriggerInventory.Set(this, i, screen.position + p, new ZPoint(32, 32));
+
+			if (data[i] != null)
+			{
+				screen.Draw(data[i].data.texture, p);
+				if (data[i].numberOfStacks > 1)
+					screen.DrawStringWithShading(MainScreen.Instance.smallFont, data[i].numberOfStacks.ToString(), p + new ZPoint(24, 18), Color.White);
+			}
+		}
+
+		MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
+		if (mti != null && mti.inventory == this) screen.Draw(MainScreen.Instance.zSelectionTexture, CellPosition(mti.cell));
 	}
 }

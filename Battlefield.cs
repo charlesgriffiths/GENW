@@ -16,7 +16,7 @@ class Battlefield
 	public Ability ability = null;
 	private GObject gObject;
 
-	private Texture2D zSelectionTexture, arrowTexture, targetTexture, damageIcon, armorIcon;
+	private Texture2D /*zSelectionTexture,*/ arrowTexture, targetTexture, damageIcon, armorIcon;
 
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
@@ -50,7 +50,7 @@ class Battlefield
 
 	public void LoadTextures()
 	{
-		zSelectionTexture = M.game.Content.Load<Texture2D>("other/zSelection");
+		//zSelectionTexture = M.game.Content.Load<Texture2D>("other/zSelection");
 		arrowTexture = M.game.Content.Load<Texture2D>("other/arrow");
 		targetTexture = M.game.Content.Load<Texture2D>("other/target");
 		damageIcon = M.game.Content.Load<Texture2D>("other/damage");
@@ -214,7 +214,7 @@ class Battlefield
             screen.Draw(c.texture, iconPosition);
 		}
 
-		if (trigger != null) Draw(zSelectionTexture, trigger.creature.position);
+		if (trigger != null) Draw(M.zSelectionTexture, trigger.creature.position);
 		MouseTriggerLCreature.Clear();
 	}
 
@@ -418,8 +418,8 @@ class Battlefield
 		scaleAnimations.Draw();
 
 		if (ability != null && Mouse.IsIn(AbilityZone)) Draw(targetTexture, Mouse);
-		else if (InRange(Mouse)) Draw(zSelectionTexture, Mouse);
-		if (spotlightObject != null && spotlightObject != currentObject) M.Draw(zSelectionTexture, GraphicCoordinates(spotlightObject.rPosition));
+		else if (InRange(Mouse)) Draw(M.zSelectionTexture, Mouse);
+		if (spotlightObject != null && spotlightObject != currentObject) M.Draw(M.zSelectionTexture, GraphicCoordinates(spotlightObject.rPosition));
 
 		foreach (DelayedDrawing dd in delayedDrawings) dd.Draw();
 		delayedDrawings.Clear();
