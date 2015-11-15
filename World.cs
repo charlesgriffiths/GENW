@@ -70,7 +70,7 @@ class World
 		map.DrawMask();
 
 		if (MyGame.Instance.battle) battlefield.Draw();
-		else player.DrawParty(new ZPoint(10, 10));
+		else player.DrawParty(new ZPoint(8, 8));
 	}
 
 	public GObject NextGObject

@@ -79,14 +79,22 @@ public class MyMonoGame : Game
 		if (KeyPressed(Keys.OemTilde)) G.input = !G.input;
 
 		if (G.input && KeyPressed()) G.console.Press(G.keyboardState);
-		else if (G.dialog && KeyPressed()) M.dialogScreen.Press(G.keyboardState);
+		else if (G.dialog)
+		{
+			if (KeyPressed()) M.dialogScreen.Press(G.keyboardState);
+			else if (G.LeftMouseButtonClicked)
+			{
+				MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
+				if (mt != null && mt.name == "dialog") M.dialogScreen.Press(mt.parameter);
+			}
+		}
 		else if (G.battle && B.ability != null)
 		{
 			if (G.mouseState.LeftButton == ButtonState.Pressed && B.Mouse.IsIn(B.AbilityZone))
 				B.CurrentLCreature.UseAbility(B.ability, B.Mouse);
 
 			if (KeyPressed(Keys.Escape)) B.ability = null;
-        }
+		}
 		else if (G.battle && B.ability == null)
 		{
 			if (G.mouseState.LeftButton == ButtonState.Pressed) B.SetSpotlight();
@@ -122,13 +130,21 @@ public class MyMonoGame : Game
 				MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
 				if (mti != null)
 				{
-					G.dndItem = new Item(mti.GetItem());
+					bool shift = G.keyboardState.IsKeyDown(Keys.LeftShift);
+
+                    G.dndItem = new Item(mti.GetItem());
 					G.inventory = mti.inventory;
 					G.cell = mti.cell;
 
 					if (G.dndItem != null)
 					{
-						mti.inventory.Remove(mti.cell);
+						if (shift)
+						{
+							G.dndItem.numberOfStacks = mti.GetItem().numberOfStacks;
+							mti.inventory.RemoveStack(mti.cell);
+						}
+						else mti.inventory.Remove(mti.cell);
+
 						IsMouseVisible = false;
 					}
 				}
@@ -137,17 +153,18 @@ public class MyMonoGame : Game
 			if (G.dndItem != null && G.LeftMouseButtonReleased)
 			{
 				MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
-				if (G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null)
+				if (mti != null && G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null && mti.GetItem().data != G.dndItem.data)
 				{
 					G.inventory.Add(new Item(mti.GetItem()), G.cell);
 					G.inventory[G.cell].numberOfStacks = mti.GetItem().numberOfStacks;
 					mti.inventory.RemoveStack(mti.cell);
 					mti.inventory.Add(new Item(G.dndItem), mti.cell);
+					mti.inventory[mti.cell].numberOfStacks = G.dndItem.numberOfStacks;
 				}
 				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell))
 				{
 					mti.inventory.Add(G.dndItem, mti.cell);
-                }
+				}
 				else
 				{
 					G.inventory.Add(G.dndItem, G.cell);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework.Graphics;
 
-class DialogResponse
+public class DialogResponse
 {
 	public string text = "", name = "", jump = "";
 

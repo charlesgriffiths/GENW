@@ -95,9 +95,11 @@ public class Inventory
 
 	public void Add(Item item, int cell)
 	{
-		if (item != null && item.data.nutritionalValue > 0 && character != null) character.AddEndurance(item.data.nutritionalValue);
+		if (item != null && item.data.nutritionalValue > 0 && character != null)
+			character.AddEndurance(item.data.nutritionalValue * item.numberOfStacks);
+
 		else if (data[cell] == null) data[cell] = item;
-		else if (data[cell].data == item.data) data[cell].numberOfStacks++;
+		else if (data[cell].data == item.data) data[cell].numberOfStacks += item.numberOfStacks;
 	}
 
 	public void Add(ItemShape shape)

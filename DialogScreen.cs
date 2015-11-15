@@ -23,17 +23,26 @@ class DialogScreen
 		
 		screen.Fill(new Color(0.2f, 0.2f, 0.2f, 0.9f));
 
-		screen.Draw(dialog.texture, new ZPoint(10, 10));
+		screen.Draw(dialog.texture, new ZPoint(8, 8));
 
-		screen.offset = 10;
+		screen.offset = 8;
 		SpriteFont font = MainScreen.Instance.verdanaFont;
-        screen.DrawString(font, dialogNode.text, new ZPoint(52, screen.offset), Color.White, screen.size.x - 62);
-		screen.DrawString(font, dialogNode.description, new ZPoint(52, screen.offset), Color.Gray, screen.size.x - 62);
+        screen.DrawString(font, dialogNode.text, new ZPoint(48, screen.offset), Color.White, screen.size.x - 64);
+		screen.DrawString(font, dialogNode.description, new ZPoint(48, screen.offset), Color.Gray, screen.size.x - 64);
 
-		screen.offset = 110;
+		screen.offset = 80;
 		for (int i = 0; i < dialogNode.responses.Count; i++)
-			screen.DrawString(font, (i+1) + ". " + dialogNode.responses[i].text, 
-				new ZPoint(10, screen.offset), Color.White, screen.size.x - 20);
+		{
+			DialogResponse r = dialogNode.responses[i];
+			ZPoint p = new ZPoint(8, screen.offset);
+
+			MouseTriggerKeyword.Set("dialog", i + 1, screen.position + p, new ZPoint(font.MeasureString(r.text)) + new ZPoint(20, 0));
+			MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
+
+			Color color = Color.White;
+			if (mt != null && mt.name == "dialog" && mt.parameter == i + 1) color = Color.DodgerBlue;
+            screen.DrawString(font, (i + 1) + ". " + r.text, p, color, screen.size.x - 20);
+		}
 	}
 
 	private static int KeyCode(KeyboardState k)
@@ -77,13 +86,12 @@ class DialogScreen
 
 		if (nextNode != "") dialogNode = dialog.nodes[nextNode];
 		else MyGame.Instance.dialog = false;
+
+		MouseTriggerKeyword.Clear("dialog");
 	}
 
-	public void Press(KeyboardState keyboardState)
-	{
-		int k = KeyCode(keyboardState);
-		if (k > 0 && k <= dialogNode.responses.Count) Press(dialogNode.responses[k-1]);
-	}
+	public void Press(int k) { if (k > 0 && k <= dialogNode.responses.Count) Press(dialogNode.responses[k - 1]); }
+	public void Press(KeyboardState keyboardState) { Press(KeyCode(keyboardState));	}
 
 	public void StartDialog(string dialogName)
 	{

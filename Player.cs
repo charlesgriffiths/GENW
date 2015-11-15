@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class Player : GObject
+partial class Player : GObject
 {
 	public bool[,] visitedLocations;
 	private List<GObject> visibleObjects = new List<GObject>();
@@ -46,7 +46,7 @@ class Player : GObject
 
 	public void DrawParty(ZPoint position)
 	{
-		Screen screen = new Screen(position, new ZPoint(10, 10));
+		Screen screen = new Screen(position, new ZPoint(1, 1));
 
 		foreach (Creature member in party)
 		{
@@ -61,8 +61,8 @@ class Player : GObject
 		}
 
 		var characters = from c in party where c is Character select c;
-		foreach (Character c in characters) c.inventory.Draw(position + new ZPoint(42, party.IndexOf(c) * 40));
-		inventory.Draw(position + new ZPoint(42, (from c in party where c is Character select c).Count() * 40));
+		foreach (Character c in characters) c.inventory.Draw(position + new ZPoint(40, party.IndexOf(c) * 40));
+		inventory.Draw(position + new ZPoint(40, (from c in party where c is Character select c).Count() * 40));
 	}
 
 	public override void Draw()
@@ -130,71 +130,4 @@ class Player : GObject
 		ZPoint pvr = new ZPoint(3, 3);
 		if (!((ZPoint)position).InBoundaries(W.camera - W.viewRadius + pvr, W.camera + W.viewRadius - pvr))	W.camera = position;
 	}
-
-	private void AddToFrontier(List<FramedHexPoint> list, HexPoint hexPoint, HexPoint.HexDirection d, float costSoFar)
-	{
-		if (!W.map.IsWalkable(hexPoint)) return;
-		if (HexPoint.Distance(hexPoint, position) > 15) return;
-
-		FramedHexPoint item = new FramedHexPoint(hexPoint, d, true, costSoFar + W.map[hexPoint].type.travelTime);
-
-		var query = from p in list where p.data.TheSameAs(item.data) select p;
-
-		if (query.Count() == 0) list.Add(item);
-		else
-		{
-			FramedHexPoint old = query.Single();
-			if (item.cost < old.cost)
-			{
-				list.Remove(old);
-				list.Add(item);
-			}
-		}
-	}
-
-	public void GoTo()
-	{
-		HexPoint destination = M.Mouse;
-
-		if (!W.map.IsWalkable(destination)) return;
-		if (!W.player[destination]) return;
-
-		List<FramedHexPoint> visited = new List<FramedHexPoint>();
-		visited.Add(new FramedHexPoint(destination, HexPoint.HexDirection.N, true, 0));
-
-		while (true)
-		{
-			List<FramedHexPoint> frontier = (from p in visited where p.onFrontier orderby p.cost + HexPoint.Distance(p.data, position) select p).Cast<FramedHexPoint>().ToList();
-			if (frontier.Count() == 0) return;
-
-			foreach (FramedHexPoint p in frontier)
-			{
-				p.onFrontier = false;
-				foreach (HexPoint.HexDirection d in HexPoint.Directions)
-					AddToFrontier(visited, p.data.Shift(d), HexPoint.Opposite(d), p.cost);
-			}
-
-			var isFinished = from p in visited where p.data.TheSameAs(position) && !p.onFrontier select p;
-			if (isFinished.Count() > 0) break;
-		}
-
-		for (int i = 0; i < 20 && !position.TheSameAs(destination); i++)
-		{
-			HexPoint.HexDirection d = (from p in visited where p.data.TheSameAs(position) select p).Single().d;
-			Move(d);
-
-			if (NewObjectsVisible()) break;
-		}
-	}
-}
-
-class FramedHexPoint
-{
-	public HexPoint data;
-	public HexPoint.HexDirection d;
-	public bool onFrontier;
-	public float cost;
-	
-	public FramedHexPoint(HexPoint datai, HexPoint.HexDirection di, bool onFrontieri, float costi)
-		{ data = datai; d = di; onFrontier = onFrontieri; cost = costi; }
 }

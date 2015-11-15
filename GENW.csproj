@@ -43,6 +43,7 @@
     <Compile Include="AI.cs" />
     <Compile Include="Animation.cs" />
     <Compile Include="Battlefield.cs" />
+    <Compile Include="BattlefieldDraw.cs" />
     <Compile Include="BigBase.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="Console.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="MyXml.cs" />
     <Compile Include="NamedObject.cs" />
     <Compile Include="Palette.cs" />
+    <Compile Include="Pathfinding.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

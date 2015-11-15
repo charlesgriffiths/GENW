@@ -13,7 +13,7 @@ public class LObject
 	public AnimationQueue movementAnimations = new AnimationQueue();
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 
-	public bool isActive;
+	//public bool isActive;
 	public float initiative;
 	public Texture2D texture;
 
@@ -23,7 +23,7 @@ public class LObject
 	public LObject() {}
 	public LObject(string namei)
 	{
-		isActive = false;
+		//isActive = false;
 		texture = BigBase.Instance.textures.Get(namei).data;
 
 		Init();
@@ -54,10 +54,7 @@ public class LObject
 		initiative = initiativei;
 	}
 
-	public virtual void Kill()
-	{
-		isActive = false;
-	}
+	public virtual void Kill() {}
 
 	public virtual Color RelationshipColor { get { return Color.Blue; }	}
 	public virtual void Run() {}

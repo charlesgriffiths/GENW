@@ -32,7 +32,7 @@ public class MouseTriggerLCreature : MouseTrigger
 		}
 	}
 
-	public static MouseTriggerLCreature GetUnderMouse() //исправить, code repetition
+	public static MouseTriggerLCreature GetUnderMouse()
 	{
 		var query = from t in G.mouseTriggerLCreatures where G.Mouse.IsIn(t) select t;
 		if (query.Count() > 0) return query.First();
@@ -71,7 +71,7 @@ public class MouseTriggerInventory : MouseTrigger
 
 public class MouseTriggerKeyword : MouseTrigger
 {
-	private string name;
+	public string name;
 	public int parameter;
 
 	private MouseTriggerKeyword(string namei, int parameteri, ZPoint positioni, ZPoint sizei)
@@ -112,4 +112,9 @@ public class MouseTriggerKeyword : MouseTrigger
 		else return null;
 	}
 
+	public static void Clear(string name)
+	{
+		var query = G.mouseTriggerKeywords.Where(t => t.name == name).Cast<MouseTriggerKeyword>().ToList();
+		foreach (MouseTriggerKeyword t in query) G.mouseTriggerKeywords.Remove(t);
+	}
 }

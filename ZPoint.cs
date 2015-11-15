@@ -85,6 +85,7 @@ public class ZPoint
 	public static ZPoint operator -(ZPoint p1, ZPoint p2) {	return new ZPoint(p1.x - p2.x, p1.y - p2.y); }
 	public static Vector2 operator /(ZPoint p, float f) { return new Vector2(p.x / f, p.y / f);	}
 	public static ZPoint operator *(int k, ZPoint p) { return new ZPoint(k * p.x, k * p.y); }
+	public static Vector2 operator *(float f, ZPoint p) { return new Vector2(f * p.x, f * p.y); }
 
 	public static implicit operator HexPoint(ZPoint zPoint) { return new HexPoint(zPoint.x, zPoint.y); }
 	public static implicit operator RPoint(ZPoint zPoint) {	return new RPoint(zPoint.x, zPoint.y); }

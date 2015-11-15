@@ -43,7 +43,8 @@ class MainScreen : Screen
 	public void LoadTextures()
 	{
 		editor = new Editor(size - new ZPoint(66, 62), new ZPoint(56, 52));
-		dialogScreen = new DialogScreen(new ZPoint(200, 200), new ZPoint(400, 300));
+		ZPoint dialogSize = new ZPoint(400, 200);
+        dialogScreen = new DialogScreen(new ZPoint((int)(0.5f * (size.x - dialogSize.x)), size.y - 8 - dialogSize.y), dialogSize);
 
 		hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
 		zSelectionTexture = game.Content.Load<Texture2D>("other/zSelection");
