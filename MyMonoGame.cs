@@ -40,7 +40,7 @@ public class MyMonoGame : Game
 		MainScreen.Instance.LoadTextures();
         GTile.LoadTextures();
 		LTile.LoadTextures();
-		Effect.LoadTextures();
+		EffectShape.LoadTextures();
 		Ability.LoadTextures();
 		GObjectShape.LoadTextures();
 		Texture.LoadTextures();
@@ -110,7 +110,7 @@ public class MyMonoGame : Game
 			foreach (char key in Stuff.AbilityHotkeys)
 			{
 				int index = Stuff.AbilityHotkeys.IndexOf(key);
-				List<Ability> abilities = B.CurrentLCreature.data.Abilities;
+				List<Ability> abilities = B.CurrentLCreature.Abilities;
 				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.CurrentLCreature.UseAbility(abilities[index]);
 			}
 

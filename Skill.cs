@@ -16,7 +16,7 @@ public class Skill : NamedObject
 public class Bonus
 {
 	public int hp, damage, attack, defence, armor;
-	public float movementTimeMultiplier, attackTimeMultiplier;
+	public float mtm, atm;
 	public Dictionary<Skill, float> skills = new Dictionary<Skill, float>();
 
 	public Bonus(XmlNode xnode)
@@ -27,8 +27,10 @@ public class Bonus
 		defence = MyXml.GetInt(xnode, "defence");
 		armor = MyXml.GetInt(xnode, "armor");
 
-		movementTimeMultiplier = MyXml.GetFloat(xnode, "mtm");
-		attackTimeMultiplier = MyXml.GetFloat(xnode, "atm");
+		mtm = MyXml.GetFloat(xnode, "mtm");
+		if (mtm == 0) mtm = 1;
+		atm = MyXml.GetFloat(xnode, "atm");
+		if (atm == 0) atm = 1;
 
 		foreach (Skill skill in BigBase.Instance.skills.data)
 			skills.Add(skill, MyXml.GetFloat(xnode, skill.name));

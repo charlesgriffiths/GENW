@@ -9,7 +9,7 @@ public class ItemShape : NamedObject
 	public Texture2D texture;
 	public Bonus bonus;
 	public float value, weight;
-	public string active;
+	public string active, description;
 
 	public bool isStackable, isEquippable, isArmor;
 	public int hands, nutritionalValue;
@@ -20,6 +20,7 @@ public class ItemShape : NamedObject
 		value = MyXml.GetFloat(xnode, "value");
 		weight = MyXml.GetFloat(xnode, "weight");
 		active = MyXml.GetString(xnode, "active");
+		description = MyXml.GetString(xnode, "description");
 		nutritionalValue = MyXml.GetInt(xnode, "nutritionalValue");
 		bonus = new Bonus(xnode);
 
@@ -37,6 +38,36 @@ public class ItemShape : NamedObject
 	{
 		foreach (ItemShape i in BigBase.Instance.items.data)
 			i.texture = MainScreen.Instance.game.Content.Load<Texture2D>("items/" + i.name);
+	}
+
+	public void DrawDescription(ZPoint position)
+	{
+		Screen screen = new Screen(position, new ZPoint(MyGame.Instance.battle ? 240 : 192, 190));
+		screen.Fill(new Color(0, 0, 0, 0.9f));
+
+		screen.DrawString(MainScreen.Instance.verdanaBoldFont, name, new ZPoint(3, 3), Color.White);
+		SpriteFont font = MainScreen.Instance.smallFont;
+
+		screen.offset = 25;
+		int previousOffset = screen.offset;
+		if (active != "") screen.DrawString(font, "ACTIVE: " + active, new ZPoint(3, screen.offset), Color.White);
+		if (nutritionalValue > 0) screen.DrawString(font, "NUTRITIONAL VALUE: " + nutritionalValue, new ZPoint(3, screen.offset), Color.White);
+		if (bonus.mtm != 1) screen.DrawString(font, "MOVEMENT TIME MULT.: " + bonus.mtm, new ZPoint(3, screen.offset), Color.White);
+		if (bonus.atm != 1) screen.DrawString(font, "ATTACK TIME MULT.: " + bonus.atm, new ZPoint(3, screen.offset), Color.White);
+
+		if (screen.offset > previousOffset) screen.offset += 8;	previousOffset = screen.offset;
+		if (bonus.damage != 0) screen.DrawString(font, "Damage " + Stuff.ShowSgn(bonus.damage), new ZPoint(3, screen.offset), Color.White);
+		if (bonus.armor != 0) screen.DrawString(font, "Armor " + Stuff.ShowSgn(bonus.armor), new ZPoint(3, screen.offset), Color.White);
+		if (bonus.attack != 0) screen.DrawString(font, "Attack " + Stuff.ShowSgn(bonus.attack), new ZPoint(3, screen.offset), Color.White);
+		if (bonus.defence != 0) screen.DrawString(font, "Defence " + Stuff.ShowSgn(bonus.defence), new ZPoint(3, screen.offset), Color.White);
+		if (bonus.hp != 0) screen.DrawString(font, "HP " + Stuff.ShowSgn(bonus.hp), new ZPoint(3, screen.offset), Color.White);
+
+		if (screen.offset > previousOffset) screen.offset += 8;	previousOffset = screen.offset;
+		screen.DrawString(font, description, new ZPoint(0, screen.offset), Color.White, screen.size.x);
+
+		if (screen.offset > previousOffset) screen.offset += 8;	previousOffset = screen.offset;
+		screen.DrawString(font, "VALUE: " + value, new ZPoint(3, screen.offset), Color.White);
+		screen.DrawString(font, "WEIGHT: " + weight, new ZPoint(3, screen.offset), Color.White);
 	}
 }
 
@@ -136,16 +167,22 @@ public class Inventory
 	{
 		Screen screen = new Screen(position, new ZPoint(6 * 32, 32));
 		if (Size > 6) screen.size = new ZPoint(6 * 32, 4 * 32);
+		if (!MyGame.Instance.battle) screen.Fill(new Color(0.05f, 0.05f, 0.05f, 0.8f));
 
-		screen.Fill(new Color(0, 0, 0, 0.8f));
+		if (MyGame.Instance.battle) MyGame.Instance.mouseTriggerInventories.Clear();
 
 		for (int i = 0; i < Size; i++)
 		{
 			Color color = new Color(0.3f, 0.3f, 0.3f, 0.8f);
 			ZPoint p = CellPosition(i);
-            screen.DrawRectangle(p, new ZPoint(32, 1), color);
-			screen.DrawRectangle(p, new ZPoint(1, 32), color);
 			MouseTriggerInventory.Set(this, i, screen.position + p, new ZPoint(32, 32));
+
+			/*if (!MyGame.Instance.battle)
+			{
+				screen.DrawRectangle(p, new ZPoint(32, 1), color);
+				screen.DrawRectangle(p, new ZPoint(1, 32), color);
+			}
+			*/
 
 			if (data[i] != null)
 			{
@@ -156,6 +193,16 @@ public class Inventory
 		}
 
 		MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
-		if (mti != null && mti.inventory == this) screen.Draw(MainScreen.Instance.zSelectionTexture, CellPosition(mti.cell));
+		if (mti != null && mti.inventory == this)
+		{
+			screen.Draw(MainScreen.Instance.zSelectionTexture, CellPosition(mti.cell));
+			if (mti.GetItem() != null)
+			{
+				ZPoint p;
+				if (MyGame.Instance.battle) p = position + new ZPoint(24, 32 + 48 + 8);
+				else p = new ZPoint(48, 16 + 4*32 + (from c in World.Instance.player.party where c is Character select c).Count() * 40);
+                mti.GetItem().data.DrawDescription(p);
+			}
+		}
 	}
 }

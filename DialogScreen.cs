@@ -27,8 +27,8 @@ class DialogScreen
 
 		screen.offset = 8;
 		SpriteFont font = MainScreen.Instance.verdanaFont;
-        screen.DrawString(font, dialogNode.text, new ZPoint(48, screen.offset), Color.White, screen.size.x - 64);
-		screen.DrawString(font, dialogNode.description, new ZPoint(48, screen.offset), Color.Gray, screen.size.x - 64);
+        screen.DrawString(font, dialogNode.text, new ZPoint(48, screen.offset), Color.White, screen.size.x - 48);
+		screen.DrawString(font, dialogNode.description, new ZPoint(48, screen.offset), Color.Gray, screen.size.x - 48);
 
 		screen.offset = 80;
 		for (int i = 0; i < dialogNode.responses.Count; i++)

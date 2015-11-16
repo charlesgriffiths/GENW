@@ -57,6 +57,11 @@ public class MouseTriggerInventory : MouseTrigger
 	{
 		var query = from t in G.mouseTriggerInventories where t.inventory == inventory && t.cell == cell select t;
 		if (query.Count() == 0) G.mouseTriggerInventories.Add(new MouseTriggerInventory(inventory, cell, position, size));
+		else
+		{
+			MouseTriggerInventory mti = query.Single();
+			mti.position = position;
+		}
 	}
 
 	public static MouseTriggerInventory GetUnderMouse()

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
 public class Character : Creature
@@ -13,10 +14,10 @@ public class Character : Creature
 
 	public override string Name { get { return race.name + " " + cClass.name; } }
 
-	public override int MaxHP { get { return 10 + gift.bonus.hp + race.bonus.hp; } }
-	public override int Damage { get { return 1 + gift.bonus.damage + race.bonus.damage; } }
-	public override int Attack { get { return gift.bonus.attack + race.bonus.attack; } }
-	public override int Defence { get { return gift.bonus.defence + race.bonus.defence; } }
+	public override int MaxHP { get { return 10 + gift.bonus.hp + race.bonus.hp /*+ (from i in inventory.Items select i.data.bonus.hp).Sum()*/; } }
+	public override int Damage { get { return 1 + gift.bonus.damage + race.bonus.damage /*+ (from i in inventory.Items select i.data.bonus.damage).Sum()*/; } }
+	public override int Attack { get { return gift.bonus.attack + race.bonus.attack /*+ (from i in inventory.Items select i.data.bonus.attack).Sum()*/; } }
+	public override int Defence { get { return gift.bonus.defence + race.bonus.defence /*+ (from i in inventory.Items select i.data.bonus.defence).Sum()*/; } }
 
 	public override List<Ability> Abilities
 	{
@@ -48,10 +49,6 @@ public class Character : Creature
 
 		inventory = new Inventory(6, this);
 	}
-
-	//public void Add(string itemName) { inventory.Add(new Item(BigBase.Instance.items.Get(itemName))); }
-	//public bool HasItem(ItemShape i) { return (from j in inventory where j.data == i select j).Count() > 0; }
-	//public bool HasItem(string itemName) { return (from j in inventory where j.data.name == itemName select j).Count() > 0; }
 }
 
 class LCharacter : LCreature

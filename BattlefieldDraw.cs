@@ -7,10 +7,6 @@ partial class Battlefield
 {
 	public Vector2 GraphicCoordinates(RPoint p) { return screenPosition + new Vector2(32 * p.x, 32 * p.y); }
 	public ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - screenPosition) / 32.0f); }
-	//{
-	//Vector2 logical = (mouse - screenPosition) / 32.0f;
-	//return new ZPoint((int)logical.X, (int)logical.Y);
-	//}
 
 	public void LoadTextures()
 	{
@@ -96,9 +92,9 @@ partial class Battlefield
 	{
 		for (int i = 0; i < 6; i++) MouseTriggerKeyword.Set("ability", i, screen.position + position + new ZPoint(48 * i, 0), new ZPoint(48, 48));
 
-		foreach (Ability a in c.data.Abilities)
+		foreach (Ability a in c.Abilities)
 		{
-			int i = c.data.Abilities.IndexOf(a);
+			int i = c.Abilities.IndexOf(a);
 			MouseTriggerKeyword t = MouseTriggerKeyword.Get("ability", i);
 			M.Draw(a.texture, t.position);
 
@@ -107,23 +103,33 @@ partial class Battlefield
 		}
 
 		MouseTriggerKeyword forDescription = MouseTriggerKeyword.GetUnderMouse("ability");
-		if (forDescription != null && forDescription.parameter < c.data.Abilities.Count)
+		if (forDescription != null && forDescription.parameter < c.Abilities.Count)
 		{
-			Ability a = c.data.Abilities[forDescription.parameter];
+			Ability a = c.Abilities[forDescription.parameter];
 			M.Draw(a.texture, forDescription.position, Color.Red);
 
-			foreach (MouseTriggerKeyword t in MouseTriggerKeyword.GetAll("ability"))
-				if (t.parameter != forDescription.parameter) M.DrawRectangle(t.position, t.size, new Color(0, 0, 0, 0.8f));
+			if (c == CurrentLCreature) M.DrawStringWithShading(M.smallFont, Stuff.AbilityHotkeys[forDescription.parameter].ToString(),
+				forDescription.position + new ZPoint(37, 33), Color.White);
 
-			screen.DrawString(M.smallFont, a.name + ". " + a.description, position, Color.White, screen.size.x);
+			//foreach (MouseTriggerKeyword t in MouseTriggerKeyword.GetAll("ability"))
+			//if (t.parameter != forDescription.parameter) M.DrawRectangle(t.position, t.size, new Color(0, 0, 0, 0.8f));
+
+			//screen.DrawString(M.smallFont, a.name + ". " + System.Environment.NewLine + a.description, 
+			//position + new ZPoint(24, 56), Color.White, screen.size.x - 50);
+
+			a.DrawDescription(screen.position + position + new ZPoint(24, 56));
 		}
+	}
+
+	private void DrawEffects(LCreature c, Screen screen, ZPoint position)
+	{
 	}
 
 	private void DrawInfo(LCreature c, ZPoint position)
 	{
-		int length = 288, height = 108;
+		int length = 288, height = 1;
 		Screen screen = new Screen(position, new ZPoint(length, height));
-		screen.Fill(Color.Black);
+		//screen.Fill(Color.Black);
 
 		float hpFraction = (float)c.HP / c.MaxHP;
 		float enduranceFraction = (float)c.Endurance / c.MaxHP;
@@ -144,7 +150,10 @@ partial class Battlefield
 		screen.DrawString(font, c.Armor.ToString(), new ZPoint(length - 32, 43), Color.White);
 		screen.Draw(armorIcon, new ZPoint(length - 20, 40));
 
-		DrawAbilities(c, screen, new ZPoint(0, height - 48));
+		DrawEffects(c, screen, new ZPoint(0, 60));
+		if (c is LCharacter) (c as LCharacter).Data.inventory.Draw(screen.position + new ZPoint(0, 92));
+		//screen.DrawRectangle(new ZPoint(32 * 6, 92), new ZPoint(1, 32), Stuff.DarkDarkGray);
+		DrawAbilities(c, screen, new ZPoint(0, 124));
 	}
 
 	public void Draw()

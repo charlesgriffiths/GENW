@@ -177,10 +177,9 @@ partial class Battlefield
 		var aliveMonsters = from c in AliveCreatures where !c.isInParty select c;
 		if (aliveMonsters.Count() == 0)
 		{
-			P.party.Clear();
-			var aliveParty = from c in AliveCreatures where c.isInParty orderby c.Importance select c;
-
-			foreach (LCreature c in aliveParty)	P.party.Add(c.data);
+			//P.party.Clear();
+			//var aliveParty = from c in AliveCreatures where c.isInParty orderby c.Importance select c;
+			//foreach (LCreature c in aliveParty)	P.party.Add(c.data);
 
 			gObject.Kill();
 			MyGame.Instance.battle = false;

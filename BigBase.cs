@@ -11,7 +11,7 @@
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
 
 	public GeneralBase<Skill> skills = new GeneralBase<Skill>();
-	public GeneralBase<Effect> effects = new GeneralBase<Effect>();
+	public GeneralBase<EffectShape> effects = new GeneralBase<EffectShape>();
 	public GeneralBase<Ability> abilities = new GeneralBase<Ability>();
 	public GeneralBase<Gift> gifts = new GeneralBase<Gift>();
 	public GeneralBase<Origin> origins = new GeneralBase<Origin>();
