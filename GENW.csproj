@@ -55,6 +55,7 @@
     <Compile Include="Effect.cs" />
     <Compile Include="GObjectShape.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="LCreature.cs" />
     <Compile Include="MouseTrigger.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="MyMonoGame.cs" />
@@ -103,7 +104,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="bin\WindowsGL\Debug\Data\codex.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\creeps.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\creepShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\effects.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\gifts.xml" />

@@ -38,7 +38,7 @@ public class AnimationQueue
 		Collection<Animation> animationsToDraw = new Collection<Animation>();
 
 		if (data.Count >= 1) animationsToDraw.Add(data[0]);
-		if (data.Count >= 2 && data[0] is RMove && data[1] is DamageAnimation) animationsToDraw.Add(data[1]);
+		if (data.Count >= 2 && data[0] is RMove && !(data[1] is RMove)) animationsToDraw.Add(data[1]);
 
 		foreach (Animation a in animationsToDraw)
 		{
@@ -84,6 +84,27 @@ class RMove : Animation
 	}
 }
 
+class ScalingAnimation : Animation
+{
+	private LObject target;
+	private float delta;
+
+	public ScalingAnimation(LObject targeti, float finalScaling, float speed)
+	{
+		target = targeti;
+		maxTime = 2 * (int)(30.0f / speed);
+		delta = (finalScaling - target.scaling) / maxTime;
+		time = 0;
+	}
+
+	public override void Draw()
+	{
+		if (time * 2 < maxTime) target.scaling += delta;
+		else target.scaling -= delta;
+		base.Draw();
+	}
+}
+
 class DamageAnimation : Animation
 {
 	private Vector2 position;
@@ -92,14 +113,14 @@ class DamageAnimation : Animation
 
 	public override Vector2 Position { get { return position; } }
 
-	public DamageAnimation(int damagei, Vector2 positioni, float seconds)
+	public DamageAnimation(int damagei, Vector2 positioni, float seconds, bool isPure)
 	{
 		damage = damagei;
 		position = positioni;
 		maxTime = (int)(seconds * 60.0f);
 		time = 0;
 
-		texture = BigBase.Instance.textures.Get("damage").data;
+		texture = BigBase.Instance.textures.Get(isPure ? "pureDamage" : "damage").Single();
 	}
 
 	public override void Draw()

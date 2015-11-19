@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 
-abstract partial class LCreature : LObject
+partial class LCreature : LObject
 {
 	private int AITargetRank(LCreature c)
 	{

@@ -102,7 +102,7 @@ public class MouseTriggerKeyword : MouseTrigger
 	}
 
 	public static List<MouseTriggerKeyword> GetAll(string name)
-	{ return (from t in G.mouseTriggerKeywords where t.name == name select t).Cast<MouseTriggerKeyword>().ToList(); }
+	{ return (from t in G.mouseTriggerKeywords where t.name == name select t).ToList(); }
 
 	public static void Set(string name, int parameter, ZPoint position, ZPoint size)
 	{
@@ -119,7 +119,7 @@ public class MouseTriggerKeyword : MouseTrigger
 
 	public static void Clear(string name)
 	{
-		var query = G.mouseTriggerKeywords.Where(t => t.name == name).Cast<MouseTriggerKeyword>().ToList();
+		var query = G.mouseTriggerKeywords.Where(t => t.name == name).ToList();
 		foreach (MouseTriggerKeyword t in query) G.mouseTriggerKeywords.Remove(t);
 	}
 }

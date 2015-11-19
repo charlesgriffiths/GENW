@@ -7,10 +7,10 @@ public class Ability : NamedObject
 	public Texture2D texture;
 	public string description;
 	public TargetType targetType;
-	public int cost;
+	public int cost, range;
 	public float castTime, cooldownTime;
 
-	public enum TargetType { Passive, None, Direction, Point, Object, Creature };
+	public enum TargetType { Passive, None, Direction, Point, Creature };
 
 	private static TargetType GetTargetType(string s)
 	{
@@ -18,7 +18,6 @@ public class Ability : NamedObject
 		else if (s == "none") return TargetType.None;
 		else if (s == "direction") return TargetType.Direction;
 		else if (s == "point") return TargetType.Point;
-		else if (s == "object") return TargetType.Object;
 		else if (s == "creature") return TargetType.Creature;
 		else
 		{
@@ -27,11 +26,24 @@ public class Ability : NamedObject
 		}
 	}
 
+	public static string Name(string s)
+	{
+		if (BigBase.Instance.abilities.Get(s) != null) return s;
+		else
+		{
+			Log.Error("Unknown ability name " + s);
+			return "ERROR";
+		}
+	}
+
+	public bool NameIs(string s) { return name == Name(s); }
+
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
 		targetType = GetTargetType(MyXml.GetString(xnode, "target"));
 		cost = MyXml.GetInt(xnode, "cost");
+		range = MyXml.GetInt(xnode, "range");
 		castTime = MyXml.GetFloat(xnode, "castTime");
 		cooldownTime = MyXml.GetFloat(xnode, "cooldownTime");
 		description = MyXml.GetString(xnode, "description");
@@ -52,6 +64,7 @@ public class Ability : NamedObject
 		SpriteFont font = MainScreen.Instance.smallFont;
 
 		screen.offset = 25;
+		if (range != 0) screen.DrawString(font, "RANGE: " + range, new ZPoint(3, screen.offset), Color.White);
 		if (targetType != TargetType.Passive)
 		{
 			screen.DrawString(font, "COST: " + cost, new ZPoint(3, screen.offset), Color.White);
@@ -60,6 +73,6 @@ public class Ability : NamedObject
 		}
 
 		screen.offset += 8;
-		screen.DrawString(font, description, new ZPoint(0, screen.offset), Color.White, screen.size.x);
+		screen.DrawString(font, description, new ZPoint(3, screen.offset), Color.White, screen.size.x - 3);
 	}
 }

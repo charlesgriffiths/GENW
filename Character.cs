@@ -13,6 +13,7 @@ public class Character : Creature
 	public Background background;
 
 	public override string Name { get { return race.name + " " + cClass.name; } }
+	public override CreepType creepType { get {	return BigBase.Instance.creepTypes.Get("Sentient");	} }
 
 	public override int MaxHP { get { return 10 + gift.bonus.hp + race.bonus.hp /*+ (from i in inventory.Items select i.data.bonus.hp).Sum()*/; } }
 	public override int Damage { get { return 1 + gift.bonus.damage + race.bonus.damage /*+ (from i in inventory.Items select i.data.bonus.damage).Sum()*/; } }
@@ -29,6 +30,8 @@ public class Character : Creature
 			return result;
 		}
 	}
+
+	public override int Importance { get { return IsAlive ? uniqueName == World.Instance.player.uniqueName ? 1 : 2 : 4; } }
 
 	public Character(string uniqueNamei, string giftName, string raceName, string className, string originName, string backgroundName)
 	{
@@ -51,6 +54,7 @@ public class Character : Creature
 	}
 }
 
+/*
 class LCharacter : LCreature
 {
 	public override float MovementSpeed { get { return 1.0f; } }
@@ -100,3 +104,4 @@ class LPlayer : LCharacter
 		base.Kill();
 	}
 }
+*/

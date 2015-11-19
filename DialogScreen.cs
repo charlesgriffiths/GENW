@@ -72,16 +72,9 @@ class DialogScreen
 		}
 		else if (dialog.name == "Wild Dogs Encounter")
 		{
-			if (r.name == "condition1")
-			{
-				if (P.party.Count <= 1) nextNode = "1positive";
-				else nextNode = "1negative";
-			}
-			else if (r.name == "condition2")
-			{
-				if (P.party.Count <= 2) nextNode = "2positive";
-				else nextNode = "2negative";
-			}
+			int threshold = gObject.Name == "Wild Dogs Large Pack" ? 6 : 1;
+			if (r.name == "condition1") nextNode = P.party.Count <= threshold ? "1positive" : "1negative";
+			else if (r.name == "condition2") nextNode = P.party.Count <= threshold + 1 ? "2positive" : "2negative";
 		}
 
 		if (nextNode != "") dialogNode = dialog.nodes[nextNode];

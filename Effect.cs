@@ -1,13 +1,15 @@
 ﻿using System.Xml;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 class EffectShape : NamedObject
 {
 	public Texture2D texture;
 	public string description;
-	public Sgn sgn;
+	private Sgn sgn;
 
-	public enum Sgn { Positive, Neutral, Negative };
+	private enum Sgn { Positive, Neutral, Negative };
+	public Color SgnColor { get { return sgn == Sgn.Positive ? Color.Green : sgn == Sgn.Neutral ? Color.DodgerBlue : Color.Red; } }
 
 	public override void Load(XmlNode xnode)
 	{
@@ -27,10 +29,15 @@ class EffectShape : NamedObject
 			e.texture = MainScreen.Instance.game.Content.Load<Texture2D>("effects/" + e.name);
 	}
 }
-/*
+
 class Effect
 {
 	public EffectShape data;
-	float timeLeft;
+	public float timeLeft;
+
+	public Effect(string name, float time)
+	{
+		data = BigBase.Instance.effects.Get(name);
+		timeLeft = time;
+	}
 }
-*/

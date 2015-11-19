@@ -10,7 +10,7 @@ partial class Battlefield
 	private char[,] data;
 	public Palette palette;
 
-	public Collection<LObject> objects = new Collection<LObject>();
+	private Collection<LObject> objects = new Collection<LObject>();
 
 	public LObject currentObject, spotlightObject;
 	public Ability ability = null;
@@ -31,7 +31,7 @@ partial class Battlefield
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 
 	public List<LCreature> Creatures { get { return (from c in objects where c is LCreature select c as LCreature).Cast<LCreature>().ToList(); } }
-	public List<LCreature> AliveCreatures { get { return Creatures.Where(c => c.isAlive).Cast<LCreature>().ToList(); } }
+	public List<LCreature> AliveCreatures { get { return Creatures.Where(c => c.IsAlive).Cast<LCreature>().ToList(); } }
 
 	public ZPoint Mouse { get { return ZCoordinates(MyGame.Instance.mouseState.Position.ToVector2()); } }
 
@@ -52,12 +52,13 @@ partial class Battlefield
 
 	private bool InRange(ZPoint p) { return p.InBoundaries(new ZPoint(0, 0), Size - new ZPoint(1, 1)); }
 
+	
 	public LObject GetLObject(ZPoint p)
 	{
 		foreach (LObject l in objects) if (l.position.TheSameAs(p)) return l;
 		return null;
 	}
-
+	
 	public LCreature GetLCreature(ZPoint p)
 	{
 		var query = from c in AliveCreatures where c.position.TheSameAs(p) select c;
@@ -70,7 +71,11 @@ partial class Battlefield
 	public bool IsWalkable(ZPoint p)
 	{
 		if (!InRange(p)) return false;
-		if (!this[p].IsWalkable || GetLCreature(p) != null) return false;
+		if (!this[p].IsWalkable) return false;
+
+		LObject lObject = GetLObject(p);
+		if (lObject != null && !lObject.IsWalkable) return false;
+	
 		return true;
     }
 
@@ -88,23 +93,11 @@ partial class Battlefield
 		return new ZPoint(0, 0);
 	}
 
-	private void AddCreature(Creature c, bool isInParty, bool isAIControlled)
+	public void Add(LObject o, ZPoint position)
 	{
-		if (c.uniqueName == P.Name)
-		{
-			LPlayer item = new LPlayer(c as Character);
-			objects.Add(item);
-		}
-		else if (c is Character)
-		{
-			LCharacter item = new LCharacter(c as Character, isInParty, isAIControlled);
-			objects.Add(item);
-		}
-		else if (c is Creep)
-		{
-			LCreep item = new LCreep(c as Creep, isInParty, isAIControlled);
-			objects.Add(item);
-		}
+		o.SetPosition(position, 60.0f, false);
+		o.SetInitiative((from q in objects select q.initiative).Average(), 60.0f, false);
+		objects.Add(o);
 	}
 
 	public void StartBattle(GObject g)
@@ -117,16 +110,15 @@ partial class Battlefield
 		Load(battlefieldName);
 
 		objects.Clear();
-		foreach (Creature c in World.Instance.player.party) AddCreature(c, true, false);
-		foreach (Creature c in g.party) AddCreature(c, false, true);
+		foreach (Creature c in P.party) objects.Add(new LCreature(c, true, false));
+		foreach (Creature c in g.party) objects.Add(new LCreature(c, false, true));
 
-		LObject item = new LObject("Tree");
-		objects.Add(item);
-
+		for (int i = 0; i <= Size.x * Size.y / 10; i++)	objects.Add(new PureLObject("Tree"));
+		
 		foreach (LObject l in objects)
 		{
 			l.SetPosition(RandomFreeTile(), 60.0f, false);
-			if (l is LPlayer) l.SetInitiative(0.1f, 60.0f, false);
+			if (l is LCreature && (l as LCreature).data.uniqueName == P.uniqueName) l.SetInitiative(0.1f, 60.0f, false);
 			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 60.0f, false);
 		}
 
@@ -177,9 +169,13 @@ partial class Battlefield
 		var aliveMonsters = from c in AliveCreatures where !c.isInParty select c;
 		if (aliveMonsters.Count() == 0)
 		{
-			//P.party.Clear();
-			//var aliveParty = from c in AliveCreatures where c.isInParty orderby c.Importance select c;
-			//foreach (LCreature c in aliveParty)	P.party.Add(c.data);
+			List<Creature> deadParty = P.party.Where(c => !c.IsAlive).Cast<Creature>().ToList();
+			foreach (Creature c in deadParty) P.party.Remove(c);
+
+			var newParty = from lc in AliveCreatures where !P.party.Contains(lc.data) && lc.isInParty select lc.data;
+			foreach (Creature c in newParty) P.party.Add(c);
+
+			P.party = P.party.OrderBy(c => c.Importance).ToList();
 
 			gObject.Kill();
 			MyGame.Instance.battle = false;
@@ -203,10 +199,12 @@ partial class Battlefield
 		{
 			System.Collections.IEnumerable query = from p in EveryPoint where false select p;
 
-			if (ability.name == "Leap")
-				query = from p in EveryPoint where IsWalkable(p) && MyMath.ManhattanDistance(p, CurrentLCreature.position) == 2 select p;
-			else if (ability.name == "Pommel Strike" || ability.name == "Decapitate")
-				query = from c in AliveCreatures where c.IsAdjacentTo(CurrentLCreature) select c.position;
+			if (ability.targetType == Ability.TargetType.Point)
+				query = from p in EveryPoint where IsWalkable(p) && CurrentLCreature.Distance(p) <= ability.range select p;
+			else if (ability.targetType == Ability.TargetType.Direction)
+				query = from p in EveryPoint where IsWalkable(p) && CurrentLCreature.Distance(p) <= 1 select p;
+			else if (ability.targetType == Ability.TargetType.Creature)
+				query = from c in AliveCreatures where CurrentLCreature.Distance(c) <= ability.range && c != CurrentLCreature select c.position;
 
 			return query.Cast<ZPoint>().ToList();
 		}

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-public class LObject
+public abstract class LObject
 {
 	public ZPoint position = new ZPoint();
 	
@@ -13,23 +15,15 @@ public class LObject
 	public AnimationQueue movementAnimations = new AnimationQueue();
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 
-	//public bool isActive;
 	public float initiative;
 	public Texture2D texture;
+	public float scaling = 1.0f;
 
 	private Battlefield B { get { return World.Instance.battlefield; } }
 	private MainScreen M { get { return MainScreen.Instance; } }
 
-	public LObject() {}
-	public LObject(string namei)
-	{
-		//isActive = false;
-		texture = BigBase.Instance.textures.Get(namei).data;
-
-		Init();
-	}
-
 	public virtual string Name { get { return ""; } }
+	public virtual bool IsWalkable { get { return true; } }
 
 	protected virtual void Init()
 	{
@@ -83,4 +77,35 @@ public class LObject
 	}
 
 	public int Distance(LObject o) { return MyMath.ManhattanDistance(position, o.position); }
+	public int Distance(ZPoint p) { return MyMath.ManhattanDistance(position, p); }
+}
+
+public class PureShape : NamedObject
+{
+	public Texture texture;
+	public bool isWalkable, isFlat;
+
+	public override void Load(XmlNode xnode)
+	{
+		name = MyXml.GetString(xnode, "name");
+		isWalkable = MyXml.GetBool(xnode, "walkable");
+		isFlat = MyXml.GetBool(xnode, "flat");
+
+		texture = BigBase.Instance.textures.Get(name);
+	}
+}
+
+public class PureLObject : LObject
+{
+	public PureShape data;
+
+	public override bool IsWalkable { get { return data.isWalkable; } }
+	public override string Name { get {	return data.texture.name; }	}
+
+	public PureLObject(string name)
+	{
+		data = BigBase.Instance.pureShapes.Get(name);
+		texture = data.texture.Random();
+		Init();
+	}
 }

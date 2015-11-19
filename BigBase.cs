@@ -21,6 +21,8 @@
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
 
 	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
+	public GeneralBase<PureShape> pureShapes = new GeneralBase<PureShape>();
+	public GeneralBase<CreepType> creepTypes = new GeneralBase<CreepType>();
 	public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
 	public GeneralBase<Race> races = new GeneralBase<Race>();
 	public GeneralBase<CClass> classes = new GeneralBase<CClass>();
@@ -47,7 +49,9 @@
 		gShapes.Load("gObjects.xml");
 
 		textures.Load("textures.xml");
-		creepShapes.Load("creeps.xml");
+		pureShapes.Load("pureShapes.xml");
+		creepTypes.Load("creepTypes.xml");
+		creepShapes.Load("creepShapes.xml");
 		races.Load("races.xml");
 		classes.Load("classes.xml");
 		items.Load("items.xml");

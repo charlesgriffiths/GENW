@@ -16,7 +16,22 @@ partial class Battlefield
 		armorIcon = M.game.Content.Load<Texture2D>("other/armor");
 	}
 
-	private void Draw(Texture2D texture, ZPoint zPosition) { M.Draw(texture, GraphicCoordinates(zPosition)); }
+	private void Draw(Texture2D texture, RPoint rPosition)
+	{
+		M.Draw(texture, GraphicCoordinates(rPosition) - new Vector2(texture.Width/2 - 16, texture.Height - 32));
+	}
+
+	private void Draw(Texture2D texture, RPoint rPosition, float scaling)
+	{
+		if (scaling == 1.0f) Draw(texture, rPosition);
+		else
+		{
+			int width = (int)(scaling * texture.Width);
+			int height = (int)(scaling * texture.Height);
+			ZPoint center = new ZPoint(GraphicCoordinates(rPosition)) + new ZPoint(16, 32 - height / 2);
+			M.spriteBatch.Draw(texture, new Rectangle(center.x - width/2, center.y - height/2, width, height), Color.White);
+		}
+	}
 
 	private void DrawZones()
 	{
@@ -31,13 +46,13 @@ partial class Battlefield
 			if (Mouse.IsIn(TotalZone))
 			{
 				List<ZPoint.Direction> path = Path(CurrentLCreature.position, Mouse);
-				expectedInitiative = CurrentLCreature.initiative - path.Count * CurrentLCreature.MovementSpeed;
+				expectedInitiative = CurrentLCreature.initiative - path.Count * CurrentLCreature.MovementTime;
 				DrawPath(CurrentLCreature.position, path, null);
 			}
 			else if (Mouse.IsIn(ReachableCreaturePositions))
 			{
 				List<ZPoint.Direction> path = Path(CurrentLCreature.position, Mouse);
-				expectedInitiative = CurrentLCreature.initiative - (path.Count - 1) * CurrentLCreature.MovementSpeed - CurrentLCreature.AttackSpeed;
+				expectedInitiative = CurrentLCreature.initiative - (path.Count - 1) * CurrentLCreature.MovementTime - CurrentLCreature.AttackTime;
 				DrawPath(CurrentLCreature.position, path, GetLCreature(Mouse));
 			}
 		}
@@ -108,21 +123,12 @@ partial class Battlefield
 			Ability a = c.Abilities[forDescription.parameter];
 			M.Draw(a.texture, forDescription.position, Color.Red);
 
-			if (c == CurrentLCreature) M.DrawStringWithShading(M.smallFont, Stuff.AbilityHotkeys[forDescription.parameter].ToString(),
+			if (c == CurrentLCreature && a.targetType != Ability.TargetType.Passive)
+				M.DrawStringWithShading(M.smallFont, Stuff.AbilityHotkeys[forDescription.parameter].ToString(),
 				forDescription.position + new ZPoint(37, 33), Color.White);
-
-			//foreach (MouseTriggerKeyword t in MouseTriggerKeyword.GetAll("ability"))
-			//if (t.parameter != forDescription.parameter) M.DrawRectangle(t.position, t.size, new Color(0, 0, 0, 0.8f));
-
-			//screen.DrawString(M.smallFont, a.name + ". " + System.Environment.NewLine + a.description, 
-			//position + new ZPoint(24, 56), Color.White, screen.size.x - 50);
 
 			a.DrawDescription(screen.position + position + new ZPoint(24, 56));
 		}
-	}
-
-	private void DrawEffects(LCreature c, Screen screen, ZPoint position)
-	{
 	}
 
 	private void DrawInfo(LCreature c, ZPoint position)
@@ -150,8 +156,8 @@ partial class Battlefield
 		screen.DrawString(font, c.Armor.ToString(), new ZPoint(length - 32, 43), Color.White);
 		screen.Draw(armorIcon, new ZPoint(length - 20, 40));
 
-		DrawEffects(c, screen, new ZPoint(0, 60));
-		if (c is LCharacter) (c as LCharacter).Data.inventory.Draw(screen.position + new ZPoint(0, 92));
+		c.DrawEffects(screen.position + new ZPoint(0, 60));
+		if (c.data is Character) (c.data as Character).inventory.Draw(screen.position + new ZPoint(0, 92));
 		//screen.DrawRectangle(new ZPoint(32 * 6, 92), new ZPoint(1, 32), Stuff.DarkDarkGray);
 		DrawAbilities(c, screen, new ZPoint(0, 124));
 	}
@@ -173,8 +179,8 @@ partial class Battlefield
 
 		if (combatAnimations.IsEmpty) DrawZones();
 
-		var query = from l in objects orderby -l.Importance select l;
-		foreach (LObject l in query) M.Draw(l.texture, GraphicCoordinates(l.rPosition));
+		var query = objects.OrderBy(o => o.position.y).ThenBy(o => -o.Importance);
+		foreach (LObject l in query) Draw(l.texture, l.rPosition, l.scaling);
 
 		combatAnimations.Draw();
 		scaleAnimations.Draw();

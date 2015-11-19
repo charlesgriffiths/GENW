@@ -10,9 +10,9 @@ public class ItemShape : NamedObject
 	public Bonus bonus;
 	public float value, weight;
 	public string active, description;
-
 	public bool isStackable, isEquippable, isArmor;
 	public int hands, nutritionalValue;
+	public List<string> properties = new List<string>();
 
 	public override void Load(XmlNode xnode)
 	{
@@ -23,15 +23,20 @@ public class ItemShape : NamedObject
 		description = MyXml.GetString(xnode, "description");
 		nutritionalValue = MyXml.GetInt(xnode, "nutritionalValue");
 		bonus = new Bonus(xnode);
-
 		isArmor = MyXml.GetBool(xnode, "isArmor");
 		hands = MyXml.GetInt(xnode, "hands");
-
 		isStackable = MyXml.GetBool(xnode, "stackable");
 		isEquippable = MyXml.GetBool(xnode, "equippable");
 
+		XmlNode xnode2 = xnode.FirstChild;
+		if (xnode2 != null)
+		{
+			for (xnode2 = xnode2.FirstChild; xnode2 != null; xnode2 = xnode2.NextSibling)
+				properties.Add(MyXml.GetString(xnode2, "name"));
+		}
+
 		if (hands > 0 || isArmor) isEquippable = true;
-		if (nutritionalValue > 0) { isStackable = true; isEquippable = true; }
+		if (nutritionalValue > 0) { isStackable = true; isEquippable = false; }
 	}
 
 	public static void LoadTextures()
@@ -87,6 +92,8 @@ public class Item
 		data = item.data;
 		numberOfStacks = 1;
 	}
+
+	public bool HasProperty(string propertyName) { return data.properties.Contains(propertyName); }
 }
 
 public class Inventory
@@ -127,7 +134,9 @@ public class Inventory
 	public void Add(Item item, int cell)
 	{
 		if (item != null && item.data.nutritionalValue > 0 && character != null)
-			character.AddEndurance(item.data.nutritionalValue * item.numberOfStacks);
+			for (int i = 0; i < item.numberOfStacks; i++)
+				character.Eat(item.data);
+		//character.AddEndurance(item.data.nutritionalValue * item.numberOfStacks);
 
 		else if (data[cell] == null) data[cell] = item;
 		else if (data[cell].data == item.data) data[cell].numberOfStacks += item.numberOfStacks;
