@@ -7,7 +7,8 @@ public partial class LCreature : LObject
 {
 	public Creature data;
 	private List<Effect> effects = new List<Effect>();
-	public bool isInParty, isAIControlled;
+	public bool isInParty;
+	private bool isAIControlled;
 	public int controlMovementCounter;
 
 	public int HP { get { return data.hp; } }
@@ -51,6 +52,7 @@ public partial class LCreature : LObject
 				result += 2;
 
 			if (HasEffect("True Strike")) result += 100;
+			if (HasEffect("Melded")) result += 100;
 
 			return result;
 		}
@@ -70,12 +72,16 @@ public partial class LCreature : LObject
 			if (HasAbility("Lone Warrior") && (from c in B.AliveCreatures where Distance(c) <= A.Get("Lone Warrior").range select c).Count() == 0)
 				result += 2;
 
+			if (HasEffect("Marked Prey")) result -= 3;
+
 			return result;
 		}
 	}
 
 	public int Armor { get { return 0; } }
 
+	public override bool IsVisible { get { return HasEffect("Melded") || HasEffect("Hidden") ? false : true; } }
+	public bool IsAIControlled { get { return isAIControlled || HasEffect("Power Strike"); } }
 	public override int Importance { get { return data.Importance; } }
 
 	public override void Kill()
@@ -137,14 +143,24 @@ public partial class LCreature : LObject
 	{
 		AnimateAttack(c.position);
 
-		if (World.Instance.random.Next(100) < HitChance(c)) c.DoDamage(Damage, false);
+		if (World.Instance.random.Next(100) < HitChance(c))
+		{
+			int damage = Damage;
+
+			if (HasEffect("Power Strike")) { damage *= 3; RemoveEffect("Power Strike");	}
+			if (HasEffect("Melded")) damage *= 2;
+
+			c.DoDamage(damage, false);
+		}
 
 		RemoveEffect("True Strike");
+		RemoveEffect("Hidden");
+		RemoveEffect("Melded");
 
 		PassTurn(AttackTime);
 	}
 
-	public void TryToMove(ZPoint.Direction d, bool control)
+	public void TryToMove(ZPoint.Direction d, bool control) // это исключительно для автоматической атаки при передвижении
 	{
 		ZPoint destination = position.Shift(d);
 		LCreature c = B.GetLCreature(destination);
@@ -153,11 +169,15 @@ public partial class LCreature : LObject
 		else Move(d, control);
 	}
 
+	private bool CanMove { get { return !HasEffect("Roots") && !HasEffect("Net"); } }
+
 	public void Move(ZPoint.Direction d, bool control)
 	{
 		ZPoint destination = position.Shift(d);
-		if (B.IsWalkable(destination)) SetPosition(destination, 2.0f / MovementTime, true);
+		if (CanMove && B.IsWalkable(destination)) SetPosition(destination, 2.0f / MovementTime, true);
 		else AnimateFailedMovement(d);
+
+		RemoveEffect("Melded");
 
 		if (control == true && controlMovementCounter > 0)
 		{
@@ -170,15 +190,17 @@ public partial class LCreature : LObject
 		}
 	}
 
-	public void Wait()
+	public void Wait(float time)
 	{
-		SetPosition(position, 2.0f / MovementTime, true);
-		PassTurn(MovementTime);
+		SetPosition(position, 2.0f / time, true);
+		PassTurn(time);
 	}
+
+	public void Wait() { Wait(MovementTime); }
 
 	public override void Run()
 	{
-		if (!isAIControlled)
+		if (!IsAIControlled)
 		{
 			B.currentObject = B.NextLObject;
 			B.spotlightObject = B.currentObject;
@@ -198,7 +220,7 @@ public partial class LCreature : LObject
 		base.PassTurn(time);
 	}
 
-	private void AddEffect(string name, float time)
+	private void AddEffect(string name, float time, object parameter)
 	{
 		var query = effects.Where(e => e.data.name == name);
 		if (query.Count() > 0)
@@ -206,11 +228,14 @@ public partial class LCreature : LObject
 			Effect e = query.Single();
 			if (e.timeLeft < time) e.timeLeft = time;
 		}
-		else effects.Add(new Effect(name, time));
+		else effects.Add(new Effect(name, time, parameter));
 	}
+
+	private void AddEffect(string name, float time) { AddEffect(name, time, null); }
 
 	private bool HasAbility(string name) { return data.HasAbility(name); }
 	private bool HasEffect(string name) { return effects.Where(e => e.data.name == name).Count() > 0; }
+	private Effect GetEffect(string name) { return effects.Where(e => e.data.name == name).Single(); }
 
 	private void RemoveEffect(string name)
 	{
@@ -222,16 +247,31 @@ public partial class LCreature : LObject
 		}
 	}
 
-	public void DrawEffects(ZPoint p)
+	public void DrawEffects(ZPoint p, ZPoint descriptionP)
 	{
+		Screen screen = new Screen(p, new ZPoint(1, 32));
+		MouseTriggerKeyword.Clear("effect");
+
 		int i = 0;
 		foreach (Effect e in effects)
 		{
-			M.Draw(e.data.texture, p + new ZPoint(32 * i, 0), e.data.SgnColor);
+			screen.Draw(e.data.texture, new ZPoint(32 * i, 0), e.data.SgnColor);
+			screen.DrawStringWithShading(M.smallFont, ((int)e.timeLeft).ToString(), new ZPoint(32 * i + 26, 20), Color.White);
+
+			MouseTriggerKeyword.Set("effect", i, p + new ZPoint(32 * i, 0), new ZPoint(32, 32));
 			i++;
 		}
 
-		// еще нужно будет нарисовать описания эффектов
+		MouseTriggerKeyword t = MouseTriggerKeyword.GetUnderMouse("effect");
+		if (t != null) effects[t.parameter].data.DrawDescription(descriptionP);
+	}
+
+	private void PayAbilityCost(Ability ability)
+	{
+		RemoveEffect("Melded");
+		RemoveEffect("Hidden");
+
+		data.AddEndurance(-ability.cost);
 	}
 
 	public void UseAbility(Ability ability)
@@ -243,11 +283,19 @@ public partial class LCreature : LObject
 
 		else if (tt == Ability.TargetType.None)
 		{
+			PayAbilityCost(ability);
+
+			if (ability.NameIs("Meld")) AddEffect("Melded", 20);
+			else if (ability.NameIs("Hide in Shadows")) AddEffect("Hidden", 20);
+
+			PassTurn(ability.castTime);
 		}
 	}
 
 	public void UseAbility(Ability ability, ZPoint target)
 	{
+		PayAbilityCost(ability);
+
 		if (ability.targetType == Ability.TargetType.Creature) UseAbility(ability, B.GetLCreature(target));
 		else if (ability.targetType == Ability.TargetType.Direction) UseAbility(ability, ZPoint.GetDirection(target - position));
 		else
@@ -259,6 +307,8 @@ public partial class LCreature : LObject
 				if (o == null && B.IsWalkable(target)) B.Add(new PureLObject("Tree"), target);
 				else if (o is PureLObject && o.Name == "Tree")
 				{
+					B.Remove(o);
+					B.Add(new LCreature(new Creep("Treant"), true, false), target);
 				}
 				else if (o == this) data.AddHP(1);
 				else if (o is LCreature) (o as LCreature).AddEffect("Roots", 10);
@@ -271,12 +321,39 @@ public partial class LCreature : LObject
 		}
 
 		B.ability = null;
-		data.AddEndurance(-ability.cost);
 		PassTurn(ability.castTime);
 	}
 
 	public void UseAbility(Ability ability, ZPoint.Direction direction)
 	{
+		if (ability.NameIs("Bull Rush") || ability.NameIs("Kick"))
+		{
+			List<LObject> train = new List<LObject>();
+			int i = ability.NameIs("Bull Rush") ? 0 : 1;
+			while (true)
+			{
+				ZPoint shifted = position.Shift(direction, i);
+				LCreature lc = B.GetLCreature(shifted);
+				if (lc == null) break;
+				else train.Add(lc);
+				i++;
+			}
+
+			if (train.Count > 0)
+			{
+				//Log.WriteLine("Train length = " + train.Count);
+				ZPoint last = train.Last().position;
+				i = 1;
+				while (B.IsWalkable(last.Shift(direction, i))) i++;
+				int shift = Math.Min(i - 1, 2);
+				//Log.WriteLine("shift = " + shift);
+				foreach (LObject o in train) o.SetPosition(o.position.Shift(direction, shift), 4.0f, false);
+			}
+		}
+		else if (ability.NameIs("Power Strike"))
+		{
+			AddEffect("Power Strike", 10, direction);
+		}
 	}
 
 	public void UseAbility(Ability ability, LCreature target)
@@ -315,7 +392,15 @@ public partial class LCreature : LObject
 		else if (ability.NameIs("True Strike"))
 		{
 			target.AddEffect("True Strike", 10);
-			B.combatAnimations.Add(new ScalingAnimation(target, 1.3f, 1.0f));
+			//B.combatAnimations.Add(new ScalingAnimation(target, 1.3f, 1.0f));
 		}
+		else if (ability.NameIs("Marked Prey")) target.AddEffect("Marked Prey", 7);
     }
+
+	public override void Draw()
+	{
+		base.Draw();
+
+		if (HasEffect("Roots")) M.DrawRectangle(GraphicPosition + new ZPoint(0, 28), new ZPoint(32, 5), Color.DarkGreen);
+	}
 }

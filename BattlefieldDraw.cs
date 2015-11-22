@@ -16,20 +16,20 @@ partial class Battlefield
 		armorIcon = M.game.Content.Load<Texture2D>("other/armor");
 	}
 
-	private void Draw(Texture2D texture, RPoint rPosition)
-	{
-		M.Draw(texture, GraphicCoordinates(rPosition) - new Vector2(texture.Width/2 - 16, texture.Height - 32));
-	}
+	private void Draw(Texture2D texture, RPoint rPosition, Color color)
+	{ M.Draw(texture, new ZPoint(GraphicCoordinates(rPosition) - new Vector2(texture.Width/2 - 16, texture.Height - 32)), color); }
 
-	private void Draw(Texture2D texture, RPoint rPosition, float scaling)
+	private void Draw(Texture2D texture, RPoint rPosition) { Draw(texture, rPosition, Color.White); }
+
+	public void Draw(Texture2D texture, RPoint rPosition, float scaling, Color color)
 	{
-		if (scaling == 1.0f) Draw(texture, rPosition);
+		if (scaling == 1.0f) Draw(texture, rPosition, color);
 		else
 		{
 			int width = (int)(scaling * texture.Width);
 			int height = (int)(scaling * texture.Height);
 			ZPoint center = new ZPoint(GraphicCoordinates(rPosition)) + new ZPoint(16, 32 - height / 2);
-			M.spriteBatch.Draw(texture, new Rectangle(center.x - width/2, center.y - height/2, width, height), Color.White);
+			M.spriteBatch.Draw(texture, new Rectangle(center.x - width/2, center.y - height/2, width, height), color);
 		}
 	}
 
@@ -156,9 +156,8 @@ partial class Battlefield
 		screen.DrawString(font, c.Armor.ToString(), new ZPoint(length - 32, 43), Color.White);
 		screen.Draw(armorIcon, new ZPoint(length - 20, 40));
 
-		c.DrawEffects(screen.position + new ZPoint(0, 60));
+		c.DrawEffects(screen.position + new ZPoint(0, 60), screen.position + new ZPoint(24, 180));
 		if (c.data is Character) (c.data as Character).inventory.Draw(screen.position + new ZPoint(0, 92));
-		//screen.DrawRectangle(new ZPoint(32 * 6, 92), new ZPoint(1, 32), Stuff.DarkDarkGray);
 		DrawAbilities(c, screen, new ZPoint(0, 124));
 	}
 
@@ -180,7 +179,7 @@ partial class Battlefield
 		if (combatAnimations.IsEmpty) DrawZones();
 
 		var query = objects.OrderBy(o => o.position.y).ThenBy(o => -o.Importance);
-		foreach (LObject l in query) Draw(l.texture, l.rPosition, l.scaling);
+		foreach (LObject l in query) l.Draw(); //Draw(l.texture, l.rPosition, l.scaling);
 
 		combatAnimations.Draw();
 		scaleAnimations.Draw();

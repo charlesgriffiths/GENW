@@ -33,6 +33,7 @@ public class ZPoint
 	}
 
 	public ZPoint Shift(Direction d) { return this + new ZPoint(d); }
+	public ZPoint Shift(Direction d, int n) { return this + n * new ZPoint(d); }
 
 	public static Direction GetDirection(int i)
 	{
@@ -82,6 +83,7 @@ public class ZPoint
 	public static ZPoint Max(ZPoint p1, ZPoint p2) { return new ZPoint(Math.Max(p1.x, p2.x), Math.Max(p1.y, p2.y));	}
 	public static ZPoint operator +(ZPoint p1, ZPoint p2) {	return new ZPoint(p1.x + p2.x, p1.y + p2.y); }
 	public static Vector2 operator +(ZPoint p, Vector2 v) { return new Vector2(p.x + v.X, p.y + v.Y); }
+	public static ZPoint operator+(ZPoint p, Direction d) { return p.Shift(d); }
 	public static ZPoint operator -(ZPoint p1, ZPoint p2) {	return new ZPoint(p1.x - p2.x, p1.y - p2.y); }
 	public static Vector2 operator /(ZPoint p, float f) { return new Vector2(p.x / f, p.y / f);	}
 	public static ZPoint operator *(int k, ZPoint p) { return new ZPoint(k * p.x, k * p.y); }

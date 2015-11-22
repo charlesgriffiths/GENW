@@ -50,29 +50,29 @@ public class ItemShape : NamedObject
 		Screen screen = new Screen(position, new ZPoint(MyGame.Instance.battle ? 240 : 192, 190));
 		screen.Fill(new Color(0, 0, 0, 0.9f));
 
-		screen.DrawString(MainScreen.Instance.verdanaBoldFont, name, new ZPoint(3, 3), Color.White);
+		screen.DrawString(MainScreen.Instance.verdanaBoldFont, name, new ZPoint(0, 0), Color.White);
 		SpriteFont font = MainScreen.Instance.smallFont;
 
-		screen.offset = 25;
+		screen.offset += 8;
 		int previousOffset = screen.offset;
-		if (active != "") screen.DrawString(font, "ACTIVE: " + active, new ZPoint(3, screen.offset), Color.White);
-		if (nutritionalValue > 0) screen.DrawString(font, "NUTRITIONAL VALUE: " + nutritionalValue, new ZPoint(3, screen.offset), Color.White);
-		if (bonus.mtm != 1) screen.DrawString(font, "MOVEMENT TIME MULT.: " + bonus.mtm, new ZPoint(3, screen.offset), Color.White);
-		if (bonus.atm != 1) screen.DrawString(font, "ATTACK TIME MULT.: " + bonus.atm, new ZPoint(3, screen.offset), Color.White);
+		if (active != "") screen.DrawString(font, "ACTIVE: " + active, new ZPoint(0, screen.offset), Color.White);
+		if (nutritionalValue > 0) screen.DrawString(font, "NUTRITIONAL VALUE: " + nutritionalValue, new ZPoint(0, screen.offset), Color.White);
+		if (bonus.mtm != 1) screen.DrawString(font, "MOVEMENT TIME MULT.: " + bonus.mtm, new ZPoint(0, screen.offset), Color.White);
+		if (bonus.atm != 1) screen.DrawString(font, "ATTACK TIME MULT.: " + bonus.atm, new ZPoint(0, screen.offset), Color.White);
 
 		if (screen.offset > previousOffset) screen.offset += 8;	previousOffset = screen.offset;
-		if (bonus.damage != 0) screen.DrawString(font, "Damage " + Stuff.ShowSgn(bonus.damage), new ZPoint(3, screen.offset), Color.White);
-		if (bonus.armor != 0) screen.DrawString(font, "Armor " + Stuff.ShowSgn(bonus.armor), new ZPoint(3, screen.offset), Color.White);
-		if (bonus.attack != 0) screen.DrawString(font, "Attack " + Stuff.ShowSgn(bonus.attack), new ZPoint(3, screen.offset), Color.White);
-		if (bonus.defence != 0) screen.DrawString(font, "Defence " + Stuff.ShowSgn(bonus.defence), new ZPoint(3, screen.offset), Color.White);
-		if (bonus.hp != 0) screen.DrawString(font, "HP " + Stuff.ShowSgn(bonus.hp), new ZPoint(3, screen.offset), Color.White);
+		if (bonus.damage != 0) screen.DrawString(font, "Damage " + Stuff.ShowSgn(bonus.damage), new ZPoint(0, screen.offset), Color.White);
+		if (bonus.armor != 0) screen.DrawString(font, "Armor " + Stuff.ShowSgn(bonus.armor), new ZPoint(0, screen.offset), Color.White);
+		if (bonus.attack != 0) screen.DrawString(font, "Attack " + Stuff.ShowSgn(bonus.attack), new ZPoint(0, screen.offset), Color.White);
+		if (bonus.defence != 0) screen.DrawString(font, "Defence " + Stuff.ShowSgn(bonus.defence), new ZPoint(0, screen.offset), Color.White);
+		if (bonus.hp != 0) screen.DrawString(font, "HP " + Stuff.ShowSgn(bonus.hp), new ZPoint(0, screen.offset), Color.White);
 
 		if (screen.offset > previousOffset) screen.offset += 8;	previousOffset = screen.offset;
 		screen.DrawString(font, description, new ZPoint(0, screen.offset), Color.White, screen.size.x);
 
 		if (screen.offset > previousOffset) screen.offset += 8;	previousOffset = screen.offset;
-		screen.DrawString(font, "VALUE: " + value, new ZPoint(3, screen.offset), Color.White);
-		screen.DrawString(font, "WEIGHT: " + weight, new ZPoint(3, screen.offset), Color.White);
+		screen.DrawString(font, "VALUE: " + value, new ZPoint(0, screen.offset), Color.White);
+		screen.DrawString(font, "WEIGHT: " + weight, new ZPoint(0, screen.offset), Color.White);
 	}
 }
 

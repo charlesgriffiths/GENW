@@ -24,6 +24,8 @@ public abstract class LObject
 
 	public virtual string Name { get { return ""; } }
 	public virtual bool IsWalkable { get { return true; } }
+	public virtual bool IsVisible { get { return true; } }
+	protected ZPoint GraphicPosition { get { return new ZPoint(B.GraphicCoordinates(rPosition)); } }
 
 	protected virtual void Init()
 	{
@@ -78,6 +80,8 @@ public abstract class LObject
 
 	public int Distance(LObject o) { return MyMath.ManhattanDistance(position, o.position); }
 	public int Distance(ZPoint p) { return MyMath.ManhattanDistance(position, p); }
+
+	public virtual void Draw() { B.Draw(texture, rPosition, scaling, IsVisible ? Color.White : new Color(0.5f, 0.5f, 0.5f, 0.5f)); }
 }
 
 public class PureShape : NamedObject

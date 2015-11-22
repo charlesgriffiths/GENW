@@ -16,12 +16,12 @@ partial class Player : GObject
 		shape.isActive = true;
 		uniqueName = shape.name;
 
-		Character playerCharacter = new Character(shape.name, "Strong", "Floran", "Ranger", "Eden", "Merchant");
+		Character playerCharacter = new Character(shape.name, "Strong", "Floran", "Assassin", "Eden", "Merchant");
 		playerCharacter.inventory.Add("Club");
 		playerCharacter.inventory.Add("Leather Armor");
 		party.Add(playerCharacter);
 
-		Character c2 = new Character("Bob", "Agile", "Dark Eloi", "Seer", "The Scorch", "Pitfighter");
+		Character c2 = new Character("Bob", "Agile", "Dark Eloi", "Ranger", "The Scorch", "Pitfighter");
 		c2.inventory.Add("Dagger");
 		c2.inventory.Add("Force Staff");
 		party.Add(c2);

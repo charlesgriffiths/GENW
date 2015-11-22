@@ -93,6 +93,7 @@ partial class Battlefield
 		return new ZPoint(0, 0);
 	}
 
+	public void Remove(LObject o) { objects.Remove(o); }
 	public void Add(LObject o, ZPoint position)
 	{
 		o.SetPosition(position, 60.0f, false);
@@ -122,7 +123,7 @@ partial class Battlefield
 			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 60.0f, false);
 		}
 
-		if(NextLObject is LCreature) { if ((NextLObject as LCreature).isAIControlled) NextLObject.Run(); }
+		if(NextLObject is LCreature) { if ((NextLObject as LCreature).IsAIControlled) NextLObject.Run(); }
 		else NextLObject.Run();
 
 		currentObject = NextLObject;
@@ -188,7 +189,6 @@ partial class Battlefield
 		{
 			List<ZPoint> result = new List<ZPoint>();
 			for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++) result.Add(new ZPoint(i, j));
-
 			return result;
 		}
 	}
@@ -200,11 +200,11 @@ partial class Battlefield
 			System.Collections.IEnumerable query = from p in EveryPoint where false select p;
 
 			if (ability.targetType == Ability.TargetType.Point)
-				query = from p in EveryPoint where IsWalkable(p) && CurrentLCreature.Distance(p) <= ability.range select p;
+				query = from p in EveryPoint where CurrentLCreature.Distance(p) <= ability.range select p;
 			else if (ability.targetType == Ability.TargetType.Direction)
-				query = from p in EveryPoint where IsWalkable(p) && CurrentLCreature.Distance(p) <= 1 select p;
+				query = from p in EveryPoint where CurrentLCreature.Distance(p) == 1 select p;
 			else if (ability.targetType == Ability.TargetType.Creature)
-				query = from c in AliveCreatures where CurrentLCreature.Distance(c) <= ability.range && c != CurrentLCreature select c.position;
+				query = from c in AliveCreatures where CurrentLCreature.Distance(c) <= ability.range /*&& c != CurrentLCreature*/ select c.position;
 
 			return query.Cast<ZPoint>().ToList();
 		}

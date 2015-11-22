@@ -60,19 +60,19 @@ public class Ability : NamedObject
 		Screen screen = new Screen(position, new ZPoint(240, 190));
 		//screen.Fill(new Color(0, 0, 0.5f, 0.5f));
 
-		screen.DrawString(MainScreen.Instance.verdanaBoldFont, name, new ZPoint(3, 3), Color.White);
+		screen.DrawString(MainScreen.Instance.verdanaBoldFont, name, new ZPoint(0, 0), Color.White);
 		SpriteFont font = MainScreen.Instance.smallFont;
 
-		screen.offset = 25;
-		if (range != 0) screen.DrawString(font, "RANGE: " + range, new ZPoint(3, screen.offset), Color.White);
+		screen.offset += 8;
+		if (range != 0) screen.DrawString(font, "RANGE: " + range, new ZPoint(0, screen.offset), Color.White);
 		if (targetType != TargetType.Passive)
 		{
-			screen.DrawString(font, "COST: " + cost, new ZPoint(3, screen.offset), Color.White);
-			screen.DrawString(font, "CAST TIME: " + castTime, new ZPoint(3, screen.offset), Color.White);
-			screen.DrawString(font, "COOLDOWN: " + cooldownTime, new ZPoint(3, screen.offset), Color.White);
+			screen.DrawString(font, "COST: " + cost, new ZPoint(0, screen.offset), Color.White);
+			screen.DrawString(font, "CAST TIME: " + castTime, new ZPoint(0, screen.offset), Color.White);
+			screen.DrawString(font, "COOLDOWN: " + cooldownTime, new ZPoint(0, screen.offset), Color.White);
 		}
 
 		screen.offset += 8;
-		screen.DrawString(font, description, new ZPoint(3, screen.offset), Color.White, screen.size.x - 3);
+		screen.DrawString(font, description, new ZPoint(0, screen.offset), Color.White, screen.size.x);
 	}
 }
