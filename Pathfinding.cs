@@ -161,7 +161,7 @@ partial class Battlefield
 		if (Mouse.IsIn(TotalZone) || Mouse.IsIn(ReachableCreaturePositions))
 		{
 			ZPoint start = CurrentLCreature.position;
-			foreach (ZPoint.Direction d in Path(start, Mouse)) CurrentLCreature.TryToMove(d, true);
+			foreach (ZPoint.Direction d in Path(start, Mouse)) CurrentLCreature.MoveOrAttack(d, true);
 		}
 	}
 }

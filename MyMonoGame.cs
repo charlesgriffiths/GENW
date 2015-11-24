@@ -102,10 +102,10 @@ public class MyMonoGame : Game
 
 			if (KeyPressed(Keys.Space)) B.CurrentLCreature.Wait();
 
-			else if (KeyPressed(Keys.Right)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Up)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Left)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Down)) B.CurrentLCreature.TryToMove(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Right)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Up)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Left)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Down)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
 
 			foreach (char key in Stuff.AbilityHotkeys)
 			{

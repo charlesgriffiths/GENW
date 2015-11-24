@@ -12,6 +12,8 @@ public class ZPoint
 	public ZPoint(int xi, int yi) { x = xi; y = yi; }
 	public ZPoint(Vector2 v) { x = (int)v.X; y = (int)v.Y; }
 
+	public enum Direction { Right, Up, Left, Down };
+
 	public ZPoint(Direction d)
 	{
 		if (d == Direction.Right) { x = 1; y = 0; }
@@ -20,9 +22,15 @@ public class ZPoint
 		else { x = 0; y = 1; }
 	}
 
+	public Direction GetDirection()
+	{
+		Log.Assert(ManhattanNorm == 1, "wrong parameter in GetDirection");
+		return x == 0 ? y == 1 ? Direction.Up : Direction.Down : x == 1 ? Direction.Right : Direction.Left;
+	}
+
 	public static ZPoint Zero { get { return new ZPoint(0, 0); } }
 
-	public enum Direction { Right, Up, Left, Down };
+	public int ManhattanNorm { get { return MyMath.ManhattanDistance(this, Zero); } }
 
 	public static float Angle(Direction d)
 	{

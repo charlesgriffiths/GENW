@@ -55,4 +55,6 @@ class Effect
 		timeLeft = time;
 		parameter = parameteri;
 	}
+
+	public bool NameIs(string name) { return data == BigBase.Instance.effects.Get(name); }
 }

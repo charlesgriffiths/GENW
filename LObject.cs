@@ -50,6 +50,8 @@ public abstract class LObject
 		initiative = initiativei;
 	}
 
+	protected void AddInitiative(float f) { SetInitiative(initiative + f, 4.0f / f, true); }
+
 	public virtual void Kill() {}
 
 	public virtual Color RelationshipColor { get { return Color.Blue; }	}

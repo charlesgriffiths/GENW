@@ -7,6 +7,8 @@ public partial class LCreature : LObject
 {
 	public Creature data;
 	private List<Effect> effects = new List<Effect>();
+	private Dictionary<LCreature, int> damageDealt = new Dictionary<LCreature, int>();
+
 	public bool isInParty;
 	private bool isAIControlled;
 	public int controlMovementCounter;
@@ -18,6 +20,7 @@ public partial class LCreature : LObject
 
 	private Battlefield B { get { return World.Instance.battlefield; } }
 	private MainScreen M { get { return MainScreen.Instance; } }
+	private Random R { get { return World.Instance.random; } }
 	private GeneralBase<Ability> A { get { return BigBase.Instance.abilities; }	}
 
 	protected override void Init()
@@ -36,20 +39,37 @@ public partial class LCreature : LObject
 	public int Damage { get { return data.Damage; } }
 	public int MaxHP { get { return data.MaxHP; } }
 
+	private int BothAD
+	{
+		get
+		{
+			int result = 0;
+
+			if (HasAbility("Lone Warrior") && B.AliveCreatures.Where(c => Distance(c) <= A.Get("Lone Warrior").range).Count() == 0)
+				result += 2;
+
+			if (HasEffect("Attention") && IsFriendTo(GetEffect("Attention").parameter as LCreature)) result += 1;
+
+			if (HasEffect("Destined to Die")) result -= HasEffect("Attention") ? 6 : 3;
+			if (HasEffect("Success Prediction Failed")) result -= HasEffect("Attention") ? 4 : 2;
+			if (HasEffect("Destined to Succeed")) result += HasEffect("Attention") ? 6 : 3;
+			if (HasEffect("Death Prediction Failed")) result += HasEffect("Attention") ? 4 : 2;
+
+			return result;
+        }
+	}
+
 	public int Attack
 	{
 		get
 		{
-			int result = data.Attack;
+			int result = data.Attack + BothAD;
 
 			if (HasAbility("Bravery"))
 				result += Math.Max((from c in Enemies where Distance(c) <= A.Get("Bravery").range select c).Count() - 1, 0);
 
 			if (HasAbility("Swarm") && data is Creep)
 				result += (from c in Friends where c.Name == Name && c != this && Distance(c) <= A.Get("Swarm").range select c).Count();
-
-			if (HasAbility("Lone Warrior") && (from c in B.AliveCreatures where Distance(c) <= A.Get("Lone Warrior").range select c).Count() == 0)
-				result += 2;
 
 			if (HasEffect("True Strike")) result += 100;
 			if (HasEffect("Melded")) result += 100;
@@ -62,15 +82,12 @@ public partial class LCreature : LObject
 	{
 		get
 		{
-			int result = data.Defence;
+			int result = data.Defence + BothAD;
 
 			int enemiesNearby = (from c in Enemies where c.position.IsAdjacentTo(position) select c).Count();
 			result -= Math.Max(enemiesNearby - 1, 0);
 
 			result += (from c in Friends where c.HasAbility("Defender") && Distance(c) <= A.Get("Defender").range select c).Count();
-
-			if (HasAbility("Lone Warrior") && (from c in B.AliveCreatures where Distance(c) <= A.Get("Lone Warrior").range select c).Count() == 0)
-				result += 2;
 
 			if (HasEffect("Marked Prey")) result -= 3;
 
@@ -80,9 +97,28 @@ public partial class LCreature : LObject
 
 	public int Armor { get { return 0; } }
 
-	public override bool IsVisible { get { return HasEffect("Melded") || HasEffect("Hidden") ? false : true; } }
-	public bool IsAIControlled { get { return isAIControlled || HasEffect("Power Strike"); } }
+	public bool IsAIControlled
+	{
+		get
+		{
+			if (HasEffect("Power Strike") || HasEffect("Sleeping")) return true;
+			else if (HasEffect("Mind Controlled")) return false;
+			else return isAIControlled;
+		}
+	}
+
 	public override int Importance { get { return data.Importance; } }
+
+	public override bool IsVisible { get { return HasEffect("Melded") || HasEffect("Hidden") ? false : true; } }
+
+	public bool CanSee(LCreature lc)
+	{
+		if (!lc.IsVisible) return false;
+		if (HasEffect("Blind") && Distance(lc) > 1) return false;
+		if (HasEffect("Blindsight") && GetEffect("Blindsight").parameter == lc) return false;
+
+		return true;
+	}
 
 	public override void Kill()
 	{
@@ -99,9 +135,15 @@ public partial class LCreature : LObject
 		}
 	}
 
-	public bool IsEnemyTo(LCreature c) { return isInParty != c.isInParty; }
+	public bool IsEnemyTo(LCreature lc)
+	{
+		bool reference = HasEffect("Mind Tricked") ? (GetEffect("Mind Tricked").parameter as LCreature).isInParty : isInParty;
+        return reference != lc.isInParty;
+	}
+	public bool IsFriendTo(LCreature lc) { return !IsEnemyTo(lc); }
+
 	public List<LCreature> Enemies { get { return (from c in B.AliveCreatures where c.IsEnemyTo(this) select c).Cast<LCreature>().ToList(); } }
-	public List<LCreature> Friends { get { return (from c in B.AliveCreatures where !c.IsEnemyTo(this) select c).Cast<LCreature>().ToList(); } }
+	public List<LCreature> Friends { get { return (from c in B.AliveCreatures where c.IsFriendTo(this) select c).Cast<LCreature>().ToList(); } }
 
 	public LCreature(Creature c, bool isInPartyi, bool isAIControlledi)
 	{
@@ -129,38 +171,62 @@ public partial class LCreature : LObject
 		B.combatAnimations.Add(new RMove(rPosition, -v, 4.0f / AttackTime));
 	}
 
-	public void DoDamage(int damage, bool pure)
+	private int DamageDealtBy(LCreature lc) { return damageDealt.ContainsKey(lc) ? damageDealt[lc] : 0;	}
+	private void RememberDamage(LCreature lc, int damage)
 	{
-		int finalDamage = pure ? damage : Math.Max(damage - Armor, 0);
-		data.AddEndurance(-finalDamage);
-		if (data.endurance == 0) Kill();
-		B.combatAnimations.Add(new DamageAnimation(finalDamage, B.GraphicCoordinates(position), 1.0f, pure));
+		if (damageDealt.ContainsKey(lc)) damageDealt[lc] += damage;
+		else damageDealt.Add(lc, damage);
 	}
 
-	public int HitChance(LCreature c) { return (int)(100.0f * (Math.Max(0.0f, Math.Min(4.0f + Attack - c.Defence, 8.0f)) / 8.0f)); }
-
-	public void DoAttack(LCreature c)
+	public void DoDamage(LCreature lc, int damage, bool pure)
 	{
-		AnimateAttack(c.position);
+		int finalDamage = pure || HasAbility("Prodigious Precision") ? damage : Math.Max(damage - lc.Armor, 0);
+		lc.data.AddEndurance(-finalDamage);
+		lc.RememberDamage(this, finalDamage);
+		if (lc.data.endurance == 0) Kill();
+		B.combatAnimations.Add(new DamageAnimation(finalDamage, B.GraphicCoordinates(lc.position), 1.0f, pure));
+	}
 
-		if (World.Instance.random.Next(100) < HitChance(c))
+	public int HitChance(LCreature lc)
+	{
+		if (HasAbility("Backstab"))
+		{
+			ZPoint.Direction d = (lc.position - position).GetDirection();
+			LCreature behind = B.GetLCreature(position.Shift(d, 2));
+			if (behind != null && behind.IsEnemyTo(lc)) return 100;
+		}
+
+		return (int)(100.0f * (Math.Max(0.0f, Math.Min(4.0f + Attack - lc.Defence, 8.0f)) / 8.0f));
+	}
+
+	public void DoAttack(LCreature lc)
+	{
+		AnimateAttack(lc.position);
+
+		List<ZPoint.Direction> availableDirections = ZPoint.Directions.Where(d => B.IsWalkable(lc.position.Shift(d))).ToList();
+		int n = availableDirections.Count;
+		if (lc.HasAbility("Heightened Grace") && n > 0) lc.SetPosition(position.Shift(availableDirections[R.Next(n)]), 4.0f / lc.MovementTime, false);
+
+		else if (World.Instance.random.Next(100) < HitChance(lc))
 		{
 			int damage = Damage;
 
-			if (HasEffect("Power Strike")) { damage *= 3; RemoveEffect("Power Strike");	}
+			if (HasEffect("Power Strike")) { damage *= 3; RemoveEffect("Power Strike"); }
 			if (HasEffect("Melded")) damage *= 2;
+			if (HasAbility("Backstab")) damage += 3;
 
-			c.DoDamage(damage, false);
+			DoDamage(lc, damage, false);
+
+			RemoveEffect("Destined to Succeed");
 		}
 
-		RemoveEffect("True Strike");
-		RemoveEffect("Hidden");
-		RemoveEffect("Melded");
+		if (HasAbility("Annoy")) lc.AddEffect("Annoyed", 5);
 
+		RemoveEffects("True Strike", "Hidden", "Melded", "Fake Death");
 		PassTurn(AttackTime);
 	}
 
-	public void TryToMove(ZPoint.Direction d, bool control) // это исключительно для автоматической атаки при передвижении
+	public void MoveOrAttack(ZPoint.Direction d, bool control)
 	{
 		ZPoint destination = position.Shift(d);
 		LCreature c = B.GetLCreature(destination);
@@ -177,17 +243,14 @@ public partial class LCreature : LObject
 		if (CanMove && B.IsWalkable(destination)) SetPosition(destination, 2.0f / MovementTime, true);
 		else AnimateFailedMovement(d);
 
-		RemoveEffect("Melded");
+		RemoveEffects("Melded", "Fake Death");
 
 		if (control == true && controlMovementCounter > 0)
 		{
 			controlMovementCounter--;
 			ContinueTurn(MovementTime);
 		}
-		else
-		{
-			PassTurn(MovementTime);
-		}
+		else PassTurn(MovementTime);
 	}
 
 	public void Wait(float time)
@@ -214,7 +277,13 @@ public partial class LCreature : LObject
 	protected override void PassTurn(float time)
 	{
 		foreach (Effect e in effects) e.timeLeft -= time;
-		foreach (Effect e in effects.Where(f => f.timeLeft <= 0).ToList()) effects.Remove(e);
+		foreach (Effect e in effects.Where(f => f.timeLeft <= 0).ToList())
+		{
+			effects.Remove(e);
+
+			if (e.NameIs("Destined to Die")) AddEffect("Death Prediction Failed", 10);
+			else if (e.NameIs("Destined to Succeed")) AddEffect("Success Prediction Failed", 10);
+		}
 
 		controlMovementCounter = 3;
 		base.PassTurn(time);
@@ -247,6 +316,8 @@ public partial class LCreature : LObject
 		}
 	}
 
+	private void RemoveEffects(params string[] names) { foreach (string name in names) RemoveEffect(name); }
+
 	public void DrawEffects(ZPoint p, ZPoint descriptionP)
 	{
 		Screen screen = new Screen(p, new ZPoint(1, 32));
@@ -265,137 +336,6 @@ public partial class LCreature : LObject
 		MouseTriggerKeyword t = MouseTriggerKeyword.GetUnderMouse("effect");
 		if (t != null) effects[t.parameter].data.DrawDescription(descriptionP);
 	}
-
-	private void PayAbilityCost(Ability ability)
-	{
-		RemoveEffect("Melded");
-		RemoveEffect("Hidden");
-
-		data.AddEndurance(-ability.cost);
-	}
-
-	public void UseAbility(Ability ability)
-	{
-		Ability.TargetType tt = ability.targetType;
-
-		if (tt == Ability.TargetType.Direction || tt == Ability.TargetType.Point || tt == Ability.TargetType.Creature)
-			B.ability = ability;
-
-		else if (tt == Ability.TargetType.None)
-		{
-			PayAbilityCost(ability);
-
-			if (ability.NameIs("Meld")) AddEffect("Melded", 20);
-			else if (ability.NameIs("Hide in Shadows")) AddEffect("Hidden", 20);
-
-			PassTurn(ability.castTime);
-		}
-	}
-
-	public void UseAbility(Ability ability, ZPoint target)
-	{
-		PayAbilityCost(ability);
-
-		if (ability.targetType == Ability.TargetType.Creature) UseAbility(ability, B.GetLCreature(target));
-		else if (ability.targetType == Ability.TargetType.Direction) UseAbility(ability, ZPoint.GetDirection(target - position));
-		else
-		{
-			if (ability.NameIs("Nature's Call"))
-			{
-				LObject o = B.GetLObject(target);
-
-				if (o == null && B.IsWalkable(target)) B.Add(new PureLObject("Tree"), target);
-				else if (o is PureLObject && o.Name == "Tree")
-				{
-					B.Remove(o);
-					B.Add(new LCreature(new Creep("Treant"), true, false), target);
-				}
-				else if (o == this) data.AddHP(1);
-				else if (o is LCreature) (o as LCreature).AddEffect("Roots", 10);
-			}
-			else if (ability.NameIs("Leap"))
-			{
-				Log.WriteLine(target.ToString());
-				SetPosition(target, 2.0f, true);
-			}
-		}
-
-		B.ability = null;
-		PassTurn(ability.castTime);
-	}
-
-	public void UseAbility(Ability ability, ZPoint.Direction direction)
-	{
-		if (ability.NameIs("Bull Rush") || ability.NameIs("Kick"))
-		{
-			List<LObject> train = new List<LObject>();
-			int i = ability.NameIs("Bull Rush") ? 0 : 1;
-			while (true)
-			{
-				ZPoint shifted = position.Shift(direction, i);
-				LCreature lc = B.GetLCreature(shifted);
-				if (lc == null) break;
-				else train.Add(lc);
-				i++;
-			}
-
-			if (train.Count > 0)
-			{
-				//Log.WriteLine("Train length = " + train.Count);
-				ZPoint last = train.Last().position;
-				i = 1;
-				while (B.IsWalkable(last.Shift(direction, i))) i++;
-				int shift = Math.Min(i - 1, 2);
-				//Log.WriteLine("shift = " + shift);
-				foreach (LObject o in train) o.SetPosition(o.position.Shift(direction, shift), 4.0f, false);
-			}
-		}
-		else if (ability.NameIs("Power Strike"))
-		{
-			AddEffect("Power Strike", 10, direction);
-		}
-	}
-
-	public void UseAbility(Ability ability, LCreature target)
-	{
-		if (ability.NameIs("Leadership"))
-		{
-			if (target.data.creepType.name == "Sentient")
-			{
-				target.isInParty = true;
-				target.isAIControlled = false;
-			}
-		}
-		else if (ability.NameIs("Animal Friend"))
-		{
-			if (target.data.creepType.name == "Animal")
-			{
-				target.isInParty = true;
-				target.isAIControlled = false;
-			}
-		}
-		else if (ability.NameIs("Pommel Strike"))
-		{
-			target.DoDamage(1, false);
-			target.SetInitiative(target.initiative - 2.0f, 2.0f, false);
-		}
-		else if (ability.NameIs("Decapitate"))
-		{
-			AnimateAttack(target.position);
-			if (target.Endurance <= 5) target.DoDamage(5, false);
-			else target.DoDamage(1, false);
-		}
-		else if (ability.NameIs("Psionic Blast"))
-		{
-			target.DoDamage(4, true);
-		}
-		else if (ability.NameIs("True Strike"))
-		{
-			target.AddEffect("True Strike", 10);
-			//B.combatAnimations.Add(new ScalingAnimation(target, 1.3f, 1.0f));
-		}
-		else if (ability.NameIs("Marked Prey")) target.AddEffect("Marked Prey", 7);
-    }
 
 	public override void Draw()
 	{

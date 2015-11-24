@@ -3,13 +3,20 @@ using System.Collections.Generic;
 
 partial class LCreature : LObject
 {
-	private int AITargetRank(LCreature c)
+	private float AITargetRank(LCreature lc)
 	{
-		return 10 - MyMath.ManhattanDistance(position, c.position);
+		float result = DamageDealtBy(lc) - Distance(lc);
+
+		if (lc.HasEffect("Fake Death")) result -= 10;
+		if (HasEffect("Annoyed") && lc.HasAbility("Annoy")) result += 5;
+		if (HasEffect("Attention") && GetEffect("Attention").parameter == lc) result += 10;
+
+		return result;
 	} 
 
 	private Action AI()
 	{
+		if (HasEffect("Sleeping")) return new AWait(MovementTime);
 		if (HasEffect("Power Strike"))
 		{
 			LCreature lc = B.GetLCreature(position + (ZPoint.Direction)GetEffect("Power Strike").parameter);
@@ -22,7 +29,7 @@ partial class LCreature : LObject
 			}
 		}
 
-		var viableTargets = from c in B.AliveCreatures where c.IsVisible && IsEnemyTo(c) orderby AITargetRank(c) select c;
+		var viableTargets = from c in B.AliveCreatures where CanSee(c) && IsEnemyTo(c) orderby AITargetRank(c) select c;
 		if (viableTargets.Count() == 0) return new AWait(MovementTime);
 
 		LCreature target = viableTargets.Last() as LCreature;

@@ -193,20 +193,25 @@ partial class Battlefield
 		}
 	}
 
+	public List<ZPoint> Range { get { return EveryPoint.Where(p => CurrentLCreature.Distance(p) <= ability.range).ToList(); } }
+
 	public List<ZPoint> AbilityZone
 	{
 		get
 		{
-			System.Collections.IEnumerable query = from p in EveryPoint where false select p;
+			System.Collections.IEnumerable query;
 
 			if (ability.targetType == Ability.TargetType.Point)
-				query = from p in EveryPoint where CurrentLCreature.Distance(p) <= ability.range select p;
+				query = from p in Range where IsWalkable(p) select p;
 			else if (ability.targetType == Ability.TargetType.Direction)
 				query = from p in EveryPoint where CurrentLCreature.Distance(p) == 1 select p;
-			else if (ability.targetType == Ability.TargetType.Creature)
-				query = from c in AliveCreatures where CurrentLCreature.Distance(c) <= ability.range /*&& c != CurrentLCreature*/ select c.position;
+			else query = from c in AliveCreatures where CurrentLCreature.Distance(c) <= ability.range select c.position;
 
-			return query.Cast<ZPoint>().ToList();
+			List<ZPoint> result = query.Cast<ZPoint>().ToList();
+
+			if (ability.NameIs("Nature's Call")) result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
+			
+			return result;
 		}
 	}
 }

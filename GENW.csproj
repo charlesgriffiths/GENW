@@ -78,6 +78,7 @@
     <Compile Include="Stuff.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="Tile.cs" />
+    <Compile Include="UseAbility.cs" />
     <Compile Include="World.cs" />
     <Compile Include="ZPoint.cs" />
   </ItemGroup>

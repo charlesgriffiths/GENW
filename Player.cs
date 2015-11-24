@@ -21,7 +21,7 @@ partial class Player : GObject
 		playerCharacter.inventory.Add("Leather Armor");
 		party.Add(playerCharacter);
 
-		Character c2 = new Character("Bob", "Agile", "Dark Eloi", "Ranger", "The Scorch", "Pitfighter");
+		Character c2 = new Character("Bob", "Agile", "Dark Eloi", "Psionic", "The Scorch", "Pitfighter");
 		c2.inventory.Add("Dagger");
 		c2.inventory.Add("Force Staff");
 		party.Add(c2);
