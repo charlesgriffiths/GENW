@@ -25,7 +25,18 @@ public class ZPoint
 	public Direction GetDirection()
 	{
 		Log.Assert(ManhattanNorm == 1, "wrong parameter in GetDirection");
-		return x == 0 ? y == 1 ? Direction.Up : Direction.Down : x == 1 ? Direction.Right : Direction.Left;
+
+		if (x == 0) return y == 1 ? Direction.Down : Direction.Up;
+		else if (x == 1) return Direction.Right;
+		else return Direction.Left;
+	}
+
+	public static string Name(Direction d)
+	{
+		if (d == Direction.Right) return "right";
+		else if (d == Direction.Up) return "up";
+		else if (d == Direction.Left) return "left";
+		else return "down";
 	}
 
 	public static ZPoint Zero { get { return new ZPoint(0, 0); } }

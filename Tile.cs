@@ -61,6 +61,7 @@ class LTile : NamedObject
 	private LTileType type;
 
 	public bool IsWalkable { get { return type.isWalkable; } }
+	public bool IsFlat { get { return type.isFlat; } }
 
 	public override void Load(XmlNode xnode)
 	{

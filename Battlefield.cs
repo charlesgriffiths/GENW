@@ -20,11 +20,11 @@ partial class Battlefield
 
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
+	public CombatLog log = new CombatLog();
 
 	private List<DelayedDrawing> delayedDrawings = new List<DelayedDrawing>();
 	private float expectedInitiative = 0.0f;
-	private ZPoint screenPosition;
-
+	
 	private MainScreen M { get { return MainScreen.Instance; } }
 	private Player P { get { return World.Instance.player; } }
 
@@ -79,6 +79,17 @@ partial class Battlefield
 		return true;
     }
 
+	public bool IsFlat(ZPoint p)
+	{
+		if (!InRange(p)) return false;
+		if (!this[p].IsFlat) return false;
+
+		LObject lObject = GetLObject(p);
+		if (lObject != null && !lObject.IsFlat) return false;
+
+		return true;
+	}
+
 	private ZPoint RandomFreeTile()
 	{
 		for (int i = 0; i < 100; i++)
@@ -96,8 +107,8 @@ partial class Battlefield
 	public void Remove(LObject o) { objects.Remove(o); }
 	public void Add(LObject o, ZPoint position)
 	{
-		o.SetPosition(position, 60.0f, false);
-		o.SetInitiative((from q in objects select q.initiative).Average(), 60.0f, false);
+		o.SetPosition(position, 0.01f, false);
+		o.SetInitiative((from q in AliveCreatures select q.initiative).Average(), 0.01f, false);
 		objects.Add(o);
 	}
 
@@ -118,9 +129,9 @@ partial class Battlefield
 		
 		foreach (LObject l in objects)
 		{
-			l.SetPosition(RandomFreeTile(), 60.0f, false);
-			if (l is LCreature && (l as LCreature).data.uniqueName == P.uniqueName) l.SetInitiative(0.1f, 60.0f, false);
-			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 60.0f, false);
+			l.SetPosition(RandomFreeTile(), 0.01f, false);
+			if (l is LCreature && (l as LCreature).data.UniqueName == P.uniqueName) l.SetInitiative(0.1f, 0.01f, false);
+			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 0.01f, false);
 		}
 
 		if(NextLObject is LCreature) { if ((NextLObject as LCreature).IsAIControlled) NextLObject.Run(); }
@@ -145,7 +156,7 @@ partial class Battlefield
 
 		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) data[i, j] = dataLines[j][i];
 
-		screenPosition = new ZPoint(16, 16);
+		//screenPosition = new ZPoint(16, 16);
 	}
 
 	public void SetSpotlight()

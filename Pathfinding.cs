@@ -154,7 +154,7 @@ partial class Battlefield
 	private List<ZPoint> YellowZone { get { return (from p in TotalFramedZone where p.onFrontier select p.data).Cast<ZPoint>().ToList(); } }
 
 	private List<ZPoint> ReachableCreaturePositions
-	{ get { return (from c in AliveCreatures where !c.isInParty && c.IsAdjacentTo(GreenZone) select c.position).Cast<ZPoint>().ToList(); } }
+	{ get { return (from c in AliveCreatures where !c.IsInParty && c.IsAdjacentTo(GreenZone) select c.position).Cast<ZPoint>().ToList(); } }
 
 	public void GoTo()
 	{

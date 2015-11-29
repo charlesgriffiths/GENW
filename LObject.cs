@@ -24,6 +24,7 @@ public abstract class LObject
 
 	public virtual string Name { get { return ""; } }
 	public virtual bool IsWalkable { get { return true; } }
+	public virtual bool IsFlat { get { return true; } }
 	public virtual bool IsVisible { get { return true; } }
 	protected ZPoint GraphicPosition { get { return new ZPoint(B.GraphicCoordinates(rPosition)); } }
 
@@ -34,23 +35,23 @@ public abstract class LObject
 
 	public virtual int Importance { get { return 4; } }
 
-	public void SetPosition(ZPoint p, float speed, bool commonQueue)
+	public void SetPosition(ZPoint p, float gameTime, bool commonQueue)
 	{
-		RMove rMove = new RMove(rPosition, p - position, speed);
+		RMove rMove = new RMove(rPosition, p - position, gameTime);
 		if (commonQueue) B.combatAnimations.Add(rMove);
 		else movementAnimations.Add(rMove);
 		position = p;
 	}
 
-	public void SetInitiative(float initiativei, float speed, bool commonQueue)
+	public void SetInitiative(float initiativei, float gameTime, bool commonQueue)
 	{
-		RMove rMove = new RMove(rInitiative, new Vector2(initiativei - initiative, 0), speed);
+		RMove rMove = new RMove(rInitiative, new Vector2(initiativei - initiative, 0), gameTime);
 		if (commonQueue) B.scaleAnimations.Add(rMove);
 		else scaleAnimations.Add(rMove);
 		initiative = initiativei;
 	}
 
-	protected void AddInitiative(float f) { SetInitiative(initiative + f, 4.0f / f, true); }
+	protected void AddInitiative(float value, float gameTime, bool commonQueue) { SetInitiative(initiative + value, gameTime, commonQueue); }
 
 	public virtual void Kill() {}
 
@@ -60,7 +61,7 @@ public abstract class LObject
 	protected void ContinueTurn(float time)
 	{
 		Log.Assert(time > 0, "time <= 0");
-		SetInitiative(initiative - time, 2.0f / time, true);
+		SetInitiative(initiative - time, time, true);
 		B.CheckForEvents();
 	}
 
@@ -69,6 +70,7 @@ public abstract class LObject
 		ContinueTurn(time);
 
 		LObject nextLObject = B.NextLObject;
+		B.spotlightObject = nextLObject;
 		if (nextLObject != null) nextLObject.Run();
 	}
 
@@ -106,6 +108,7 @@ public class PureLObject : LObject
 	public PureShape data;
 
 	public override bool IsWalkable { get { return data.isWalkable; } }
+	public override bool IsFlat { get { return data.isFlat; } }
 	public override string Name { get {	return data.texture.name; }	}
 
 	public PureLObject(string name)

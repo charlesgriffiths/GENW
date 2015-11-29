@@ -35,7 +35,7 @@ class World
 		camera = new ZPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y"));
 
 		player = new Player();
-		player.SetPosition(camera, 60.0f);
+		player.SetPosition(camera, 0.01f);
 		player.UpdateVisitedLocations();
 
 		for (xnode = xnode.NextSibling.FirstChild; xnode != null; xnode = xnode.NextSibling)
@@ -46,7 +46,7 @@ class World
 			string dialogName = MyXml.GetString(xnode, "dialog");
 			if (dialogName != "") item.dialog = BigBase.Instance.dialogs.Get(dialogName);
 
-			item.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 60.0f);
+			item.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 0.01f);
 			gObjects.Add(item);
 		}
 

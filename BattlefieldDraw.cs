@@ -1,12 +1,15 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 partial class Battlefield
 {
-	public Vector2 GraphicCoordinates(RPoint p) { return screenPosition + new Vector2(32 * p.x, 32 * p.y); }
-	public ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - screenPosition) / 32.0f); }
+	public static Vector2 ScreenPosition { get { return new Vector2(16 + 96, 8); } }
+	public Vector2 GraphicCoordinates(RPoint p) { return ScreenPosition + new Vector2(32 * p.x, 32 * p.y); }
+	public Vector2 GC(RPoint p) { return GraphicCoordinates(p); }
+	public ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - ScreenPosition) / 32.0f); }
 
 	public void LoadTextures()
 	{
@@ -65,38 +68,49 @@ partial class Battlefield
 		}
 	}
 
-	private void DrawScale(ZPoint position, ZPoint zMouse)
+	private void DrawScale(ZPoint position)
 	{
-		int length = 736, height = 20;
-		Screen screen = new Screen(position, new ZPoint(length, height));
+		bool horizontal = false;
+		int length = horizontal ? 736 : 720 - 16 - 64 - 32, height = horizontal ? 20 : 16;
+		Screen screen = new Screen(position, new ZPoint(horizontal ? length : height, horizontal ? height : length));
 
 		screen.Fill(Stuff.DarkDarkGray);
 
 		var query = from c in AliveCreatures orderby c.rInitiative.x select c;
 		float zeroInitiative = -query.Last().rInitiative.x;
+		Func<float, int> func = f => (int)(100.0f * (-f - zeroInitiative)) + 1;
 
 		MouseTriggerLCreature trigger = null;
 		foreach (LCreature c in query)
 		{
-			int rInitiative = (int)(150.0f * (-c.rInitiative.x - zeroInitiative)) + 1;
+			int rInitiative = func(c.rInitiative.x); //(int)(150.0f * (-c.rInitiative.x - zeroInitiative)) + 1;
 			int y = -32, z = -32;
-			if (c.isInParty) { y = height; z = 0; }
+			if (horizontal == c.IsInParty) { y = height; z = 0; }
 
-			ZPoint iconPosition = new ZPoint(rInitiative + 1, y);
+			ZPoint iconPosition = new ZPoint(y, rInitiative + 1);
+			if (horizontal) iconPosition = new ZPoint(rInitiative + 1, y);
+
 			MouseTriggerLCreature.Set(c, screen.position + iconPosition, new ZPoint(32, 32));
 			trigger = MouseTriggerLCreature.GetUnderMouse();
 
 			Color color = Color.White;
-			if (c.position.TheSameAs(zMouse) || (trigger != null && c == trigger.creature)) color = c.RelationshipColor;
+			if (c.position.TheSameAs(Mouse) || (trigger != null && c == trigger.creature)) color = c.RelationshipColor;
 
 			if (scaleAnimations.CurrentTarget != c.rInitiative)
-				screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
+			{
+				if (horizontal) screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
+				else screen.DrawRectangle(new ZPoint(z, rInitiative), new ZPoint(height + 32, 1), color);
+			}
 
 			screen.Draw(c.texture, iconPosition);
 		}
 
 		if (expectedInitiative < 0)
-			screen.DrawRectangle(new ZPoint((int)(150.0f * (-expectedInitiative - zeroInitiative)) + 1, 0), new ZPoint(1, height + 32), Color.DodgerBlue);
+		{
+			if (horizontal) screen.DrawRectangle(new ZPoint(func(expectedInitiative), 0), new ZPoint(1, height + 32), Color.DodgerBlue);
+			else screen.DrawRectangle(new ZPoint(0, func(expectedInitiative)), new ZPoint(height + 32, 1), Color.DodgerBlue);
+		}
+
 		expectedInitiative = 0.0f;
 
 		if (trigger != null) Draw(M.zSelectionTexture, trigger.creature.position);
@@ -191,8 +205,10 @@ partial class Battlefield
 		foreach (DelayedDrawing dd in delayedDrawings) dd.Draw();
 		delayedDrawings.Clear();
 
-		DrawScale(new ZPoint(128, M.size.y - 68), Mouse);
+		//DrawScale(new ZPoint(128, M.size.y - 68));
+		DrawScale(new ZPoint(16 + 32, 8 + 16 + 32));
 		DrawInfo(spotlightObject as LCreature, new ZPoint(M.size.x - 288 - 8, 8));
+		log.Draw();
 	}
 }
 

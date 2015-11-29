@@ -42,10 +42,12 @@
     <Compile Include="Ability.cs" />
     <Compile Include="AI.cs" />
     <Compile Include="Animation.cs" />
+    <Compile Include="Animations.cs" />
     <Compile Include="Battlefield.cs" />
     <Compile Include="BattlefieldDraw.cs" />
     <Compile Include="BigBase.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="CombatLog.cs" />
     <Compile Include="Console.cs" />
     <Compile Include="Creature.cs" />
     <Compile Include="Creep.cs" />

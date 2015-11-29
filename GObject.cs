@@ -74,7 +74,7 @@ partial class GObject
 
 	public static void CheckForEvents()
 	{
-		var query = from pc in World.Instance.player.party where pc.uniqueName == "Boo-Boo" select pc;
+		var query = from pc in World.Instance.player.party where pc.UniqueName == "Boo-Boo" select pc;
 		if (query.Count() == 0 && World.Instance.random.Next(300) == 0) MainScreen.Instance.dialogScreen.StartDialog("Boo-Boo Died");
 	}
 
@@ -82,7 +82,7 @@ partial class GObject
 	{
 		ZPoint destination = position.Shift(d);
 		float travelTime = Speed * W.map[destination].type.travelTime;
-        if (W.map.IsWalkable(destination)) SetPosition(destination, 4.0f / travelTime);
+        if (W.map.IsWalkable(destination)) SetPosition(destination, travelTime);
 		PassTurn(travelTime);
 	}
 
@@ -100,9 +100,9 @@ partial class GObject
 		if (!MyGame.Instance.dialog) W.NextGObject.Run();
 	}
 
-	public void SetPosition(HexPoint p, float speed)
+	public void SetPosition(HexPoint p, float gameTime)
 	{
-		movementAnimations.Add(new RMove(rPosition, (ZPoint)p - position, speed));
+		movementAnimations.Add(new RMove(rPosition, (ZPoint)p - position, gameTime));
 		position = p;
 	}
 }

@@ -97,7 +97,7 @@ public class MyMonoGame : Game
 		}
 		else if (G.battle && B.ability == null)
 		{
-			if (G.mouseState.LeftButton == ButtonState.Pressed) B.SetSpotlight();
+			if (G.LeftMouseButtonClicked) B.SetSpotlight();
 			if (G.RightMouseButtonClicked) B.GoTo();
 
 			if (KeyPressed(Keys.Space)) B.CurrentLCreature.Wait();

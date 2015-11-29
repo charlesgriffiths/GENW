@@ -30,9 +30,10 @@ public partial class LCreature : LObject
 		base.Init();
 	}
 
-	public override bool IsWalkable { get { return false; } }
+	public override bool IsWalkable { get { return !IsAlive; } }
+	public override bool IsFlat { get { return !IsAlive; } }
 	public override string Name { get { return data.Name; } }
-	public string UniqueName { get { return data.uniqueName; } }
+	public string UniqueName { get { return data.UniqueName; } }
 
 	public float MovementTime { get { return data.MovementTime; } }
 	public float AttackTime { get { return data.AttackTime; } }
@@ -107,6 +108,8 @@ public partial class LCreature : LObject
 		}
 	}
 
+	public bool IsInParty { get { return HasEffect("Mind Tricked") ? !isInParty : isInParty; } }
+
 	public override int Importance { get { return data.Importance; } }
 
 	public override bool IsVisible { get { return HasEffect("Melded") || HasEffect("Hidden") ? false : true; } }
@@ -130,16 +133,12 @@ public partial class LCreature : LObject
 	{
 		get
 		{
-			if (isInParty) return Color.Green;
+			if (IsInParty) return Color.Green;
 			else return Color.Red;
 		}
 	}
 
-	public bool IsEnemyTo(LCreature lc)
-	{
-		bool reference = HasEffect("Mind Tricked") ? (GetEffect("Mind Tricked").parameter as LCreature).isInParty : isInParty;
-        return reference != lc.isInParty;
-	}
+	public bool IsEnemyTo(LCreature lc) { return IsInParty != lc.IsInParty; }
 	public bool IsFriendTo(LCreature lc) { return !IsEnemyTo(lc); }
 
 	public List<LCreature> Enemies { get { return (from c in B.AliveCreatures where c.IsEnemyTo(this) select c).Cast<LCreature>().ToList(); } }
@@ -157,18 +156,18 @@ public partial class LCreature : LObject
 	private void AnimateFailedMovement(ZPoint.Direction d)
 	{
 		Vector2 v = 0.25f * (Vector2)(ZPoint.Zero.Shift(d));
-		B.combatAnimations.Add(new RMove(rPosition, v, 4.0f / MovementTime));
-		B.combatAnimations.Add(new RMove(rPosition, -v, 4.0f / MovementTime));
+		B.combatAnimations.Add(new RMove(rPosition, v, 0.5f * MovementTime));
+		B.combatAnimations.Add(new RMove(rPosition, -v, 0.5f * MovementTime));
 	}
 
-	private void AnimateAttack(ZPoint p)
+	private void AnimateAttack(ZPoint p, float gameTime)
 	{
 		Vector2 v = p - position;
 		v.Normalize();
 		v *= 0.5f;
 
-		B.combatAnimations.Add(new RMove(rPosition, v, 4.0f / AttackTime));
-		B.combatAnimations.Add(new RMove(rPosition, -v, 4.0f / AttackTime));
+		B.combatAnimations.Add(new RMove(rPosition, v, 0.5f * gameTime));
+		B.combatAnimations.Add(new RMove(rPosition, -v, 0.5f * gameTime));
 	}
 
 	private int DamageDealtBy(LCreature lc) { return damageDealt.ContainsKey(lc) ? damageDealt[lc] : 0;	}
@@ -183,31 +182,37 @@ public partial class LCreature : LObject
 		int finalDamage = pure || HasAbility("Prodigious Precision") ? damage : Math.Max(damage - lc.Armor, 0);
 		lc.data.AddEndurance(-finalDamage);
 		lc.RememberDamage(this, finalDamage);
-		if (lc.data.endurance == 0) Kill();
+		if (lc.data.endurance == 0) lc.Kill();
 		B.combatAnimations.Add(new DamageAnimation(finalDamage, B.GraphicCoordinates(lc.position), 1.0f, pure));
 	}
 
-	public int HitChance(LCreature lc)
+	public int HitChance(LCreature lc) { return (int)(100.0f * (Math.Max(0.0f, Math.Min(4.0f + Attack - lc.Defence, 8.0f)) / 8.0f)); }
+
+	public void DoAttack(LCreature lc)
 	{
+		AnimateAttack(lc.position, AttackTime);
+
+		B.log.AddLine(UniqueName, IsInParty ? Color.White : Color.Orange);
+		B.log.Add(" attacks " + lc.UniqueName, Color.Pink);
+
+		int hitChance = HitChance(lc);
+
 		if (HasAbility("Backstab"))
 		{
 			ZPoint.Direction d = (lc.position - position).GetDirection();
 			LCreature behind = B.GetLCreature(position.Shift(d, 2));
-			if (behind != null && behind.IsEnemyTo(lc)) return 100;
+			if (behind != null && behind.IsEnemyTo(lc)) hitChance = 100;
 		}
-
-		return (int)(100.0f * (Math.Max(0.0f, Math.Min(4.0f + Attack - lc.Defence, 8.0f)) / 8.0f));
-	}
-
-	public void DoAttack(LCreature lc)
-	{
-		AnimateAttack(lc.position);
 
 		List<ZPoint.Direction> availableDirections = ZPoint.Directions.Where(d => B.IsWalkable(lc.position.Shift(d))).ToList();
 		int n = availableDirections.Count;
-		if (lc.HasAbility("Heightened Grace") && n > 0) lc.SetPosition(position.Shift(availableDirections[R.Next(n)]), 4.0f / lc.MovementTime, false);
 
-		else if (World.Instance.random.Next(100) < HitChance(lc))
+		if (lc.HasAbility("Heightened Grace") && n > 0)
+		{
+			lc.SetPosition(position.Shift(availableDirections[R.Next(n)]), lc.MovementTime, false);
+			B.log.Add(" but" + lc.UniqueName + " was ready for that!");
+		}
+		else if (World.Instance.random.Next(100) < hitChance)
 		{
 			int damage = Damage;
 
@@ -218,7 +223,10 @@ public partial class LCreature : LObject
 			DoDamage(lc, damage, false);
 
 			RemoveEffect("Destined to Succeed");
+
+			B.log.Add(" and deals " + Math.Max(0, damage - lc.Armor) + " damage.");
 		}
+		else B.log.Add(" and misses.");
 
 		if (HasAbility("Annoy")) lc.AddEffect("Annoyed", 5);
 
@@ -240,7 +248,7 @@ public partial class LCreature : LObject
 	public void Move(ZPoint.Direction d, bool control)
 	{
 		ZPoint destination = position.Shift(d);
-		if (CanMove && B.IsWalkable(destination)) SetPosition(destination, 2.0f / MovementTime, true);
+		if (CanMove && B.IsWalkable(destination)) SetPosition(destination, MovementTime, true);
 		else AnimateFailedMovement(d);
 
 		RemoveEffects("Melded", "Fake Death");
@@ -255,7 +263,7 @@ public partial class LCreature : LObject
 
 	public void Wait(float time)
 	{
-		SetPosition(position, 2.0f / time, true);
+		SetPosition(position, time, true);
 		PassTurn(time);
 	}
 
