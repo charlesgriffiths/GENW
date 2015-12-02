@@ -111,7 +111,6 @@
     <Content Include="bin\WindowsGL\Debug\Data\creepTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\effects.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\gifts.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\gObjects.xml">
       <SubType>Designer</SubType>
     </Content>

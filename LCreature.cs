@@ -14,7 +14,7 @@ public partial class LCreature : LObject
 	public int controlMovementCounter;
 
 	public int HP { get { return data.hp; } }
-	public int Endurance { get { return data.endurance; } }
+	public int Stamina { get { return data.stamina; } }
 	public bool IsAlive { get { return data.IsAlive; } }
 	public List<Ability> Abilities { get { return data.Abilities; } }
 
@@ -96,19 +96,19 @@ public partial class LCreature : LObject
 		}
 	}
 
-	public int Armor { get { return 0; } }
+	public int Armor { get { return data.Armor; } }
 
 	public bool IsAIControlled
 	{
 		get
 		{
-			if (HasEffect("Power Strike") || HasEffect("Sleeping")) return true;
+			if (HasEffect("Power Strike") || HasEffect("Sleeping") || HasEffect("Unconscious")) return true;
 			else if (HasEffect("Mind Controlled")) return false;
 			else return isAIControlled;
 		}
 	}
 
-	public bool IsInParty { get { return HasEffect("Mind Tricked") ? !isInParty : isInParty; } }
+	//public bool IsInParty { get { return HasEffect("Mind Tricked") ? !isInParty : isInParty; } }
 
 	public override int Importance { get { return data.Importance; } }
 
@@ -129,16 +129,17 @@ public partial class LCreature : LObject
 		base.Kill();
 	}
 
-	public override Color RelationshipColor
-	{
-		get
-		{
-			if (IsInParty) return Color.Green;
-			else return Color.Red;
-		}
-	}
+	public override Color RelationshipColor { get {	return isInParty ? Color.Green : Color.Red;	} }
+	public Color LogColor { get { return isInParty ? Color.White : Color.Orange; } }
 
-	public bool IsEnemyTo(LCreature lc) { return IsInParty != lc.IsInParty; }
+	public bool IsEnemyTo(LCreature lc)
+	{
+		LCreature reference = this;
+		if (HasEffect("Mind Controlled")) reference = GetEffect("Mind Controlled").parameter as LCreature;
+		else if (HasEffect("Mind Tricked")) reference = GetEffect("Mind Tricked").parameter as LCreature;
+
+		return reference.isInParty != lc.isInParty;
+	}
 	public bool IsFriendTo(LCreature lc) { return !IsEnemyTo(lc); }
 
 	public List<LCreature> Enemies { get { return (from c in B.AliveCreatures where c.IsEnemyTo(this) select c).Cast<LCreature>().ToList(); } }
@@ -180,10 +181,10 @@ public partial class LCreature : LObject
 	public void DoDamage(LCreature lc, int damage, bool pure)
 	{
 		int finalDamage = pure || HasAbility("Prodigious Precision") ? damage : Math.Max(damage - lc.Armor, 0);
-		lc.data.AddEndurance(-finalDamage);
+		lc.data.AddStamina(-finalDamage);
 		lc.RememberDamage(this, finalDamage);
-		if (lc.data.endurance == 0) lc.Kill();
-		B.combatAnimations.Add(new DamageAnimation(finalDamage, B.GraphicCoordinates(lc.position), 1.0f, pure));
+		if (lc.data.stamina == 0) lc.Kill();
+		B.combatAnimations.Add(new DamageAnimation(finalDamage, Battlefield.GC(lc.position), 1.0f, pure));
 	}
 
 	public int HitChance(LCreature lc) { return (int)(100.0f * (Math.Max(0.0f, Math.Min(4.0f + Attack - lc.Defence, 8.0f)) / 8.0f)); }
@@ -192,16 +193,21 @@ public partial class LCreature : LObject
 	{
 		AnimateAttack(lc.position, AttackTime);
 
-		B.log.AddLine(UniqueName, IsInParty ? Color.White : Color.Orange);
+		B.log.AddLine(UniqueName, LogColor);
 		B.log.Add(" attacks " + lc.UniqueName, Color.Pink);
 
 		int hitChance = HitChance(lc);
 
+		if (lc.HasEffect("Sleeping")) hitChance = 100;
 		if (HasAbility("Backstab"))
 		{
 			ZPoint.Direction d = (lc.position - position).GetDirection();
 			LCreature behind = B.GetLCreature(position.Shift(d, 2));
-			if (behind != null && behind.IsEnemyTo(lc)) hitChance = 100;
+			if (behind != null && behind.IsEnemyTo(lc))
+			{
+				hitChance = 100;
+				B.log.Add(" from behind");
+			}
 		}
 
 		List<ZPoint.Direction> availableDirections = ZPoint.Directions.Where(d => B.IsWalkable(lc.position.Shift(d))).ToList();
@@ -209,8 +215,8 @@ public partial class LCreature : LObject
 
 		if (lc.HasAbility("Heightened Grace") && n > 0)
 		{
-			lc.SetPosition(position.Shift(availableDirections[R.Next(n)]), lc.MovementTime, false);
-			B.log.Add(" but" + lc.UniqueName + " was ready for that!");
+			lc.SetPosition(lc.position.Shift(availableDirections[R.Next(n)]), lc.MovementTime, false);
+			B.log.Add(" but " + lc.UniqueName + " was ready for that!");
 		}
 		else if (World.Instance.random.Next(100) < hitChance)
 		{
@@ -231,6 +237,8 @@ public partial class LCreature : LObject
 		if (HasAbility("Annoy")) lc.AddEffect("Annoyed", 5);
 
 		RemoveEffects("True Strike", "Hidden", "Melded", "Fake Death");
+		lc.RemoveEffect("Sleeping");
+
 		PassTurn(AttackTime);
 	}
 
@@ -287,10 +295,8 @@ public partial class LCreature : LObject
 		foreach (Effect e in effects) e.timeLeft -= time;
 		foreach (Effect e in effects.Where(f => f.timeLeft <= 0).ToList())
 		{
-			effects.Remove(e);
-
-			if (e.NameIs("Destined to Die")) AddEffect("Death Prediction Failed", 10);
-			else if (e.NameIs("Destined to Succeed")) AddEffect("Success Prediction Failed", 10);
+			//effects.Remove(e);
+			RemoveEffect(e.data.name);
 		}
 
 		controlMovementCounter = 3;
@@ -305,7 +311,28 @@ public partial class LCreature : LObject
 			Effect e = query.Single();
 			if (e.timeLeft < time) e.timeLeft = time;
 		}
-		else effects.Add(new Effect(name, time, parameter));
+		else
+		{
+			Effect e = new Effect(name, time, parameter);
+            effects.Add(e);
+
+			if (e.NameIs("True Strike", "Blind", "Fake Death", "Sleeping", "Blindsight", "Mind Tricked", "Mind Controlled"))
+				B.log.AddLine(UniqueName + " ", LogColor);
+
+			if (e.NameIs("Roots"))
+			{
+				B.log.AddLine("Multiple roots crawl from the ground and entangle " + UniqueName + "! ", Color.Pink);
+				B.log.Add(UniqueName, LogColor);
+				B.log.Add(" can't move!", Color.Pink);
+			}
+			else if (e.NameIs("True Strike")) B.log.Add("feels confident.", Color.Pink);
+			else if (e.NameIs("Blind")) B.log.Add("can't see anything!", Color.Pink);
+			else if (e.NameIs("Fake Death")) B.log.Add("looks completely dead.", Color.Pink);
+			else if (e.NameIs("Sleeping")) B.log.Add("falls asleep.", Color.Pink);
+			else if (e.NameIs("Blindsight")) B.log.Add("can't see " + (e.parameter as LCreature).UniqueName + " now.", Color.Pink);
+			else if (e.NameIs("Mind Tricked")) B.log.Add("is now fighting for the wrong party!", Color.Pink);
+			else if (e.NameIs("Mind Controlled")) B.log.Add("is now controlled by " + (e.parameter as LCreature).UniqueName + "!", Color.Pink);
+		}
 	}
 
 	private void AddEffect(string name, float time) { AddEffect(name, time, null); }
@@ -319,12 +346,41 @@ public partial class LCreature : LObject
 		var query = effects.Where(e => e.data.name == name);
 		if (query.Count() > 0)
 		{
-			Effect effect = query.Single();
-			effects.Remove(effect);
+			Effect e = query.Single();
+
+			if (e.NameIs("Destined to Die"))
+			{
+				AddEffect("Death Prediction Failed", 10);
+
+				B.log.AddLine((e.parameter as LCreature).UniqueName + "'s death prediction failed. ", Color.Pink);
+				B.log.Add(UniqueName, LogColor);
+				B.log.Add(" feels relieved.", Color.Pink);
+			}
+			else if (e.NameIs("Destined to Succeed"))
+			{
+				AddEffect("Success Prediction Failed", 10);
+
+				B.log.AddLine((e.parameter as LCreature).UniqueName + "'s success prediction failed. ", Color.Pink);
+				B.log.Add(UniqueName, LogColor);
+				B.log.Add(" feels depressed.", Color.Pink);
+			}
+			else
+			{
+				B.log.AddLine(UniqueName, LogColor);
+				B.log.Add(" is no longer ", Color.Pink);
+				B.log.Add(e.data.name + ".", e.data.SgnColor);
+			}
+
+			effects.Remove(e);
 		}
 	}
 
 	private void RemoveEffects(params string[] names) { foreach (string name in names) RemoveEffect(name); }
+	private bool HasOneOfEffects(params string[] names)
+	{
+		foreach (string name in names) if (HasEffect(name)) return true;
+		return false;
+	}
 
 	public void DrawEffects(ZPoint p, ZPoint descriptionP)
 	{
@@ -348,6 +404,19 @@ public partial class LCreature : LObject
 	public override void Draw()
 	{
 		base.Draw();
+		if (!IsAlive) return;
+
+		Action<string> Draw = textureName => Battlefield.Draw(textureName, rPosition);
+				
+		if (HasEffect("Unconscious")) Draw("otherEffect");
+		else if (HasEffect("Sleeping")) Draw("sleeping");
+		else if (HasEffect("Mind Controlled")) Draw("psionicEffect");
+		else if (HasEffect("Mind Tricked")) Draw("questionMark");
+		else if (HasEffect("Power Strike")) Draw("timeEffect");
+		else if (HasOneOfEffects("Blind", "Blindsight")) Draw("visionEffect");
+		else if (HasOneOfEffects("Destined to Die", "Success Prediction Failed", "Marked Prey")) Draw("negativeEffect");
+		else if (HasOneOfEffects("Destined to Succeed", "Death Prediction Failed", "Faked Death", "True Strike")) Draw("positiveEffect");
+		else if (HasOneOfEffects("Annoyed", "Attention")) Draw("aggroEffect");
 
 		if (HasEffect("Roots")) M.DrawRectangle(GraphicPosition + new ZPoint(0, 28), new ZPoint(32, 5), Color.DarkGreen);
 	}

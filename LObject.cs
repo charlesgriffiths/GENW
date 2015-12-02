@@ -26,7 +26,7 @@ public abstract class LObject
 	public virtual bool IsWalkable { get { return true; } }
 	public virtual bool IsFlat { get { return true; } }
 	public virtual bool IsVisible { get { return true; } }
-	protected ZPoint GraphicPosition { get { return new ZPoint(B.GraphicCoordinates(rPosition)); } }
+	protected ZPoint GraphicPosition { get { return new ZPoint(Battlefield.GC(rPosition)); } }
 
 	protected virtual void Init()
 	{

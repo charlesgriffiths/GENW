@@ -39,6 +39,8 @@ class CombatLog
 		Add(s, line[line.Count - 1].Item2);
 	}
 
+	public void RemoveLastLine() { data.Remove(data[data.Count - 1]); }
+
 	public void Draw()
 	{
 		Screen screen = new Screen(Position, new ZPoint(Length, Height));

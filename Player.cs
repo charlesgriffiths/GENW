@@ -16,12 +16,12 @@ partial class Player : GObject
 		shape.isActive = true;
 		uniqueName = shape.name;
 
-		Character playerCharacter = new Character(shape.name, "Strong", "Floran", "Alchemist", "Eden", "Merchant");
+		Character playerCharacter = new Character(shape.name, "Floran", "Seer", "Eden", "Soldier");
 		playerCharacter.inventory.Add("Club");
 		playerCharacter.inventory.Add("Leather Armor");
 		party.Add(playerCharacter);
 
-		Character c2 = new Character("Bob", "Agile", "Dark Eloi", "Alchemist", "The Scorch", "Pitfighter");
+		Character c2 = new Character("Bob", "Vorcha", "Psionic", "The Scorch", "Pitfighter");
 		c2.inventory.Add("Dagger");
 		c2.inventory.Add("Force Staff");
 		party.Add(c2);
@@ -55,9 +55,9 @@ partial class Player : GObject
 			screen.Draw(member.texture, new ZPoint(0, i * 40));
 
 			float hpMissing = 1 - (float)member.hp / member.MaxHP;
-			float enduranceMissing = 1 - (float)member.endurance / member.MaxHP;
+			float staminaMissing = 1 - (float)member.stamina / member.MaxHP;
 
-			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), new ZPoint(32, -(int)(enduranceMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
+			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), new ZPoint(32, -(int)(staminaMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 			screen.DrawRectangle(new ZPoint(0, i * 40 + 32), new ZPoint(32, -(int)(hpMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 		}
 

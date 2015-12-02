@@ -57,4 +57,9 @@ class Effect
 	}
 
 	public bool NameIs(string name) { return data == BigBase.Instance.effects.Get(name); }
+	public bool NameIs(params string[] names)
+	{
+		foreach (string name in names) if (NameIs(name)) return true;
+		return false;
+	}
 }

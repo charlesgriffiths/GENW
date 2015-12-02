@@ -25,8 +25,8 @@ partial class Battlefield
 	private List<DelayedDrawing> delayedDrawings = new List<DelayedDrawing>();
 	private float expectedInitiative = 0.0f;
 	
-	private MainScreen M { get { return MainScreen.Instance; } }
-	private Player P { get { return World.Instance.player; } }
+	private static MainScreen M { get { return MainScreen.Instance; } }
+	private static Player P { get { return World.Instance.player; } }
 
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 

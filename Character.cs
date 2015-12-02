@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -6,19 +7,32 @@ public class Character : Creature
 {
 	public Inventory inventory;
 
-	public Gift gift;
 	public Race race;
 	public CClass cClass;
 	public Origin origin;
 	public Background background;
 
+	public int xp;
+
 	public override string Name { get { return race.name + " " + cClass.name; } }
 	public override CreepType creepType { get {	return BigBase.Instance.creepTypes.Get("Sentient");	} }
 
-	public override int MaxHP { get { return 10 + gift.bonus.hp + race.bonus.hp /*+ (from i in inventory.Items select i.data.bonus.hp).Sum()*/; } }
-	public override int Damage { get { return 1 + gift.bonus.damage + race.bonus.damage /*+ (from i in inventory.Items select i.data.bonus.damage).Sum()*/; } }
-	public override int Attack { get { return gift.bonus.attack + race.bonus.attack /*+ (from i in inventory.Items select i.data.bonus.attack).Sum()*/; } }
-	public override int Defence { get { return gift.bonus.defence + race.bonus.defence /*+ (from i in inventory.Items select i.data.bonus.defence).Sum()*/; } }
+	private int InventorySum(Func<Bonus, int> func)	{ return (from i in inventory.Items select func(i.data.bonus)).Sum(); }
+
+	public override int MaxHP { get { return 10 + 4 * this["Endurance"] + InventorySum(b => b.hp); } }
+	public override int Damage { get { return 1 + this["Strength"] + InventorySum(b => b.damage); } }
+	public override int Attack { get { return this["Agility"] + InventorySum(b => b.attack); } }
+	public override int Defence { get { return this["Agility"] + InventorySum(b => b.defence); } }
+	public override int Armor { get { return InventorySum(b => b.armor); } }
+
+	public int this[string skillName]
+	{
+		get
+		{
+			Skill skill = BigBase.Instance.skills.Get(skillName);
+			return (int)(race.bonus.skills[skill] + origin.bonus.skills[skill] + background.bonus.skills[skill]);
+		}
+	}
 
 	public override List<Ability> Abilities
 	{
@@ -33,13 +47,13 @@ public class Character : Creature
 
 	public override int Importance { get { return IsAlive ? uniqueName == World.Instance.player.uniqueName ? 1 : 2 : 4; } }
 
-	public Character(string uniqueNamei, string giftName, string raceName, string className, string originName, string backgroundName)
+	public Character(string uniqueNamei, string raceName, string className, string originName, string backgroundName)
 	{
 		BigBase b = BigBase.Instance;
 
 		uniqueName = uniqueNamei;
+		inventory = new Inventory(6, this);
 
-		gift = b.gifts.Get(giftName);
 		race = b.races.Get(raceName);
 		cClass = b.classes.Get(className);
 		origin = b.origins.Get(originName);
@@ -48,8 +62,6 @@ public class Character : Creature
 		texture = MainScreen.Instance.game.Content.Load<Texture2D>("characters/" + Name);
 
 		hp = MaxHP;
-		endurance = MaxHP;
-
-		inventory = new Inventory(6, this);
+		stamina = MaxHP;
 	}
 }

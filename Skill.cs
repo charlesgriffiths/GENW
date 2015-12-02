@@ -37,17 +37,6 @@ public class Bonus
 	}
 }
 
-public class Gift : NamedObject
-{
-	public Bonus bonus;
-
-	public override void Load(XmlNode xnode)
-	{
-		name = MyXml.GetString(xnode, "name");
-		bonus = new Bonus(xnode);
-	}
-}
-
 public class Origin : NamedObject
 {
 	public Bonus bonus;

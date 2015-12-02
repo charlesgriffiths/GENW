@@ -7,9 +7,9 @@ using Microsoft.Xna.Framework.Graphics;
 partial class Battlefield
 {
 	public static Vector2 ScreenPosition { get { return new Vector2(16 + 96, 8); } }
-	public Vector2 GraphicCoordinates(RPoint p) { return ScreenPosition + new Vector2(32 * p.x, 32 * p.y); }
-	public Vector2 GC(RPoint p) { return GraphicCoordinates(p); }
-	public ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - ScreenPosition) / 32.0f); }
+	public static Vector2 GraphicCoordinates(RPoint p) { return ScreenPosition + new Vector2(32 * p.x, 32 * p.y); }
+	public static Vector2 GC(RPoint p) { return GraphicCoordinates(p); }
+	public static ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - ScreenPosition) / 32.0f); }
 
 	public void LoadTextures()
 	{
@@ -19,10 +19,11 @@ partial class Battlefield
 		armorIcon = M.game.Content.Load<Texture2D>("other/armor");
 	}
 
-	private void Draw(Texture2D texture, RPoint rPosition, Color color)
+	private static void Draw(Texture2D texture, RPoint rPosition, Color color)
 	{ M.Draw(texture, new ZPoint(GraphicCoordinates(rPosition) - new Vector2(texture.Width/2 - 16, texture.Height - 32)), color); }
 
-	private void Draw(Texture2D texture, RPoint rPosition) { Draw(texture, rPosition, Color.White); }
+	public static void Draw(Texture2D texture, RPoint rPosition) { Draw(texture, rPosition, Color.White); }
+	public static void Draw(string textureName, RPoint rPosition) { Draw(BigBase.Instance.textures.Get(textureName).Single(), rPosition); }
 
 	public void Draw(Texture2D texture, RPoint rPosition, float scaling, Color color)
 	{
@@ -74,7 +75,7 @@ partial class Battlefield
 		int length = horizontal ? 736 : 720 - 16 - 64 - 32, height = horizontal ? 20 : 16;
 		Screen screen = new Screen(position, new ZPoint(horizontal ? length : height, horizontal ? height : length));
 
-		screen.Fill(Stuff.DarkDarkGray);
+		screen.Fill(Stuff.MyColor("Dark Grey"));
 
 		var query = from c in AliveCreatures orderby c.rInitiative.x select c;
 		float zeroInitiative = -query.Last().rInitiative.x;
@@ -85,7 +86,7 @@ partial class Battlefield
 		{
 			int rInitiative = func(c.rInitiative.x); //(int)(150.0f * (-c.rInitiative.x - zeroInitiative)) + 1;
 			int y = -32, z = -32;
-			if (horizontal == c.IsInParty) { y = height; z = 0; }
+			if (horizontal == c.isInParty) { y = height; z = 0; }
 
 			ZPoint iconPosition = new ZPoint(y, rInitiative + 1);
 			if (horizontal) iconPosition = new ZPoint(rInitiative + 1, y);
@@ -117,7 +118,7 @@ partial class Battlefield
 		MouseTriggerLCreature.Clear();
 	}
 
-	private void DrawAbilities(LCreature c, Screen screen, ZPoint position)
+	private void DrawAbilities(LCreature c, Screen screen, ZPoint position) // эту штуку нужно будет немного переписать, пока криво
 	{
 		for (int i = 0; i < 6; i++) MouseTriggerKeyword.Set("ability", i, screen.position + position + new ZPoint(48 * i, 0), new ZPoint(48, 48));
 
@@ -135,7 +136,7 @@ partial class Battlefield
 		if (forDescription != null && forDescription.parameter < c.Abilities.Count)
 		{
 			Ability a = c.Abilities[forDescription.parameter];
-			M.Draw(a.texture, forDescription.position, Color.Red);
+			M.Draw(a.texture, forDescription.position, a.color);
 
 			if (c == CurrentLCreature && a.targetType != Ability.TargetType.Passive)
 				M.DrawStringWithShading(M.smallFont, Stuff.AbilityHotkeys[forDescription.parameter].ToString(),
@@ -152,10 +153,10 @@ partial class Battlefield
 		//screen.Fill(Color.Black);
 
 		float hpFraction = (float)c.HP / c.MaxHP;
-		float enduranceFraction = (float)c.Endurance / c.MaxHP;
+		float staminaFraction = (float)c.Stamina / c.MaxHP;
 
 		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(hpFraction * length), 20), new Color(0.2f, 0, 0));
-		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(enduranceFraction * length), 20), new Color(0.4f, 0, 0));
+		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(staminaFraction * length), 20), new Color(0.4f, 0, 0));
 		for (int i = 1; i <= c.MaxHP; i++) screen.DrawRectangle(new ZPoint((int)(i * (float)length / c.MaxHP), 0), new ZPoint(1, 20), Color.Black);
 
 		SpriteFont font = MainScreen.Instance.verdanaBoldFont;

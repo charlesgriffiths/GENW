@@ -28,9 +28,8 @@ static class MyXml
 	public static int GetInt(XmlNode xmlNode, string attribute)
 	{
 		string s = GetString(xmlNode, attribute);
-		if (s == "") return 0;
-        else return int.Parse(s);
-	}
+		return s == "" ? 0 : int.Parse(s);
+    }
 
 	public static float GetFloat(XmlNode xmlNode, string attribute)
 	{

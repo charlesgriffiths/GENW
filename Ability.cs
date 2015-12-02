@@ -9,6 +9,7 @@ public class Ability : NamedObject
 	public TargetType targetType;
 	public int cost, range;
 	public float castTime, cooldownTime;
+	public Color color;
 
 	public enum TargetType { Passive, None, Direction, Point, Creature };
 
@@ -46,6 +47,7 @@ public class Ability : NamedObject
 		range = MyXml.GetInt(xnode, "range");
 		castTime = MyXml.GetFloat(xnode, "castTime");
 		cooldownTime = MyXml.GetFloat(xnode, "cooldownTime");
+		color = Stuff.MyColor(MyXml.GetString(xnode, "color"));
 		description = MyXml.GetString(xnode, "description");
 	}
 
@@ -63,7 +65,7 @@ public class Ability : NamedObject
 		screen.DrawString(MainScreen.Instance.verdanaBoldFont, name, new ZPoint(0, 0), Color.White);
 		SpriteFont font = MainScreen.Instance.smallFont;
 
-		screen.offset += 8;
+		if (range != 0 || targetType != TargetType.Passive) screen.offset += 8;
 		if (range != 0) screen.DrawString(font, "RANGE: " + range, new ZPoint(0, screen.offset), Color.White);
 		if (targetType != TargetType.Passive)
 		{

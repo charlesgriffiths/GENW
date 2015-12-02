@@ -17,15 +17,21 @@ public partial class LCreature : LObject
 		{
 			PayAbilityCost(ability);
 
+			Action<string> log = s => B.log.Add(" " + s, ability.color);
+
 			if (ability.NameIs("Meld"))
 			{
 				AddEffect("Melded", 20);
+
 				AnimateByDefault(ability.castTime);
+				log("melds with surroundings.");
 			}
 			else if (ability.NameIs("Hide in Shadows"))
 			{
 				AddEffect("Hidden", 20);
+
 				AnimateByDefault(ability.castTime);
+				log("hides in shadows.");
 			}
 
 			PassTurn(ability.castTime);
@@ -40,27 +46,46 @@ public partial class LCreature : LObject
 		else if (ability.targetType == Ability.TargetType.Direction) UseAbility(ability, ZPoint.GetDirection(target - position));
 		else
 		{
+			Action<string> log = s => B.log.Add(" " + s, ability.color);
+
 			if (ability.NameIs("Nature's Call"))
 			{
 				LObject o = B.GetLObject(target);
 
-				if (o == null && B.IsWalkable(target)) B.Add(new PureLObject("Tree"), target);
+				if (o == null && B.IsWalkable(target))
+				{
+					B.Add(new PureLObject("Tree"), target);
+					log("grows a tree.");
+				}
 				else if (o is PureLObject && o.Name == "Tree")
 				{
 					B.Remove(o);
 					B.Add(new LCreature(new Creep("Treant"), true, false), target);
+					log("transforms a tree into a treant!");
 				}
-				else if (o == this) data.AddHP(1);
-				else if (o is LCreature) (o as LCreature).AddEffect("Roots", 10);
+				else if (o == this)
+				{
+					data.AddHP(1);
+					log("regenerates.");
+				}
+				else if (o is LCreature)
+				{
+					B.log.RemoveLastLine();
+					(o as LCreature).AddEffect("Roots", 10);
+				}
 
 				AnimateByDefault(ability.castTime);
 			}
 			else if (ability.NameIs("Leap"))
 			{
-				Log.WriteLine(target.ToString());
+				//Log.WriteLine(target.ToString());
 				SetPosition(target, ability.castTime, true);
+				log("leaps to a different location.");
 			}
 		}
+
+		LCreature lc = B.GetLCreature(target);
+		if (lc != null) lc.RemoveEffect("Sleeping");
 
 		B.ability = null;
 		PassTurn(ability.castTime);
@@ -96,13 +121,25 @@ public partial class LCreature : LObject
 
 	public void UseAbility(Ability ability, ZPoint.Direction direction)
 	{
-		if (ability.NameIs("Bull Rush")) Kick(position, direction, 2, true, ability.castTime);
-		else if (ability.NameIs("Kick")) Kick(position, direction, 2, false, ability.castTime);
+		Action<string> log = s => B.log.Add(" " + s, ability.color);
+
+		if (ability.NameIs("Bull Rush"))
+		{
+			Kick(position, direction, 2, true, ability.castTime);
+			log("bull-rushes somebody.");
+		}
+		else if (ability.NameIs("Kick"))
+		{
+			Kick(position, direction, 2, false, ability.castTime);
+			log("kicks somebody.");
+		}
 		else if (ability.NameIs("Power Strike"))
 		{
 			AddEffect("Power Strike", 10, direction);
+
 			AnimateByDefault(ability.castTime);
-			//colorful description with words in combat log
+			LCreature lc = B.GetLCreature(position + direction);
+			log("prepares to do a powerful attack" + (lc != null ? " on " + lc.UniqueName : "") + ".");
 		}
 		else if (ability.NameIs("Hurl Rock"))
 		{
@@ -110,26 +147,40 @@ public partial class LCreature : LObject
 			while (B.IsFlat(p) && Distance(p) <= ability.range) p = p + direction;
 			LCreature lc = B.GetLCreature(p);
 
-			B.combatAnimations.Add(new TextureAnimation("stone", B.GC(position), B.GC(p), 0.5f * ability.castTime));
+			B.combatAnimations.Add(new TextureAnimation("stone", Battlefield.GC(position), Battlefield.GC(p), 0.5f * ability.castTime));
+			log("throws a rock and hits");
 
 			if (lc != null)
 			{
 				Kick(p, direction, 1, true, 0.5f * ability.castTime);
 				DoDamage(lc, 2, false);
+
+				log(lc.UniqueName + ".");
 			}
-			else AnimateByDefault(0.5f * ability.castTime);
+			else
+			{
+				AnimateByDefault(0.5f * ability.castTime);
+				log("nobody.");
+			}
 		}
 	}
 
 	public void UseAbility(Ability ability, LCreature target)
 	{
+		Action<string> log = s => B.log.Add(" " + s, ability.color);
+		Action<LCreature, string> logn = (lc, s) => { B.log.AddLine(lc.UniqueName, lc.LogColor); log(s); };
+
 		if (ability.NameIs("Leadership"))
 		{
 			if (target.data.creepType.name == "Sentient")
 			{
 				target.isInParty = true;
 				target.isAIControlled = false;
+
+				log("persuades " + target.UniqueName + " to join the party!");
 			}
+			else log("tries to persuade " + target.UniqueName + "to join the party, but " + target.UniqueName + " being "
+			   + target.data.creepType.name + " is deaf to the arguments.");
 
 			AnimateByDefault(ability.castTime);
 		}
@@ -139,7 +190,11 @@ public partial class LCreature : LObject
 			{
 				target.isInParty = true;
 				target.isAIControlled = false;
+
+				log("pets " + target.UniqueName + ".");
 			}
+			else log("tries to pet " + target.UniqueName + ", but " + target.UniqueName + " being " + target.data.creepType.name
+			   + " is unresponsive and looks skeptical");
 
 			AnimateByDefault(ability.castTime);
 		}
@@ -149,92 +204,136 @@ public partial class LCreature : LObject
 			target.SetInitiative(target.initiative - 6.0f, ability.castTime, false);
 
 			AnimateByDefault(ability.castTime);
-		}
+			log("strikes " + target.UniqueName + " unexpectedly.");
+        }
 		else if (ability.NameIs("Decapitate"))
 		{
 			AnimateAttack(target.position, ability.castTime);
 
-			if (target.Endurance <= 5) DoDamage(target, 5, false);
-			else DoDamage(target, 1, false);
+			if (target.Stamina <= 5)
+			{
+				DoDamage(target, 5, false);
+				log("decapitates " + target.UniqueName + "!");
+			}
+			else
+			{
+				DoDamage(target, 1, false);
+				log("tries to decapitate " + target.UniqueName + ", but " + target.UniqueName + " still has enough stamina to dodge that.");
+			}
 		}
 		else if (ability.NameIs("Psionic Blast"))
 		{
 			DoDamage(target, 4, true);
+
 			AnimateByDefault(ability.castTime);
+			log("makes " + target.UniqueName + " feel pain.");
 		}
 		else if (ability.NameIs("True Strike"))
 		{
-			target.AddEffect("True Strike", 10);
 			AnimateByDefault(ability.castTime);
+			B.log.RemoveLastLine();
+
+			target.AddEffect("True Strike", 10);
 		}
 		else if (ability.NameIs("Marked Prey"))
 		{
 			target.AddEffect("Marked Prey", 7);
+
 			AnimateByDefault(ability.castTime);
+			log("marks " + target.UniqueName + ".");
 		}
 		else if (ability.NameIs("Dirty Fighting"))
 		{
-			target.AddEffect("Blind", 6);
 			AnimateByDefault(ability.castTime);
+			log("throws sand into " + target.UniqueName + "'s face!");
+
+			target.AddEffect("Blind", 6);
 		}
 		else if (ability.NameIs("Fake Death"))
 		{
-			target.AddEffect("Fake Death", 20);
 			AnimateByDefault(ability.castTime);
+			B.log.RemoveLastLine();
+
+			target.AddEffect("Fake Death", 20);
 		}
 		else if (ability.NameIs("Mind Bond"))
 		{
-			target.AddInitiative(-ability.castTime, ability.castTime, false);
 			AnimateByDefault(ability.castTime);
+			log("holds " + target.UniqueName + "'s mind.");
+
+			target.AddEffect("Unconscious", 6);
+			AddEffect("Sleeping", 6);
+
+			B.log.RemoveLastLine();
 		}
 		else if (ability.NameIs("Blindsight"))
 		{
-			target.AddEffect("Blindsight", 6, this);
 			AnimateByDefault(ability.castTime);
+			B.log.RemoveLastLine();
+
+			target.AddEffect("Blindsight", 6, this);
 		}
 		else if (ability.NameIs("Sleep"))
 		{
-			if (!IsEnemyTo(target)) target.data.AddEndurance(1);
-			target.AddEffect("Sleeping", 10);
 			AnimateByDefault(ability.castTime);
+			B.log.RemoveLastLine();
+			if (target.HasEffect("Sleeping")) logn(target, "falls asleep within a dream.");
+
+			if (!IsEnemyTo(target)) target.data.AddStamina(1);
+			target.AddEffect("Sleeping", 10);
 		}
 		else if (ability.NameIs("Mind Trick"))
 		{
-			target.AddEffect("Mind Tricked", 10, this);
 			AnimateByDefault(ability.castTime);
+			B.log.RemoveLastLine();
+
+			target.AddEffect("Mind Tricked", 10, this);
 		}
 		else if (ability.NameIs("Mind Control"))
 		{
-			target.AddEffect("Mind Controlled", ability.castTime);
 			AnimateByDefault(ability.castTime);
+			B.log.RemoveLastLine();
+
+			target.AddEffect("Mind Controlled", 10, this);
+			AddEffect("Sleeping", 10);
+
+			B.log.RemoveLastLine();
 		}
 		else if (ability.NameIs("Attention"))
 		{
 			target.AddEffect("Attention", 10, this);
+
 			AnimateByDefault(ability.castTime);
+			log("is now the main object of " + target.UniqueName + "'s thoughts.");
 		}
 		else if (ability.NameIs("Prediction"))
 		{
-			if (IsEnemyTo(target)) target.AddEffect("Destined to Die", 10);
-			else target.AddEffect("Destined to Succeed", 10);
+			target.AddEffect(IsEnemyTo(target) ? "Destined to Die" : "Destined to Succeed", 10, this);
 
 			AnimateByDefault(ability.castTime);
+			log("predicts that " + target.UniqueName + " will " + (IsEnemyTo(target) ? "die" : "succeed") + " tonight.");
 		}
 		else if (ability.NameIs("Grimoire Slam"))
 		{
 			target.AddInitiative(-2.0f, ability.castTime, false);
 			Kick(position, (target.position - position).GetDirection(), 1, false, ability.castTime);
+
+			log("slams " + target.UniqueName + " with a book!");
 		}
 		else if (ability.NameIs("First Aid"))
 		{
 			target.data.AddHP(1);
+
 			AnimateByDefault(ability.castTime);
+			log("heals " + target.UniqueName + " a little.");
 		}
 	}
 
 	private void PayAbilityCost(Ability ability)
 	{
 		RemoveEffects("Melded", "Hidden", "Fake Death");
-		data.AddEndurance(-ability.cost);
+		data.AddStamina(-ability.cost);
+
+		B.log.AddLine(UniqueName, LogColor);
 	}
 }
