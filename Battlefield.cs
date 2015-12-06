@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework.Graphics;
 
-partial class Battlefield
+public partial class Battlefield
 {
 	private char[,] data;
 	public Palette palette;
@@ -176,22 +176,48 @@ partial class Battlefield
 		}
 	}
 
-	public void CheckForEvents()
+	private enum Resolution { Not, Victory, Retreat };
+	private Resolution GetResolution()
 	{
-		var aliveMonsters = from c in AliveCreatures where !c.isInParty select c;
-		if (aliveMonsters.Count() == 0)
+		Func<LCreature, bool> onBorder = lc => lc.position.x == 0 || lc.position.y == 0 || lc.position.x == Size.x - 1 || lc.position.y == Size.y - 1;
+		Func<LCreature, bool> noEnemiesNearby = lc => AliveCreatures.Where(c => lc.IsEnemyTo(lc) && lc.Distance(c) <= 2).Count() == 0;
+
+		if (AliveCreatures.Where(c => !c.isInParty).Count() == 0) return Resolution.Victory;
+		else if (AliveCreatures.Where(c => c.isInParty && (!onBorder(c) || !noEnemiesNearby(c))).Count() == 0) return Resolution.Retreat;
+		else return Resolution.Not;
+	}
+
+	public void EndBattle()
+	{
+		Action<List<Creature>, bool> reshape = (party, isInParty) =>
 		{
-			List<Creature> deadParty = P.party.Where(c => !c.IsAlive).Cast<Creature>().ToList();
+			List<Creature> deadParty = party.Where(c => !c.IsAlive).ToList();
+			foreach (Creature c in deadParty) party.Remove(c);
+
+			var newParty = from lc in AliveCreatures where !party.Contains(lc.data) && (isInParty ? lc.isInParty : !lc.isInParty) select lc.data;
+			foreach (Creature c in newParty) party.Add(c);
+
+			party = party.OrderBy(c => c.Importance).ToList();
+		};
+
+		Resolution resolution = GetResolution();
+		if (resolution == Resolution.Victory || resolution == Resolution.Retreat)
+		{
+			/*List<Creature> deadParty = P.party.Where(c => !c.IsAlive).Cast<Creature>().ToList();
 			foreach (Creature c in deadParty) P.party.Remove(c);
 
 			var newParty = from lc in AliveCreatures where !P.party.Contains(lc.data) && lc.isInParty select lc.data;
 			foreach (Creature c in newParty) P.party.Add(c);
 
-			P.party = P.party.OrderBy(c => c.Importance).ToList();
+			P.party = P.party.OrderBy(c => c.Importance).ToList();*/
 
-			gObject.Kill();
+			reshape(P.party, true);
+			reshape(gObject.party, false);
+
+			if (resolution == Resolution.Victory) gObject.Kill();
 			MyGame.Instance.battle = false;
 		}
+		else Log.Error("can't end battle");
 	}
 
 	public List<ZPoint> EveryPoint

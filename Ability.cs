@@ -54,7 +54,7 @@ public class Ability : NamedObject
 	public static void LoadTextures()
 	{
 		foreach (Ability a in BigBase.Instance.abilities.data)
-			a.texture = MainScreen.Instance.game.Content.Load<Texture2D>("abilities/" + a.name);
+			a.texture = M.game.Content.Load<Texture2D>("abilities/" + a.name);
 	}
 
 	public void DrawDescription(ZPoint position)
@@ -62,8 +62,8 @@ public class Ability : NamedObject
 		Screen screen = new Screen(position, new ZPoint(240, 190));
 		//screen.Fill(new Color(0, 0, 0.5f, 0.5f));
 
-		screen.DrawString(MainScreen.Instance.verdanaBoldFont, name, new ZPoint(0, 0), Color.White);
-		SpriteFont font = MainScreen.Instance.smallFont;
+		screen.DrawString(M.fonts.verdanaBold, name, new ZPoint(0, 0), Color.White);
+		SpriteFont font = M.fonts.small;
 
 		if (range != 0 || targetType != TargetType.Passive) screen.offset += 8;
 		if (range != 0) screen.DrawString(font, "RANGE: " + range, new ZPoint(0, screen.offset), Color.White);

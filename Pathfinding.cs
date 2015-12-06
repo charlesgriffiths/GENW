@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
-partial class Player : GObject
+public partial class Player : GObject
 {
 	private void AddToFrontier(List<FramedHexPoint> list, HexPoint hexPoint, HexPoint.HexDirection d, float costSoFar)
 	{
@@ -61,7 +61,7 @@ partial class Player : GObject
 	}
 }
 
-partial class Battlefield
+public partial class Battlefield
 {
 	private void AddToFrontier(List<FramedZPoint> list, ZPoint zPoint, ZPoint.Direction d, ZPoint start)
 	{
@@ -116,7 +116,7 @@ partial class Battlefield
 		foreach (ZPoint.Direction d in path)
 		{
 			if (c != null && i == path.Count())
-				delayedDrawings.Add(new DelayedDrawing(M.verdanaBoldFont, CurrentLCreature.HitChance(c).ToString() + "%",
+				delayedDrawings.Add(new DelayedDrawing(M.fonts.verdanaBold, CurrentLCreature.HitChance(c).ToString() + "%",
 					new ZPoint(GraphicCoordinates(position)) + 16 * new ZPoint(d) + new ZPoint(1, 8), Color.Red));
 			else
 			{

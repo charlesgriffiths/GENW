@@ -5,12 +5,11 @@ public abstract class Animation
 {
 	protected int frameTime, maxFrameTime;
 
+	protected static MainScreen M { get { return MainScreen.Instance; } }
+
 	public virtual void Draw() { frameTime++; }
 	public virtual bool SpendsTime { get { return false; } }
 	public bool IsFinished { get { return frameTime >= maxFrameTime; } }
-
-	//public virtual Vector2 Position { get { return Vector2.Zero; } }
-
 	public static int FramesInOneGameTime { get { return 20; } }
 }
 

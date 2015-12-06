@@ -6,6 +6,8 @@ public abstract class NamedObject
 	public string name;
 
 	public abstract void Load(XmlNode xnode);
+
+	protected static MainScreen M { get { return MainScreen.Instance; } }
 }
 
 public class GeneralBase<T> where T : NamedObject, new ()

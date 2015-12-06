@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class MainScreen : Screen
+public class MainScreen : Screen
 {
 	private static readonly MainScreen instance = new MainScreen();
 	public static MainScreen Instance { get { return instance; } }
@@ -15,7 +15,9 @@ class MainScreen : Screen
 
 	public Texture2D universalTexture, zSelectionTexture;
 	private Texture2D hexSelectionTexture;
-	public SpriteFont ambientFont, smallFont, verdanaFont, verdanaBoldFont;
+	
+	public struct Fonts { public SpriteFont ambient, small, verySmall, verdana, verdanaBold; }
+	public Fonts fonts;
 
 	private MyGame G { get { return MyGame.Instance; } }
 	private World W { get { return World.Instance; } }
@@ -49,10 +51,11 @@ class MainScreen : Screen
 		hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
 		zSelectionTexture = game.Content.Load<Texture2D>("other/zSelection");
 
-		ambientFont = game.Content.Load<SpriteFont>("fonts/ambient");
-		smallFont = game.Content.Load<SpriteFont>("fonts/small");
-		verdanaFont = game.Content.Load<SpriteFont>("fonts/verdana");
-		verdanaBoldFont = game.Content.Load<SpriteFont>("fonts/verdanaBold");
+		fonts.ambient = game.Content.Load<SpriteFont>("fonts/ambient");
+		fonts.small = game.Content.Load<SpriteFont>("fonts/small");
+		fonts.verySmall = game.Content.Load<SpriteFont>("fonts/verySmall");
+		fonts.verdana = game.Content.Load<SpriteFont>("fonts/verdana");
+		fonts.verdanaBold = game.Content.Load<SpriteFont>("fonts/verdanaBold");
 	}
 
 	public void Draw()
@@ -60,7 +63,7 @@ class MainScreen : Screen
 		W.Draw();
 
         if (!G.dialog && !G.battle && (!G.FOVEnabled || W.player[Mouse])) Draw(hexSelectionTexture, GraphicCoordinates(Mouse));
-		if (G.debug) DrawString(ambientFont, "Mouse: " + Mouse, new ZPoint(10, 10), Color.Red);
+		if (G.debug) DrawString(fonts.ambient, "Mouse: " + Mouse, new ZPoint(10, 10), Color.Red);
 		if (G.dndItem != null) Draw(G.dndItem.data.texture, G.Mouse - new ZPoint(16, 16));
 
 		editor.Draw();

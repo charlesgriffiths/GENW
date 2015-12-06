@@ -1,7 +1,7 @@
 ﻿using System.Xml;
 using Microsoft.Xna.Framework.Graphics;
 
-class GTileType : NamedObject
+public class GTileType : NamedObject
 {
 	public bool isWalkable, isFlat;
 	public float travelTime;
@@ -15,7 +15,7 @@ class GTileType : NamedObject
 	}
 }
 
-class GTile : NamedObject
+public class GTile : NamedObject
 {
 	public Texture2D texture, topTexture;
 	public string picture;
@@ -43,7 +43,7 @@ class GTile : NamedObject
 	}
 }
 
-class LTileType : NamedObject
+public class LTileType : NamedObject
 {
 	public bool isWalkable, isFlat;
 
@@ -55,7 +55,7 @@ class LTileType : NamedObject
 	}
 }
 
-class LTile : NamedObject
+public class LTile : NamedObject
 {
 	public Texture2D texture;
 	private LTileType type;

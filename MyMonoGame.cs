@@ -97,7 +97,15 @@ public class MyMonoGame : Game
 		}
 		else if (G.battle && B.ability == null)
 		{
-			if (G.LeftMouseButtonClicked) B.SetSpotlight();
+			if (G.LeftMouseButtonClicked)
+			{
+				MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
+				if (mt != null)
+				{
+					if (mt.name == "End Battle") B.EndBattle();
+				}
+				else B.SetSpotlight();
+			}
 			if (G.RightMouseButtonClicked) B.GoTo();
 
 			if (KeyPressed(Keys.Space)) B.CurrentLCreature.Wait();

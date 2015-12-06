@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-partial class Battlefield
+public partial class Battlefield
 {
-	public static Vector2 ScreenPosition { get { return new Vector2(16 + 96, 8); } }
+	public static Vector2 ScreenPosition { get { return new Vector2(16 + 96, 8)/*Vector2(8, 8)*/; } }
 	public static Vector2 GraphicCoordinates(RPoint p) { return ScreenPosition + new Vector2(32 * p.x, 32 * p.y); }
 	public static Vector2 GC(RPoint p) { return GraphicCoordinates(p); }
 	public static ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - ScreenPosition) / 32.0f); }
@@ -129,7 +129,7 @@ partial class Battlefield
 			M.Draw(a.texture, t.position);
 
 			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(t.position, t.size, new Color(0, 0, 0, 0.7f));
-			else if (c == CurrentLCreature) M.DrawStringWithShading(M.smallFont, Stuff.AbilityHotkeys[i].ToString(), t.position + new ZPoint(37, 33), Color.White);
+			else if (c == CurrentLCreature) M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[i].ToString(), t.position + new ZPoint(37, 33), Color.White);
 		}
 
 		MouseTriggerKeyword forDescription = MouseTriggerKeyword.GetUnderMouse("ability");
@@ -139,7 +139,7 @@ partial class Battlefield
 			M.Draw(a.texture, forDescription.position, a.color);
 
 			if (c == CurrentLCreature && a.targetType != Ability.TargetType.Passive)
-				M.DrawStringWithShading(M.smallFont, Stuff.AbilityHotkeys[forDescription.parameter].ToString(),
+				M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[forDescription.parameter].ToString(),
 				forDescription.position + new ZPoint(37, 33), Color.White);
 
 			a.DrawDescription(screen.position + position + new ZPoint(24, 56));
@@ -159,7 +159,7 @@ partial class Battlefield
 		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(staminaFraction * length), 20), new Color(0.4f, 0, 0));
 		for (int i = 1; i <= c.MaxHP; i++) screen.DrawRectangle(new ZPoint((int)(i * (float)length / c.MaxHP), 0), new ZPoint(1, 20), Color.Black);
 
-		SpriteFont font = MainScreen.Instance.verdanaBoldFont;
+		SpriteFont font = M.fonts.verdanaBold;
 
 		string name = c.Name;
 		if (c.UniqueName != "") name = c.UniqueName + ", " + c.Name;
@@ -174,6 +174,22 @@ partial class Battlefield
 		c.DrawEffects(screen.position + new ZPoint(0, 60), screen.position + new ZPoint(24, 180));
 		if (c.data is Character) (c.data as Character).inventory.Draw(screen.position + new ZPoint(0, 92));
 		DrawAbilities(c, screen, new ZPoint(0, 124));
+	}
+
+	private void DrawEndButton()
+	{
+		int length = 128, height = 32;
+		Screen screen = new Screen(new ZPoint(M.size.x - 8 - 144 - length / 2, M.size.y - 8 - height), new ZPoint(length, height));
+
+		MouseTriggerKeyword.Clear("End Battle");
+		Resolution resolution = GetResolution();
+        if (resolution != Resolution.Not) MouseTriggerKeyword.Set("End Battle", 0, screen.position, screen.size);
+		MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse("End Battle");
+
+		screen.Fill(Stuff.MyColor("Dark Grey"));
+
+		string text = resolution == Resolution.Victory ? "Victory!" : resolution == Resolution.Retreat ? "Run!" : "End Battle";
+		screen.DrawString(M.fonts.verdanaBold, text, 9, resolution == Resolution.Not ? Color.Gray : mt != null ? Color.Red : Color.White);
 	}
 
 	public void Draw()
@@ -194,7 +210,7 @@ partial class Battlefield
 		if (combatAnimations.IsEmpty) DrawZones();
 
 		var query = objects.OrderBy(o => o.position.y).ThenBy(o => -o.Importance);
-		foreach (LObject l in query) l.Draw(); //Draw(l.texture, l.rPosition, l.scaling);
+		foreach (LObject l in query) l.Draw();
 
 		combatAnimations.Draw();
 		scaleAnimations.Draw();
@@ -209,7 +225,8 @@ partial class Battlefield
 		//DrawScale(new ZPoint(128, M.size.y - 68));
 		DrawScale(new ZPoint(16 + 32, 8 + 16 + 32));
 		DrawInfo(spotlightObject as LCreature, new ZPoint(M.size.x - 288 - 8, 8));
-		log.Draw();
+		if (MyGame.Instance.combatLog) log.Draw();
+		DrawEndButton();
 	}
 }
 

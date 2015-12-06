@@ -108,9 +108,7 @@ public partial class LCreature : LObject
 		}
 	}
 
-	//public bool IsInParty { get { return HasEffect("Mind Tricked") ? !isInParty : isInParty; } }
-
-	public override int Importance { get { return data.Importance; } }
+	public override int Importance { get { return IsAlive ? data.Importance : 5; } }
 
 	public override bool IsVisible { get { return HasEffect("Melded") || HasEffect("Hidden") ? false : true; } }
 
@@ -138,7 +136,8 @@ public partial class LCreature : LObject
 		if (HasEffect("Mind Controlled")) reference = GetEffect("Mind Controlled").parameter as LCreature;
 		else if (HasEffect("Mind Tricked")) reference = GetEffect("Mind Tricked").parameter as LCreature;
 
-		return reference.isInParty != lc.isInParty;
+		if (lc == this) return false;
+		else return reference.isInParty != lc.isInParty;
 	}
 	public bool IsFriendTo(LCreature lc) { return !IsEnemyTo(lc); }
 
@@ -181,7 +180,10 @@ public partial class LCreature : LObject
 	public void DoDamage(LCreature lc, int damage, bool pure)
 	{
 		int finalDamage = pure || HasAbility("Prodigious Precision") ? damage : Math.Max(damage - lc.Armor, 0);
-		lc.data.AddStamina(-finalDamage);
+
+		lc.data.AddHP(-finalDamage);
+		if (lc.Stamina > lc.HP) lc.data.AddStamina(lc.HP - lc.Stamina);
+
 		lc.RememberDamage(this, finalDamage);
 		if (lc.data.stamina == 0) lc.Kill();
 		B.combatAnimations.Add(new DamageAnimation(finalDamage, Battlefield.GC(lc.position), 1.0f, pure));
@@ -391,7 +393,7 @@ public partial class LCreature : LObject
 		foreach (Effect e in effects)
 		{
 			screen.Draw(e.data.texture, new ZPoint(32 * i, 0), e.data.SgnColor);
-			screen.DrawStringWithShading(M.smallFont, ((int)e.timeLeft).ToString(), new ZPoint(32 * i + 26, 20), Color.White);
+			screen.DrawStringWithShading(M.fonts.small, ((int)e.timeLeft).ToString(), new ZPoint(32 * i + 26, 20), Color.White);
 
 			MouseTriggerKeyword.Set("effect", i, p + new ZPoint(32 * i, 0), new ZPoint(32, 32));
 			i++;

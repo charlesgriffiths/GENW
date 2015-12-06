@@ -2424,3 +2424,9 @@
 /processorParam:TextureFormat=Color
 /build:local/otherEffect.png
 
+#begin fonts/verySmall.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:fonts/verySmall.spritefont
+

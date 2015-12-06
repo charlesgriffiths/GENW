@@ -8,16 +8,16 @@ public class Screen
 
 	private MainScreen M { get { return MainScreen.Instance; } }
 
-	public Screen()
-	{
-		ZPoint position = new ZPoint(10, 10);
-		ZPoint size = new ZPoint(200, 100);
-	}
-	
 	public Screen(ZPoint positioni, ZPoint sizei)
 	{
 		position = positioni;
 		size = sizei;
+	}
+
+	protected Screen()
+	{
+		ZPoint position = new ZPoint(10, 10);
+		ZPoint size = new ZPoint(200, 100);
 	}
 
 	public void DrawRectangle(ZPoint p, ZPoint s, Color color)

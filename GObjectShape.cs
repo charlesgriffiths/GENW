@@ -2,7 +2,7 @@
 using System.Xml;
 using Microsoft.Xna.Framework.Graphics;
 
-class GObjectShape : NamedObject
+public class GObjectShape : NamedObject
 {
 	private string textureName;
 	public Texture2D texture;

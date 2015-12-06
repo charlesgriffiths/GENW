@@ -15,7 +15,7 @@ public class DialogResponse
 	}
 }
 
-class DialogNode
+public class DialogNode
 {
 	public string text, name, description;
 	public Collection<DialogResponse> responses = new Collection<DialogResponse>();
@@ -36,7 +36,7 @@ class DialogNode
 	}
 }
 
-class Dialog : NamedObject
+public class Dialog : NamedObject
 {
 	public Dictionary<string, DialogNode> nodes = new Dictionary<string, DialogNode>();
 

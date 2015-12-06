@@ -3,11 +3,11 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-partial class GObject
+public partial class GObject
 {
 	protected GObjectShape shape;
 	public List<Creature> party = new List<Creature>();
-	public Inventory inventory = new Inventory(24, null);
+	public Inventory inventory = new Inventory(24, null, "Party");
 
 	public HexPoint position = new HexPoint();
 	public RPoint rPosition = new RPoint();
@@ -43,10 +43,10 @@ partial class GObject
 	{
 		if (IsVisible() && uniqueName != "")
 		{
-			Vector2 offset = M.smallFont.MeasureString(uniqueName);
+			Vector2 offset = M.fonts.small.MeasureString(uniqueName);
 			Vector2 v = M.GraphicCoordinates(rPosition) + new Vector2(24 - offset.X / 2, 48);
 			M.DrawRectangle(new ZPoint(v), new ZPoint(offset), new Color(0.0f, 0.0f, 0.0f, 0.8f));
-			M.DrawString(M.smallFont, uniqueName, new ZPoint(v), Color.White);
+			M.DrawString(M.fonts.small, uniqueName, new ZPoint(v), Color.White);
 		}
 	}
 

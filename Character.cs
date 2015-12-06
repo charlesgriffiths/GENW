@@ -18,7 +18,7 @@ public class Character : Creature
 	public override CreepType creepType { get {	return BigBase.Instance.creepTypes.Get("Sentient");	} }
 
 	private int InventorySum(Func<Bonus, int> func)	{ return (from i in inventory.Items select func(i.data.bonus)).Sum(); }
-
+	
 	public override int MaxHP { get { return 10 + 4 * this["Endurance"] + InventorySum(b => b.hp); } }
 	public override int Damage { get { return 1 + this["Strength"] + InventorySum(b => b.damage); } }
 	public override int Attack { get { return this["Agility"] + InventorySum(b => b.attack); } }
@@ -52,7 +52,7 @@ public class Character : Creature
 		BigBase b = BigBase.Instance;
 
 		uniqueName = uniqueNamei;
-		inventory = new Inventory(6, this);
+		inventory = new Inventory(6, this, "");
 
 		race = b.races.Get(raceName);
 		cClass = b.classes.Get(className);
@@ -63,5 +63,11 @@ public class Character : Creature
 
 		hp = MaxHP;
 		stamina = MaxHP;
+	}
+
+	public override void AddFatigue(float value)
+	{
+		fatigue += value * 0.1f * Math.Max(10 - this["Survival"], 0);
+		UpdateFatigue();
 	}
 }

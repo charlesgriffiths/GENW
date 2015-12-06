@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 
-class DialogScreen
+public class DialogScreen
 {
 	private DialogNode dialogNode;
 	private Dialog dialog;
@@ -26,7 +26,7 @@ class DialogScreen
 		screen.Draw(dialog.texture, new ZPoint(8, 8));
 
 		screen.offset = 8;
-		SpriteFont font = MainScreen.Instance.verdanaFont;
+		SpriteFont font = MainScreen.Instance.fonts.verdana;
         screen.DrawString(font, dialogNode.text, new ZPoint(48, screen.offset), Color.White, screen.size.x - 48);
 		screen.DrawString(font, dialogNode.description, new ZPoint(48, screen.offset), Color.Gray, screen.size.x - 48);
 

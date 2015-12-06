@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-class CombatLog
+public class CombatLog
 {
 	List<List<Tuple<string, Color>>> data = new List<List<Tuple<string, Color>>>();
 
 	public static MainScreen M { get { return MainScreen.Instance; } }
 	public static int MaxLines { get { return 9; } }
-	public static SpriteFont Font { get { return M.verdanaFont; } }
+	public static SpriteFont Font { get { return M.fonts.verdana; } }
 	public static int LineHeight { get { return (int)Font.MeasureString("ABC").Y; } }
 	public static int Length { get { return 600; } }
 	public static int Height { get { return 6 + MaxLines * LineHeight; } }

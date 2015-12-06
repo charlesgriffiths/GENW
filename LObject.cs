@@ -62,7 +62,7 @@ public abstract class LObject
 	{
 		Log.Assert(time > 0, "time <= 0");
 		SetInitiative(initiative - time, time, true);
-		B.CheckForEvents();
+		//B.CheckForEvents();
 	}
 
 	protected virtual void PassTurn(float time)

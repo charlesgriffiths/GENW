@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-class Palette : NamedObject
+public class Palette : NamedObject
 {
 	private Dictionary<char, LTile> data = new Dictionary<char, LTile>();
 

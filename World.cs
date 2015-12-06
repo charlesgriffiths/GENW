@@ -2,7 +2,7 @@
 using System.Xml;
 using System.Collections.Generic;
 
-class World
+public class World
 {
 	private static readonly World instance = new World();
 	public static World Instance { get { return instance; } }

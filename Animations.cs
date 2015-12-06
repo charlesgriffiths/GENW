@@ -98,7 +98,7 @@ class DamageAnimation : Animation
 	{
 		MainScreen m = MainScreen.Instance;
 		m.Draw(texture, position);
-		m.DrawString(m.verdanaBoldFont, damage.ToString(), new ZPoint(position) + new ZPoint(10, 10 - (int)(frameTime * 0.35f)), Color.White);
+		m.DrawString(m.fonts.verdana, damage.ToString(), new ZPoint(position) + new ZPoint(10, 10 - (int)(frameTime * 0.35f)), Color.White);
 		base.Draw();
 	}
 }

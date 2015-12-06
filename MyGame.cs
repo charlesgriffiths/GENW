@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Input;
 
 public class MyGame
 {
-	public bool input, dialog, battle, editor, debug, FOVEnabled;
+	public bool input, dialog, battle, editor, debug, combatLog, FOVEnabled;
 	public Console console;
 
 	public KeyboardState keyboardState, previousKeyboardState;
@@ -29,6 +29,7 @@ public class MyGame
 		battle = false;
 		editor = false;
 		debug = false;
+		combatLog = false;
 
 		FOVEnabled = true;
     }

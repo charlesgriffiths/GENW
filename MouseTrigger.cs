@@ -110,6 +110,8 @@ public class MouseTriggerKeyword : MouseTrigger
 		if (query.Count() == 0)	G.mouseTriggerKeywords.Add(new MouseTriggerKeyword(name, parameter, position, size));
 	}
 
+	public static void Set(string name, ZPoint position, ZPoint size) { Set(name, 0, position, size); }
+
 	public static MouseTriggerKeyword GetUnderMouse()
 	{
 		var query = from t in G.mouseTriggerKeywords where G.Mouse.IsIn(t) select t;
