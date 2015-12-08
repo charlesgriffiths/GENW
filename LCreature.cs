@@ -199,6 +199,7 @@ public partial class LCreature : LObject
 		B.log.Add(" attacks " + lc.UniqueName, Color.Pink);
 
 		int hitChance = HitChance(lc);
+		int damage = Damage;
 
 		if (lc.HasEffect("Sleeping")) hitChance = 100;
 		if (HasAbility("Backstab"))
@@ -208,6 +209,7 @@ public partial class LCreature : LObject
 			if (behind != null && behind.IsEnemyTo(lc))
 			{
 				hitChance = 100;
+				damage += 3;
 				B.log.Add(" from behind");
 			}
 		}
@@ -222,11 +224,8 @@ public partial class LCreature : LObject
 		}
 		else if (World.Instance.random.Next(100) < hitChance)
 		{
-			int damage = Damage;
-
 			if (HasEffect("Power Strike")) { damage *= 3; RemoveEffect("Power Strike"); }
 			if (HasEffect("Melded")) damage *= 2;
-			if (HasAbility("Backstab")) damage += 3;
 
 			DoDamage(lc, damage, false);
 

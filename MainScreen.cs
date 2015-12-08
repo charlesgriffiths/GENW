@@ -16,7 +16,7 @@ public class MainScreen : Screen
 	public Texture2D universalTexture, zSelectionTexture;
 	private Texture2D hexSelectionTexture;
 	
-	public struct Fonts { public SpriteFont ambient, small, verySmall, verdana, verdanaBold; }
+	public struct Fonts { public SpriteFont ambient, small, verySmall, superSmall, verdana, verdanaBold; }
 	public Fonts fonts;
 
 	private MyGame G { get { return MyGame.Instance; } }
@@ -54,6 +54,7 @@ public class MainScreen : Screen
 		fonts.ambient = game.Content.Load<SpriteFont>("fonts/ambient");
 		fonts.small = game.Content.Load<SpriteFont>("fonts/small");
 		fonts.verySmall = game.Content.Load<SpriteFont>("fonts/verySmall");
+		fonts.superSmall = game.Content.Load<SpriteFont>("fonts/superSmall");
 		fonts.verdana = game.Content.Load<SpriteFont>("fonts/verdana");
 		fonts.verdanaBold = game.Content.Load<SpriteFont>("fonts/verdanaBold");
 	}

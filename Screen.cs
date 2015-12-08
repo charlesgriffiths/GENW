@@ -75,6 +75,12 @@ public class Screen
 		DrawString(font, text, new ZPoint((int)x, y), color);
 	}
 
+	public void DrawString(SpriteFont font, string text, Color color)
+	{
+		Vector2 s = font.MeasureString(text);
+		DrawString(font, text, new ZPoint((int)(0.5f * (size.x - s.X)), (int)(0.5f * (size.y - s.Y))), color);
+    }
+
 	public void DrawString(SpriteFont font, string text, ZPoint p, Color color, int length)
 	{
 		//MainScreen.Instance.spriteBatch.DrawString(font, Stuff.Split(text, font, length), position + p, color);

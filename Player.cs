@@ -1,12 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 public partial class Player : GObject
 {
-	private Inventory crafting = new Inventory(6, null, "Crafting");
-	private Inventory ground = new Inventory(12, null, "Ground");
+	private Inventory crafting = new Inventory(6, 1, null, "CRAFTING");
+	private Inventory ground = new Inventory(6, 2, null, "GROUND");
 
 	public bool[,] visitedLocations;
 	private List<GObject> visibleObjects = new List<GObject>();
@@ -19,13 +20,13 @@ public partial class Player : GObject
 		shape.isActive = true;
 		uniqueName = shape.name;
 
-		Character playerCharacter = new Character(shape.name, "Floran", "Assassin", "Eden", "Soldier");
+		Character playerCharacter = new Character(shape.name, "Ratling", "Assassin", "Eden", "Soldier");
 		playerCharacter.inventory.Add("Club");
 		playerCharacter.inventory.Add("Leather Armor");
 		party.Add(playerCharacter);
 
 		Character c2 = new Character("Bob", "Vorcha", "Alchemist", "The Scorch", "Pitfighter");
-		c2.inventory.Add("Dagger");
+		c2.inventory.Add("Iron Dagger");
 		c2.inventory.Add("Force Staff");
 		party.Add(c2);
 
@@ -40,7 +41,8 @@ public partial class Player : GObject
 		inventory.Add("Buckler");
 		inventory.Add("Chainmail");
 		inventory.Add("Banana", 4);
-		inventory.Add("Corpse Meat", 2);
+		inventory.Add("Meat", 2);
+		inventory.Add("Rotten Meat", 3);
 	}
 
 	public void LoadTextures()
@@ -51,32 +53,59 @@ public partial class Player : GObject
 	public void DrawParty(ZPoint position)
 	{
 		Screen screen = new Screen(position, new ZPoint(1, 1));
-		int vOffset = 0;
+		int vOffset = 0, iOffset = 0, hiOffset = 40, vStep = 40;
+		MouseTriggerCreature.Clear();
 
-		foreach (Creature member in party)
+		foreach (Creature c in party)
 		{
-			//int i = party.IndexOf(member);
 			Screen icon = new Screen(position + new ZPoint(0, vOffset), new ZPoint(32, 32));
+			icon.Draw(c.texture, ZPoint.Zero);
+			MouseTriggerCreature.Set(c, icon.position, icon.size);
+			//icon.DrawString(M.fonts.verySmall, member.stamina.ToString() + "/" + member.hp + "/" + member.MaxHP, 32, Color.White);
 
-			icon.Draw(member.texture, ZPoint.Zero);
-			icon.DrawString(M.fonts.verySmall, member.stamina.ToString() + "/" + member.hp + "/" + member.MaxHP, 32, Color.White);
-
-			float hpMissing = 1 - (float)member.hp / member.MaxHP;
-			float staminaMissing = 1 - (float)member.stamina / member.MaxHP;
+			float hpMissing = 1 - (float)c.hp / c.MaxHP;
+			float staminaMissing = 1 - (float)c.stamina / c.MaxHP;
 
 			icon.DrawRectangle(new ZPoint(0, 32), new ZPoint(32, -(int)(staminaMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 			icon.DrawRectangle(new ZPoint(0, 32), new ZPoint(32, -(int)(hpMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 
-			vOffset += 32 + 16;
+			if (c is Character) (c as Character).inventory.Draw(position + new ZPoint(hiOffset, iOffset));
+
+			vOffset += vStep;
+			iOffset += vStep;
 		}
 
-		var characters = from c in party where c is Character select c;
-		foreach (Character c in characters) c.inventory.Draw(position + new ZPoint(40, party.IndexOf(c) * 40));
+		MouseTriggerCreature mtc = MouseTriggerCreature.GetUnderMouse();
+		if (mtc != null)
+		{
+			Creature c = mtc.creature;
+			Screen icon = new Screen(position + new ZPoint(0, vStep * party.IndexOf(c)), new ZPoint(32, 32));
+			icon.DrawString(M.fonts.verySmall, c.stamina.ToString() + "/" + c.hp + "/" + c.MaxHP, 27, Color.White);
+		}
 
-		vOffset = (from c in party where c is Character select c).Count() * 40;
-		inventory.Draw(position + new ZPoint(40, vOffset));
-		crafting.Draw(position + new ZPoint(40, vOffset + 256));
-		ground.Draw(position + new ZPoint(40, vOffset + 256 + 32 + 16));
+		Action<Inventory> draw = i =>
+		{
+			i.Draw(position + new ZPoint(hiOffset, iOffset));
+			iOffset += i.Height * 32 + 8;
+		};
+
+		draw(inventory);
+
+		DrawCrafting(screen.position + new ZPoint(240, iOffset));
+		draw(crafting);
+		draw(ground);
+	}
+
+	private void DrawCrafting(ZPoint position)
+	{
+		List<ItemShape> items = BigBase.Instance.items.data.Where(i => i.IsComposable(crafting.CComponents)).ToList();
+
+		int vOffset = 0;
+		foreach(ItemShape item in items)
+		{
+			M.DrawString(M.fonts.verdanaBold, item.name, position + new ZPoint(0, vOffset), Color.White);
+			vOffset += 16;
+		}
 	}
 
 	public override void Draw()

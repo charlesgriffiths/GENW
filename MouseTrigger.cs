@@ -40,6 +40,38 @@ public class MouseTriggerLCreature : MouseTrigger
 	}
 }
 
+public class MouseTriggerCreature : MouseTrigger // можно ввести просто MouseTriggerObject
+{
+	public Creature creature;
+
+	private MouseTriggerCreature(Creature c, ZPoint positioni, ZPoint sizei)
+	{
+		creature = c;
+		position = positioni;
+		size = sizei;
+	}
+
+	public static void Clear() { G.mouseTriggerCreatures.Clear(); }
+
+	public static void Set(Creature creature, ZPoint position, ZPoint size)
+	{
+		var query = from t in G.mouseTriggerCreatures where t.creature == creature select t;
+		if (query.Count() == 0) G.mouseTriggerCreatures.Add(new MouseTriggerCreature(creature, position, size));
+		else
+		{
+			MouseTriggerCreature t = query.Single();
+			t.position = position;
+		}
+	}
+
+	public static MouseTriggerCreature GetUnderMouse()
+	{
+		var query = from t in G.mouseTriggerCreatures where G.Mouse.IsIn(t) select t;
+		if (query.Count() > 0) return query.First();
+		else return null;
+	}
+}
+
 public class MouseTriggerInventory : MouseTrigger
 {
 	public Inventory inventory;

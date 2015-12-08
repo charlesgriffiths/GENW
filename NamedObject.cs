@@ -1,5 +1,5 @@
 ﻿using System.Xml;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 public abstract class NamedObject
 {
@@ -12,14 +12,14 @@ public abstract class NamedObject
 
 public class GeneralBase<T> where T : NamedObject, new ()
 {
-	public Collection<T> data;
+	public List<T> data;
 
 	public bool loaded;
 	private string filename;
 
 	public GeneralBase()
 	{
-		data = new Collection<T>();
+		data = new List<T>();
 		loaded = false;
 	}
 

@@ -161,6 +161,8 @@ public class MyMonoGame : Game
 			if (G.dndItem != null && G.LeftMouseButtonReleased)
 			{
 				MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
+				MouseTriggerCreature mtc = MouseTriggerCreature.GetUnderMouse();
+
 				if (mti != null && G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null && mti.GetItem().data != G.dndItem.data)
 				{
 					G.inventory.Add(new Item(mti.GetItem()), G.cell);
@@ -169,14 +171,9 @@ public class MyMonoGame : Game
 					mti.inventory.Add(new Item(G.dndItem), mti.cell);
 					mti.inventory[mti.cell].numberOfStacks = G.dndItem.numberOfStacks;
 				}
-				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell))
-				{
-					mti.inventory.Add(G.dndItem, mti.cell);
-				}
-				else
-				{
-					G.inventory.Add(G.dndItem, G.cell);
-				}
+				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell)) mti.inventory.Add(G.dndItem, mti.cell);
+				else if (mtc != null && mtc.creature.CanEat(G.dndItem)) mtc.creature.Eat(G.dndItem);
+				else G.inventory.Add(G.dndItem, G.cell);
 
 				G.dndItem = null;
 				G.inventory = null;

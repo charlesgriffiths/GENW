@@ -52,7 +52,7 @@ public class Character : Creature
 		BigBase b = BigBase.Instance;
 
 		uniqueName = uniqueNamei;
-		inventory = new Inventory(6, this, "");
+		inventory = new Inventory(6, 1, this, "");
 
 		race = b.races.Get(raceName);
 		cClass = b.classes.Get(className);

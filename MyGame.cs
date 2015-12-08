@@ -11,6 +11,7 @@ public class MyGame
 
 	public List<MouseTriggerKeyword> mouseTriggerKeywords = new List<MouseTriggerKeyword>();
 	public List<MouseTriggerLCreature> mouseTriggerLCreatures = new List<MouseTriggerLCreature>();
+	public List<MouseTriggerCreature> mouseTriggerCreatures = new List<MouseTriggerCreature>();
 	public List<MouseTriggerInventory> mouseTriggerInventories = new List<MouseTriggerInventory>();
 
 	public Item dndItem = null;

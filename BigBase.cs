@@ -9,6 +9,7 @@
 	public GeneralBase<GTile> gTiles = new GeneralBase<GTile>();
 	public GeneralBase<LTile> lTiles = new GeneralBase<LTile>();
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
+	public GeneralBase<CComponent> ccomponents = new GeneralBase<CComponent>();
 
 	public GeneralBase<Skill> skills = new GeneralBase<Skill>();
 	public GeneralBase<EffectShape> effects = new GeneralBase<EffectShape>();
@@ -37,6 +38,7 @@
 		gTiles.Load("gTiles.xml");
 		lTiles.Load("lTiles.xml");
 		palettes.Load("palettes.xml");
+		ccomponents.Load("ccomponents.xml");
 
 		skills.Load("skills.xml");
 		effects.Load("effects.xml");

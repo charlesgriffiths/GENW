@@ -246,7 +246,7 @@ public partial class Battlefield
 
 			List<ZPoint> result = query.Cast<ZPoint>().ToList();
 
-			if (ability.NameIs("Nature's Call")) result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
+			if (ability.NameIs("Overgrowth")) result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
 			
 			return result;
 		}

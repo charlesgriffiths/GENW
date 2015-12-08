@@ -48,7 +48,7 @@ public partial class LCreature : LObject
 		{
 			Action<string> log = s => B.log.Add(" " + s, ability.color);
 
-			if (ability.NameIs("Nature's Call"))
+			if (ability.NameIs("Overgrowth"))
 			{
 				LObject o = B.GetLObject(target);
 
