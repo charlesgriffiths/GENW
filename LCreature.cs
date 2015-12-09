@@ -394,12 +394,12 @@ public partial class LCreature : LObject
 			screen.Draw(e.data.texture, new ZPoint(32 * i, 0), e.data.SgnColor);
 			screen.DrawStringWithShading(M.fonts.small, ((int)e.timeLeft).ToString(), new ZPoint(32 * i + 26, 20), Color.White);
 
-			MouseTriggerKeyword.Set("effect", i, p + new ZPoint(32 * i, 0), new ZPoint(32, 32));
+			MouseTriggerKeyword.Set("effect", i.ToString(), p + new ZPoint(32 * i, 0), new ZPoint(32, 32));
 			i++;
 		}
 
-		MouseTriggerKeyword t = MouseTriggerKeyword.GetUnderMouse("effect");
-		if (t != null) effects[t.parameter].data.DrawDescription(descriptionP);
+		var mtk = MouseTriggerKeyword.GetUnderMouse("effect");
+		if (mtk != null) effects[int.Parse(mtk.parameter)].data.DrawDescription(descriptionP);
 	}
 
 	public override void Draw()

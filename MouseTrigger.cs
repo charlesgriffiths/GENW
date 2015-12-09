@@ -6,69 +6,38 @@ public abstract class MouseTrigger
 	public ZPoint position, size;
 
 	protected static MyGame G { get { return MyGame.Instance; } }
+
+	public static T GetUnderMouse<T>() where T : MouseTrigger {
+		var query = from mt in G.mouseTriggers where mt is T && G.Mouse.IsIn(mt) select mt as T;
+		return query.Count() > 0 ? query.First() : null; }
+
+	public static List<T> All<T>() where T : MouseTrigger {
+		return (from mt in G.mouseTriggers where mt is T select mt as T).ToList(); }
+
+	public static List<T> AllUnderMouse<T>() where T : MouseTrigger	{
+		return (from mt in G.mouseTriggers where mt is T && G.Mouse.IsIn(mt) select mt as T).ToList(); }
+
+	public static void Clear<T>() where T : MouseTrigger {
+		var query = G.mouseTriggers.Where(mt => mt is T).ToList();
+        foreach (var mt in query) G.mouseTriggers.Remove(mt); }
 }
 
-public class MouseTriggerLCreature : MouseTrigger
+public class MouseTriggerObject<T> : MouseTrigger where T : class
 {
-	public LCreature creature;
+	public T t;
 
-	private MouseTriggerLCreature(LCreature c, ZPoint positioni, ZPoint sizei)
+	private MouseTriggerObject(T ti, ZPoint positioni, ZPoint sizei)
 	{
-		creature = c;
+		t = ti;
 		position = positioni;
 		size = sizei;
 	}
 
-	public static void Clear() { G.mouseTriggerLCreatures.Clear(); }
-
-	public static void Set(LCreature creature, ZPoint position, ZPoint size)
+	public static void Set(T ti, ZPoint position, ZPoint size)
 	{
-		var query = from t in G.mouseTriggerLCreatures where t.creature == creature select t;
-		if (query.Count() == 0) G.mouseTriggerLCreatures.Add(new MouseTriggerLCreature(creature, position, size));
-		else
-		{
-			MouseTriggerLCreature t = query.Single();
-			t.position = position;
-		}
-	}
-
-	public static MouseTriggerLCreature GetUnderMouse()
-	{
-		var query = from t in G.mouseTriggerLCreatures where G.Mouse.IsIn(t) select t;
-		if (query.Count() > 0) return query.First();
-		else return null;
-	}
-}
-
-public class MouseTriggerCreature : MouseTrigger // можно ввести просто MouseTriggerObject
-{
-	public Creature creature;
-
-	private MouseTriggerCreature(Creature c, ZPoint positioni, ZPoint sizei)
-	{
-		creature = c;
-		position = positioni;
-		size = sizei;
-	}
-
-	public static void Clear() { G.mouseTriggerCreatures.Clear(); }
-
-	public static void Set(Creature creature, ZPoint position, ZPoint size)
-	{
-		var query = from t in G.mouseTriggerCreatures where t.creature == creature select t;
-		if (query.Count() == 0) G.mouseTriggerCreatures.Add(new MouseTriggerCreature(creature, position, size));
-		else
-		{
-			MouseTriggerCreature t = query.Single();
-			t.position = position;
-		}
-	}
-
-	public static MouseTriggerCreature GetUnderMouse()
-	{
-		var query = from t in G.mouseTriggerCreatures where G.Mouse.IsIn(t) select t;
-		if (query.Count() > 0) return query.First();
-		else return null;
+		var query = G.mouseTriggers.Where(mt => mt is MouseTriggerObject<T> && (mt as MouseTriggerObject<T>).t == ti);
+		if (query.Count() == 0) G.mouseTriggers.Add(new MouseTriggerObject<T>(ti, position, size));
+		else query.Single().position = position;
 	}
 }
 
@@ -87,20 +56,9 @@ public class MouseTriggerInventory : MouseTrigger
 
 	public static void Set(Inventory inventory, int cell, ZPoint position, ZPoint size)
 	{
-		var query = from t in G.mouseTriggerInventories where t.inventory == inventory && t.cell == cell select t;
-		if (query.Count() == 0) G.mouseTriggerInventories.Add(new MouseTriggerInventory(inventory, cell, position, size));
-		else
-		{
-			MouseTriggerInventory mti = query.Single();
-			mti.position = position;
-		}
-	}
-
-	public static MouseTriggerInventory GetUnderMouse()
-	{
-		var query = from t in G.mouseTriggerInventories where G.Mouse.IsIn(t) select t;
-		if (query.Count() > 0) return query.First();
-		else return null;
+		var query = All<MouseTriggerInventory>().Where(mti => mti.inventory == inventory && mti.cell == cell);
+		if (query.Count() == 0) G.mouseTriggers.Add(new MouseTriggerInventory(inventory, cell, position, size));
+		else query.Single().position = position;
 	}
 
 	public Item GetItem() { return inventory[cell]; }
@@ -108,10 +66,9 @@ public class MouseTriggerInventory : MouseTrigger
 
 public class MouseTriggerKeyword : MouseTrigger
 {
-	public string name;
-	public int parameter;
+	public string name, parameter;
 
-	private MouseTriggerKeyword(string namei, int parameteri, ZPoint positioni, ZPoint sizei)
+	private MouseTriggerKeyword(string namei, string parameteri, ZPoint positioni, ZPoint sizei)
 	{
 		name = namei;
 		parameter = parameteri;
@@ -119,41 +76,20 @@ public class MouseTriggerKeyword : MouseTrigger
 		size = sizei;
 	}
 
-	public static MouseTriggerKeyword GetUnderMouse(string name)
-	{
-		var query = from t in G.mouseTriggerKeywords where G.Mouse.IsIn(t) && t.name == name select t;
-		if (query.Count() > 0) return query.First();
-		else return null;
-	}
+	public static MouseTriggerKeyword GetUnderMouse(string name) {
+		var query = AllUnderMouse<MouseTriggerKeyword>().Where(mtk => mtk.name == name);
+		return query.Count() > 0 ? query.First() : null; }
 
-	public static MouseTriggerKeyword Get(string name, int parameter)
-	{
-		var query = from t in G.mouseTriggerKeywords where t.name == name && t.parameter == parameter select t;
-		if (query.Count() > 0) return query.Single();
-		else return null;
-	}
+	public static void Set(string name, string parameter, ZPoint position, ZPoint size) {
+		var query = All<MouseTriggerKeyword>().Where(mtk => mtk.name == name && mtk.parameter == parameter);
+		if (query.Count() == 0)	G.mouseTriggers.Add(new MouseTriggerKeyword(name, parameter, position, size)); }
 
-	public static List<MouseTriggerKeyword> GetAll(string name)
-	{ return (from t in G.mouseTriggerKeywords where t.name == name select t).ToList(); }
+	public static void Set(string name, ZPoint position, ZPoint size) { Set(name, "", position, size); }
 
-	public static void Set(string name, int parameter, ZPoint position, ZPoint size)
-	{
-		var query = from t in G.mouseTriggerKeywords where t.name == name && t.parameter == parameter select t;
-		if (query.Count() == 0)	G.mouseTriggerKeywords.Add(new MouseTriggerKeyword(name, parameter, position, size));
-	}
+	public static void Clear(string name) {
+		foreach (var mt in All<MouseTriggerKeyword>().Where(mtk => mtk.name == name)) G.mouseTriggers.Remove(mt); }
 
-	public static void Set(string name, ZPoint position, ZPoint size) { Set(name, 0, position, size); }
-
-	public static MouseTriggerKeyword GetUnderMouse()
-	{
-		var query = from t in G.mouseTriggerKeywords where G.Mouse.IsIn(t) select t;
-		if (query.Count() > 0) return query.First();
-		else return null;
-	}
-
-	public static void Clear(string name)
-	{
-		var query = G.mouseTriggerKeywords.Where(t => t.name == name).ToList();
-		foreach (MouseTriggerKeyword t in query) G.mouseTriggerKeywords.Remove(t);
-	}
+	public static MouseTriggerKeyword Get(string name, string parameter) {
+		var query = All<MouseTriggerKeyword>().Where(mtk => mtk.name == name && mtk.parameter == parameter);
+		return query.Count() > 0 ? query.First() : null; }
 }

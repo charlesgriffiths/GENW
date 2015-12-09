@@ -17,6 +17,8 @@ public partial class GObject
 	public float initiative;
 	public Dialog dialog;
 
+	protected static MyGame G { get { return MyGame.Instance; } }
+
 	public string Name { get { return shape.name; } }
 	public float Speed { get { return shape.speed; } }
 	public bool IsActive { get { return shape.isActive; } }

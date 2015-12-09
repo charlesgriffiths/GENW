@@ -91,9 +91,13 @@ public class Inventory
 	{
 		Screen screen = new Screen(position, new ZPoint(width * 32, height * 32));
 
-		if (G.battle) G.mouseTriggerInventories.Clear();
+		//if (G.battle) G.mouseTriggerInventories.Clear();
+		if (G.battle) MouseTrigger.Clear<MouseTriggerInventory>();
+
 		for (int i = 0; i < Size; i++) MouseTriggerInventory.Set(this, i, screen.position + CellPosition(i), new ZPoint(32, 32));
-		MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
+
+		//MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
+		var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
 
 		if (((mti != null && mti.inventory == this) || !IsEmpty) && name != "") screen.DrawString(M.fonts.superSmall, name, Color.White);
 		if (!G.battle) screen.Fill(Stuff.MyColor("Very Dark Grey"));

@@ -6,8 +6,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 public partial class Player : GObject
 {
-	private Inventory crafting = new Inventory(6, 1, null, "CRAFTING");
-	private Inventory ground = new Inventory(6, 2, null, "GROUND");
+	public Inventory crafting = new Inventory(6, 1, null, "CRAFTING");
+	public Dictionary<ItemShape, int> craftableShapes = new Dictionary<ItemShape, int>();
+
+	//private Inventory ground = new Inventory(6, 2, null, "GROUND");
 
 	public bool[,] visitedLocations;
 	private List<GObject> visibleObjects = new List<GObject>();
@@ -54,14 +56,13 @@ public partial class Player : GObject
 	{
 		Screen screen = new Screen(position, new ZPoint(1, 1));
 		int vOffset = 0, iOffset = 0, hiOffset = 40, vStep = 40;
-		MouseTriggerCreature.Clear();
+		MouseTrigger.Clear<MouseTriggerObject<Creature>>();
 
 		foreach (Creature c in party)
 		{
 			Screen icon = new Screen(position + new ZPoint(0, vOffset), new ZPoint(32, 32));
 			icon.Draw(c.texture, ZPoint.Zero);
-			MouseTriggerCreature.Set(c, icon.position, icon.size);
-			//icon.DrawString(M.fonts.verySmall, member.stamina.ToString() + "/" + member.hp + "/" + member.MaxHP, 32, Color.White);
+			MouseTriggerObject<Creature>.Set(c, icon.position, icon.size);
 
 			float hpMissing = 1 - (float)c.hp / c.MaxHP;
 			float staminaMissing = 1 - (float)c.stamina / c.MaxHP;
@@ -75,10 +76,10 @@ public partial class Player : GObject
 			iOffset += vStep;
 		}
 
-		MouseTriggerCreature mtc = MouseTriggerCreature.GetUnderMouse();
+		var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<Creature>>();
 		if (mtc != null)
 		{
-			Creature c = mtc.creature;
+			Creature c = mtc.t;
 			Screen icon = new Screen(position + new ZPoint(0, vStep * party.IndexOf(c)), new ZPoint(32, 32));
 			icon.DrawString(M.fonts.verySmall, c.stamina.ToString() + "/" + c.hp + "/" + c.MaxHP, 27, Color.White);
 		}
@@ -91,21 +92,59 @@ public partial class Player : GObject
 
 		draw(inventory);
 
-		DrawCrafting(screen.position + new ZPoint(240, iOffset));
+		if (!crafting.IsEmpty) DrawCrafting(screen.position + new ZPoint(240, iOffset));
+
 		draw(crafting);
-		draw(ground);
+		//draw(ground);
 	}
 
 	private void DrawCrafting(ZPoint position)
 	{
-		List<ItemShape> items = BigBase.Instance.items.data.Where(i => i.IsComposable(crafting.CComponents)).ToList();
+		List<ItemShape> shapes = craftableShapes.Keys.ToList();
 
-		int vOffset = 0;
-		foreach(ItemShape item in items)
+		int length = 160, height = 16;
+		Func<int, ZPoint> iPosition = n => position + new ZPoint(0, height * n);
+
+		int i = 0;
+		MouseTrigger.Clear<MouseTriggerObject<ItemShape>>();
+		foreach (ItemShape s in shapes)
 		{
-			M.DrawString(M.fonts.verdanaBold, item.name, position + new ZPoint(0, vOffset), Color.White);
-			vOffset += 16;
+			MouseTriggerObject<ItemShape>.Set(s, iPosition(i), new ZPoint(length, height));
+			i++;
 		}
+
+		var mto = MouseTrigger.GetUnderMouse<MouseTriggerObject<ItemShape>>();
+
+		i = 0;
+		foreach(ItemShape s in shapes)
+		{
+			bool underMouse = mto != null && mto.t == s;
+			bool isComposable = s.IsComposable();
+			bool isReducible = craftableShapes[s] > 0;
+
+			Color color;
+			if (isComposable) color = underMouse ? Color.Red : Color.White;
+			else if (isReducible && underMouse) color = Color.Gray;
+			else color = Stuff.MyColor("Dark Grey");
+
+			M.DrawString(M.fonts.verdanaBold, s.name, iPosition(i), color);
+			if (craftableShapes[s] != 0) M.DrawString(M.fonts.verdanaBold, craftableShapes[s].ToString(), iPosition(i) + new ZPoint(length - 10, 0), color);
+
+			if (underMouse)
+			{
+				if (G.LeftMouseButtonClicked && isComposable) craftableShapes[s]++;
+				else if (G.RightMouseButtonClicked && isReducible) craftableShapes[s]--;
+			}
+
+			i++;
+		}
+	}
+
+	public void UpdateCrafting()
+	{
+		craftableShapes.Clear();
+		foreach (ItemShape itemShape in BigBase.Instance.items.data.Where(s => s.IsComposable(crafting.CComponents)))
+			craftableShapes.Add(itemShape, 0);
 	}
 
 	public override void Draw()

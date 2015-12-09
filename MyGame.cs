@@ -9,10 +9,7 @@ public class MyGame
 	public KeyboardState keyboardState, previousKeyboardState;
 	public MouseState mouseState, previousMouseState;
 
-	public List<MouseTriggerKeyword> mouseTriggerKeywords = new List<MouseTriggerKeyword>();
-	public List<MouseTriggerLCreature> mouseTriggerLCreatures = new List<MouseTriggerLCreature>();
-	public List<MouseTriggerCreature> mouseTriggerCreatures = new List<MouseTriggerCreature>();
-	public List<MouseTriggerInventory> mouseTriggerInventories = new List<MouseTriggerInventory>();
+	public List<MouseTrigger> mouseTriggers = new List<MouseTrigger>();
 
 	public Item dndItem = null;
 	public Inventory inventory = null;

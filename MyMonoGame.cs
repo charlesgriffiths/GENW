@@ -72,6 +72,8 @@ public class MyMonoGame : Game
 
 	protected override void Update(GameTime gameTime)
 	{
+		G.previousKeyboardState = G.keyboardState;
+		G.previousMouseState = G.mouseState;
 		G.keyboardState = Keyboard.GetState();
 		G.mouseState = Mouse.GetState();
 
@@ -84,8 +86,8 @@ public class MyMonoGame : Game
 			if (KeyPressed()) M.dialogScreen.Press(G.keyboardState);
 			else if (G.LeftMouseButtonClicked)
 			{
-				MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
-				if (mt != null && mt.name == "dialog") M.dialogScreen.Press(mt.parameter);
+				var mtk = MouseTriggerKeyword.GetUnderMouse("dialog");
+				if (mtk != null) M.dialogScreen.Press(int.Parse(mtk.parameter));
 			}
 		}
 		else if (G.battle && B.ability != null)
@@ -99,10 +101,10 @@ public class MyMonoGame : Game
 		{
 			if (G.LeftMouseButtonClicked)
 			{
-				MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
-				if (mt != null)
+				var mtk = MouseTrigger.GetUnderMouse<MouseTriggerKeyword>();
+				if (mtk != null)
 				{
-					if (mt.name == "End Battle") B.EndBattle();
+					if (mtk.name == "End Battle") B.EndBattle();
 				}
 				else B.SetSpotlight();
 			}
@@ -135,7 +137,7 @@ public class MyMonoGame : Game
 			if (G.RightMouseButtonClicked) W.player.GoTo();
 			if (G.LeftMouseButtonClicked)
 			{
-				MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
+				var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
 				if (mti != null)
 				{
 					bool shift = G.keyboardState.IsKeyDown(Keys.LeftShift);
@@ -155,13 +157,15 @@ public class MyMonoGame : Game
 
 						IsMouseVisible = false;
 					}
+
+					if (mti.inventory == W.player.crafting) W.player.UpdateCrafting();
 				}
 			}
 
 			if (G.dndItem != null && G.LeftMouseButtonReleased)
 			{
-				MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
-				MouseTriggerCreature mtc = MouseTriggerCreature.GetUnderMouse();
+				var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
+				var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<Creature>>();
 
 				if (mti != null && G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null && mti.GetItem().data != G.dndItem.data)
 				{
@@ -172,8 +176,10 @@ public class MyMonoGame : Game
 					mti.inventory[mti.cell].numberOfStacks = G.dndItem.numberOfStacks;
 				}
 				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell)) mti.inventory.Add(G.dndItem, mti.cell);
-				else if (mtc != null && mtc.creature.CanEat(G.dndItem)) mtc.creature.Eat(G.dndItem);
+				else if (mtc != null && mtc.t.CanEat(G.dndItem)) mtc.t.Eat(G.dndItem);
 				else G.inventory.Add(G.dndItem, G.cell);
+
+				if (mti != null && mti.inventory == W.player.crafting) W.player.UpdateCrafting();
 
 				G.dndItem = null;
 				G.inventory = null;
@@ -196,8 +202,8 @@ public class MyMonoGame : Game
 			}
 		}
 
-		G.previousKeyboardState = G.keyboardState;
-		G.previousMouseState = G.mouseState;
+		//G.previousKeyboardState = G.keyboardState;
+		//G.previousMouseState = G.mouseState;
 		base.Update(gameTime);
 	}
 

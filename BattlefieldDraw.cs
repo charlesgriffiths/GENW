@@ -69,7 +69,7 @@ public partial class Battlefield
 		}
 	}
 
-	private void DrawScale(ZPoint position)
+	private void DrawScale(ZPoint position) // вот это переписать, сейчас же
 	{
 		bool horizontal = false;
 		int length = horizontal ? 736 : 720 - 16 - 64 - 32, height = horizontal ? 20 : 16;
@@ -81,21 +81,21 @@ public partial class Battlefield
 		float zeroInitiative = -query.Last().rInitiative.x;
 		Func<float, int> func = f => (int)(100.0f * (-f - zeroInitiative)) + 1;
 
-		MouseTriggerLCreature trigger = null;
+		MouseTriggerObject<LCreature> trigger = null;
 		foreach (LCreature c in query)
 		{
-			int rInitiative = func(c.rInitiative.x); //(int)(150.0f * (-c.rInitiative.x - zeroInitiative)) + 1;
+			int rInitiative = func(c.rInitiative.x);
 			int y = -32, z = -32;
 			if (horizontal == c.isInParty) { y = height; z = 0; }
 
 			ZPoint iconPosition = new ZPoint(y, rInitiative + 1);
 			if (horizontal) iconPosition = new ZPoint(rInitiative + 1, y);
 
-			MouseTriggerLCreature.Set(c, screen.position + iconPosition, new ZPoint(32, 32));
-			trigger = MouseTriggerLCreature.GetUnderMouse();
+			MouseTriggerObject<LCreature>.Set(c, screen.position + iconPosition, new ZPoint(32, 32));
+			trigger = MouseTrigger.GetUnderMouse<MouseTriggerObject<LCreature>>();
 
 			Color color = Color.White;
-			if (c.position.TheSameAs(Mouse) || (trigger != null && c == trigger.creature)) color = c.RelationshipColor;
+			if (c.position.TheSameAs(Mouse) || (trigger != null && c == trigger.t)) color = c.RelationshipColor;
 
 			if (scaleAnimations.CurrentTarget != c.rInitiative)
 			{
@@ -114,35 +114,33 @@ public partial class Battlefield
 
 		expectedInitiative = 0.0f;
 
-		if (trigger != null) Draw(M.zSelectionTexture, trigger.creature.position);
-		MouseTriggerLCreature.Clear();
+		if (trigger != null) Draw(M.zSelectionTexture, trigger.t.position);
+		MouseTrigger.Clear<MouseTriggerObject<LCreature>>();
 	}
 
-	private void DrawAbilities(LCreature c, Screen screen, ZPoint position) // эту штуку нужно будет немного переписать, пока криво
+	private void DrawAbilities(LCreature c, Screen screen, ZPoint position)
 	{
-		for (int i = 0; i < 6; i++) MouseTriggerKeyword.Set("ability", i, screen.position + position + new ZPoint(48 * i, 0), new ZPoint(48, 48));
+		Func<int, ZPoint> aPosition = k => screen.position + position + new ZPoint(48 * k, 0);
+		ZPoint aSize = new ZPoint(48, 48);
 
+		for (int n = 0; n < 6; n++) MouseTriggerKeyword.Set("ability", n.ToString(), aPosition(n), aSize);
+		var mtk = MouseTriggerKeyword.GetUnderMouse("ability");
+
+		int i = 0;
 		foreach (Ability a in c.Abilities)
 		{
-			int i = c.Abilities.IndexOf(a);
-			MouseTriggerKeyword t = MouseTriggerKeyword.Get("ability", i);
-			M.Draw(a.texture, t.position);
+			bool mouseOn = mtk != null && mtk.parameter == i.ToString();
 
-			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(t.position, t.size, new Color(0, 0, 0, 0.7f));
-			else if (c == CurrentLCreature) M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[i].ToString(), t.position + new ZPoint(37, 33), Color.White);
-		}
+			M.Draw(a.texture, aPosition(i), mouseOn ? a.color : Color.White);
 
-		MouseTriggerKeyword forDescription = MouseTriggerKeyword.GetUnderMouse("ability");
-		if (forDescription != null && forDescription.parameter < c.Abilities.Count)
-		{
-			Ability a = c.Abilities[forDescription.parameter];
-			M.Draw(a.texture, forDescription.position, a.color);
+			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(aPosition(i), aSize, new Color(0, 0, 0, 0.7f));
 
-			if (c == CurrentLCreature && a.targetType != Ability.TargetType.Passive)
-				M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[forDescription.parameter].ToString(),
-				forDescription.position + new ZPoint(37, 33), Color.White);
+			else if (c == CurrentLCreature) M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[i].ToString(),
+				aPosition(i) + new ZPoint(37, 33), Color.White);
 
-			a.DrawDescription(screen.position + position + new ZPoint(24, 56));
+			if (mouseOn) a.DrawDescription(screen.position + position + new ZPoint(24, 56));
+
+			i++;
 		}
 	}
 
@@ -150,7 +148,6 @@ public partial class Battlefield
 	{
 		int length = 288, height = 1;
 		Screen screen = new Screen(position, new ZPoint(length, height));
-		//screen.Fill(Color.Black);
 
 		float hpFraction = (float)c.HP / c.MaxHP;
 		float staminaFraction = (float)c.Stamina / c.MaxHP;
@@ -162,7 +159,7 @@ public partial class Battlefield
 		SpriteFont font = M.fonts.verdanaBold;
 
 		string name = c.Name;
-		if (c.UniqueName != "") name = c.UniqueName + ", " + c.Name;
+		if (c.UniqueName != c.Name) name = c.UniqueName + ", " + c.Name;
 		screen.DrawString(font, name, 23, Color.White);
 
 		screen.Draw(damageIcon, new ZPoint(0, 40));
@@ -183,7 +180,7 @@ public partial class Battlefield
 
 		MouseTriggerKeyword.Clear("End Battle");
 		Resolution resolution = GetResolution();
-        if (resolution != Resolution.Not) MouseTriggerKeyword.Set("End Battle", 0, screen.position, screen.size);
+        if (resolution != Resolution.Not) MouseTriggerKeyword.Set("End Battle", screen.position, screen.size);
 		MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse("End Battle");
 
 		screen.Fill(Stuff.MyColor("Dark Grey"));

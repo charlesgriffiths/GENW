@@ -36,11 +36,12 @@ public class DialogScreen
 			DialogResponse r = dialogNode.responses[i];
 			ZPoint p = new ZPoint(8, screen.offset);
 
-			MouseTriggerKeyword.Set("dialog", i + 1, screen.position + p, new ZPoint(font.MeasureString(r.text)) + new ZPoint(20, 0));
-			MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
+			MouseTriggerKeyword.Set("dialog", (i + 1).ToString(), screen.position + p, new ZPoint(font.MeasureString(r.text)) + new ZPoint(20, 0));
+			//MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
+			var mtk = MouseTrigger.GetUnderMouse<MouseTriggerKeyword>();
 
 			Color color = Color.White;
-			if (mt != null && mt.name == "dialog" && mt.parameter == i + 1) color = Color.DodgerBlue;
+			if (mtk != null && mtk.name == "dialog" && mtk.parameter == (i + 1).ToString()) color = Color.DodgerBlue;
             screen.DrawString(font, (i + 1) + ". " + r.text, p, color, screen.size.x - 20);
 		}
 	}

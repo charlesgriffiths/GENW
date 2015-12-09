@@ -114,11 +114,40 @@ public class ItemShape : NamedObject
 
 	public List<CComponent> MultilessComponents { get { return cComponents.Select(t => t.Item1).ToList(); } }
 
+	private int this[CComponent cc]
+	{
+		get
+		{
+			var query = from tuple in cComponents where tuple.Item1 == cc select tuple.Item2;
+			return query.Count() > 0 ? query.Single() : 0;
+		}
+	}
+
 	public bool IsComposable(Dictionary<CComponent, int> d)
 	{
 		foreach (var t in cComponents) if (!d.ContainsKey(t.Item1) || d[t.Item1] < t.Item2) return false;
 		return true;
 	}
+
+	public bool IsComposable()
+	{
+		Player P = World.Instance.player;
+
+		foreach (var t in cComponents)
+		{
+			int crafted = 0;
+			foreach (var pair in P.craftableShapes)
+				for (int n = 0; n < pair.Value; n++)
+					crafted += pair.Key[t.Item1];
+
+			int wanted = t.Item2;
+			int available = P.crafting.CComponents.ContainsKey(t.Item1) ? P.crafting.CComponents[t.Item1] : 0;
+
+			if (available < crafted + wanted) return false;
+		}
+
+		return true;
+    }
 }
 
 public class Item
