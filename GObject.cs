@@ -7,7 +7,7 @@ public partial class GObject
 {
 	protected GObjectShape shape;
 	public List<Creature> party = new List<Creature>();
-	public Inventory inventory = new Inventory(6, 5, null, "PARTY");
+	public Inventory inventory = new Inventory(6, 5, null, "");
 
 	public HexPoint position = new HexPoint();
 	public RPoint rPosition = new RPoint();
@@ -107,4 +107,10 @@ public partial class GObject
 		movementAnimations.Add(new RMove(rPosition, (ZPoint)p - position, gameTime));
 		position = p;
 	}
+
+	public int Max(Skill skill) {
+		return (from c in party where c is Character let ch = c as Character select ch[skill]).Max(); }
+
+	public bool HasAbility(Ability a) {	return party.Where(c => c.Abilities.Contains(a)).Count() > 0; }
+	public bool HasAbility(string abilityName) { return HasAbility(Ability.Get(abilityName)); }
 }

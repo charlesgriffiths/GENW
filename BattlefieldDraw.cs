@@ -69,48 +69,38 @@ public partial class Battlefield
 		}
 	}
 
-	private void DrawScale(ZPoint position) // вот это переписать, сейчас же
+	private void DrawScale(bool horizontal)
 	{
-		bool horizontal = false;
+		ZPoint position = horizontal ? new ZPoint(128, M.size.y - 68) : new ZPoint(16 + 32, 8 + 16 + 32);
 		int length = horizontal ? 736 : 720 - 16 - 64 - 32, height = horizontal ? 20 : 16;
-		Screen screen = new Screen(position, new ZPoint(horizontal ? length : height, horizontal ? height : length));
+		Screen screen = new Screen(position, new ZPoint(height, length).Transpose(horizontal));
 
 		screen.Fill(Stuff.MyColor("Dark Grey"));
 
-		var query = from c in AliveCreatures orderby c.rInitiative.x select c;
+		var query = AliveCreatures.OrderBy(lc => lc.rInitiative.x);
 		float zeroInitiative = -query.Last().rInitiative.x;
+
 		Func<float, int> func = f => (int)(100.0f * (-f - zeroInitiative)) + 1;
+		Func<LCreature, ZPoint> yz = lc => horizontal == lc.isInParty ? new ZPoint(height, 0) : new ZPoint(-32, -32);
+		Func<LCreature, ZPoint> iconPosition = lc => new ZPoint(yz(lc).x, func(lc.rInitiative.x) + 1).Transpose(horizontal);
 
-		MouseTriggerObject<LCreature> trigger = null;
-		foreach (LCreature c in query)
+		foreach (LCreature lc in query) MouseTriggerObject<LCreature>.Set(lc, screen.position + iconPosition(lc), new ZPoint(32, 32));
+		var trigger = MouseTrigger.GetUnderMouse<MouseTriggerObject<LCreature>>();
+
+		foreach (LCreature lc in query)
 		{
-			int rInitiative = func(c.rInitiative.x);
-			int y = -32, z = -32;
-			if (horizontal == c.isInParty) { y = height; z = 0; }
+			Color color = lc.position.TheSameAs(Mouse) || (trigger != null && trigger.t == lc) ? lc.RelationshipColor : Color.White;
 
-			ZPoint iconPosition = new ZPoint(y, rInitiative + 1);
-			if (horizontal) iconPosition = new ZPoint(rInitiative + 1, y);
+			if (scaleAnimations.CurrentTarget != lc.rInitiative)
+				screen.DrawRectangle(new ZPoint(yz(lc).y, func(lc.rInitiative.x)).Transpose(horizontal), 
+				new ZPoint(height + 32, 1).Transpose(horizontal), color);
 
-			MouseTriggerObject<LCreature>.Set(c, screen.position + iconPosition, new ZPoint(32, 32));
-			trigger = MouseTrigger.GetUnderMouse<MouseTriggerObject<LCreature>>();
-
-			Color color = Color.White;
-			if (c.position.TheSameAs(Mouse) || (trigger != null && c == trigger.t)) color = c.RelationshipColor;
-
-			if (scaleAnimations.CurrentTarget != c.rInitiative)
-			{
-				if (horizontal) screen.DrawRectangle(new ZPoint(rInitiative, z), new ZPoint(1, height + 32), color);
-				else screen.DrawRectangle(new ZPoint(z, rInitiative), new ZPoint(height + 32, 1), color);
-			}
-
-			screen.Draw(c.texture, iconPosition);
+			screen.Draw(lc.texture, iconPosition(lc));
 		}
 
 		if (expectedInitiative < 0)
-		{
-			if (horizontal) screen.DrawRectangle(new ZPoint(func(expectedInitiative), 0), new ZPoint(1, height + 32), Color.DodgerBlue);
-			else screen.DrawRectangle(new ZPoint(0, func(expectedInitiative)), new ZPoint(height + 32, 1), Color.DodgerBlue);
-		}
+			screen.DrawRectangle(new ZPoint(0, func(expectedInitiative)).Transpose(horizontal),
+			new ZPoint(height + 32, 1).Transpose(horizontal), Color.DodgerBlue);
 
 		expectedInitiative = 0.0f;
 
@@ -146,8 +136,9 @@ public partial class Battlefield
 
 	private void DrawInfo(LCreature c, ZPoint position)
 	{
-		int length = 288, height = 1;
+		int length = 288, height = 124 + 48;
 		Screen screen = new Screen(position, new ZPoint(length, height));
+		screen.Fill(Color.Black);
 
 		float hpFraction = (float)c.HP / c.MaxHP;
 		float staminaFraction = (float)c.Stamina / c.MaxHP;
@@ -157,10 +148,7 @@ public partial class Battlefield
 		for (int i = 1; i <= c.MaxHP; i++) screen.DrawRectangle(new ZPoint((int)(i * (float)length / c.MaxHP), 0), new ZPoint(1, 20), Color.Black);
 
 		SpriteFont font = M.fonts.verdanaBold;
-
-		string name = c.Name;
-		if (c.UniqueName != c.Name) name = c.UniqueName + ", " + c.Name;
-		screen.DrawString(font, name, 23, Color.White);
+		screen.DrawString(font, /*name*/ c.data.FullName, 23, Color.White);
 
 		screen.Draw(damageIcon, new ZPoint(0, 40));
 		screen.DrawString(font, c.Damage.ToString(), new ZPoint(22, 43), Color.White);
@@ -191,6 +179,8 @@ public partial class Battlefield
 
 	public void Draw()
 	{
+		M.Fill(new Color(0, 0, 0, 0.8f));
+
 		foreach (LObject l in objects)
 		{
 			l.movementAnimations.Draw();
@@ -219,8 +209,7 @@ public partial class Battlefield
 		foreach (DelayedDrawing dd in delayedDrawings) dd.Draw();
 		delayedDrawings.Clear();
 
-		//DrawScale(new ZPoint(128, M.size.y - 68));
-		DrawScale(new ZPoint(16 + 32, 8 + 16 + 32));
+		DrawScale(false);
 		DrawInfo(spotlightObject as LCreature, new ZPoint(M.size.x - 288 - 8, 8));
 		if (MyGame.Instance.combatLog) log.Draw();
 		DrawEndButton();

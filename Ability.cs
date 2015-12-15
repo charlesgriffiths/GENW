@@ -13,6 +13,8 @@ public class Ability : NamedObject
 
 	public enum TargetType { Passive, None, Direction, Point, Creature };
 
+	public static Ability Get (string name) { return BigBase.Instance.abilities.Get(name); }
+
 	private static TargetType GetTargetType(string s)
 	{
 		if (s == "passive") return TargetType.Passive;

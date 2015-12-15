@@ -19,20 +19,15 @@ public class Character : Creature
 
 	private int InventorySum(Func<Bonus, int> func)	{ return (from i in inventory.Items select func(i.data.bonus)).Sum(); }
 	
-	public override int MaxHP { get { return 10 + 4 * this["Endurance"] + InventorySum(b => b.hp); } }
-	public override int Damage { get { return 1 + this["Strength"] + InventorySum(b => b.damage); } }
-	public override int Attack { get { return this["Agility"] + InventorySum(b => b.attack); } }
-	public override int Defence { get { return this["Agility"] + InventorySum(b => b.defence); } }
+	public override int MaxHP { get { return 10 + 4 * this[Skill.Get("Endurance")] + InventorySum(b => b.hp); } }
+	public override int Damage { get { return 1 + this[Skill.Get("Strength")] + InventorySum(b => b.damage); } }
+	public override int Attack { get { return this[Skill.Get("Agility")] + InventorySum(b => b.attack); } }
+	public override int Defence { get { return this[Skill.Get("Agility")] + InventorySum(b => b.defence); } }
 	public override int Armor { get { return InventorySum(b => b.armor); } }
 
-	public int this[string skillName]
-	{
-		get
-		{
-			Skill skill = BigBase.Instance.skills.Get(skillName);
-			return (int)(race.bonus.skills[skill] + origin.bonus.skills[skill] + background.bonus.skills[skill]);
-		}
-	}
+	public int this[Skill skill] { get {
+		return (int)(race.bonus.skills[skill] + origin.bonus.skills[skill] + background.bonus.skills[skill]); } }
+	public int this[string skillName] { get { return this[Skill.Get(skillName)]; } }
 
 	public override List<Ability> Abilities
 	{

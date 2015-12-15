@@ -130,4 +130,6 @@ public class ZPoint
 	public bool IsIn(MouseTrigger t) { return x >= t.position.x && y >= t.position.y && x <= t.position.x + t.size.x && y <= t.position.y + t.size.y; }
 
 	public Direction GetDirection(List<FramedZPoint> list) { return (from p in list where TheSameAs(p.data) select p.d).Single(); }
+
+	public ZPoint Transpose(bool seriously) { return seriously ? new ZPoint(y, x) : this; }
 }

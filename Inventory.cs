@@ -13,7 +13,7 @@ public class Inventory
 	private static MainScreen M { get { return MainScreen.Instance; } }
 	private static MyGame G { get { return MyGame.Instance; } }
 
-	public int Size { get { return /*data.Count*/ width * height; } }
+	public int Size { get { return width * height; } }
 	public Item this[int k] { get { return data[k]; } }
 	public int Width { get { return width; } }
 	public int Height { get { return height; } }
@@ -73,8 +73,11 @@ public class Inventory
 		if (EmptyCells.Count() > 0) data[EmptyCells.First()] = new Item(shape);
 	}
 
+	public void Add(ItemShape shape, int number) { for (int i = 0; i < number; i++) Add(shape); }
 	public void Add(string name) { Add(BigBase.Instance.items.Get(name)); }
 	public void Add(string name, int number) { for (int i = 0; i < number; i++) Add(name); }
+
+	public void Clear() { for (int i = 0; i < Size; i++) data[i] = null; }
 
 	public void Remove(int cell)
 	{
@@ -91,12 +94,8 @@ public class Inventory
 	{
 		Screen screen = new Screen(position, new ZPoint(width * 32, height * 32));
 
-		//if (G.battle) G.mouseTriggerInventories.Clear();
 		if (G.battle) MouseTrigger.Clear<MouseTriggerInventory>();
-
 		for (int i = 0; i < Size; i++) MouseTriggerInventory.Set(this, i, screen.position + CellPosition(i), new ZPoint(32, 32));
-
-		//MouseTriggerInventory mti = MouseTriggerInventory.GetUnderMouse();
 		var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
 
 		if (((mti != null && mti.inventory == this) || !IsEmpty) && name != "") screen.DrawString(M.fonts.superSmall, name, Color.White);
@@ -121,7 +120,6 @@ public class Inventory
 		}
 	}
 
-	//public List<Tuple<CComponent, int>> CComponents
 	public Dictionary<CComponent, int> CComponents
 	{
 		get
@@ -137,4 +135,6 @@ public class Inventory
 			return result;
         }
 	}
+
+	public bool Contains(ItemShape shape) { return Items.Where(i => i.data == shape).Count() > 0; }
 }

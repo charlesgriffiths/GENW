@@ -11,6 +11,8 @@ public class Skill : NamedObject
 		name = MyXml.GetString(xnode, "name");
 		description = MyXml.GetString(xnode, "description");
 	}
+
+	public static Skill Get (string name) {	return BigBase.Instance.skills.Get(name); }
 }
 
 public class Bonus

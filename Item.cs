@@ -28,7 +28,7 @@ public class ItemShape : NamedObject
 	public float value, weight;
 	public string active, description;
 	public bool isStackable, isEquippable, isArmor;
-	public int hands;
+	public int hands, craftLevel;
 	//public List<string> properties = new List<string>();
 
 	public override void Load(XmlNode xnode)
@@ -43,6 +43,8 @@ public class ItemShape : NamedObject
 		hands = MyXml.GetInt(xnode, "hands");
 		isStackable = MyXml.GetBool(xnode, "stackable");
 		isEquippable = MyXml.GetBool(xnode, "equippable");
+		craftLevel = MyXml.GetInt(xnode, "craftable");
+		if (craftLevel == 0) craftLevel = 100;
 
 		XmlNode cnode = xnode.FirstChild;
 		for (cnode = cnode.FirstChild; cnode != null; cnode = cnode.NextSibling)
@@ -73,7 +75,7 @@ public class ItemShape : NamedObject
 	public void DrawDescription(ZPoint position)
 	{
 		Screen screen = new Screen(position, new ZPoint(MyGame.Instance.battle ? 240 : 192, 190));
-		screen.Fill(new Color(0, 0, 0, 0.9f));
+		//screen.Fill(new Color(0, 0, 0, 0.9f));
 		screen.DrawString(M.fonts.verdanaBold, name, new ZPoint(0, 0), Color.White);
 		SpriteFont font = M.fonts.small;
 		int previousOffset = 0, hOffset = 0;

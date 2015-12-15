@@ -63,7 +63,10 @@ public class MainScreen : Screen
 	{
 		W.Draw();
 
-        if (!G.dialog && !G.battle && (!G.FOVEnabled || W.player[Mouse])) Draw(hexSelectionTexture, GraphicCoordinates(Mouse));
+		var mt = MouseTrigger.GetUnderMouse<MouseTrigger>();		
+        if (!G.dialog && !G.battle && (!G.FOVEnabled || W.player[Mouse]) && mt == null)
+			Draw(hexSelectionTexture, GraphicCoordinates(Mouse));
+
 		if (G.debug) DrawString(fonts.ambient, "Mouse: " + Mouse, new ZPoint(10, 10), Color.Red);
 		if (G.dndItem != null) Draw(G.dndItem.data.texture, G.Mouse - new ZPoint(16, 16));
 

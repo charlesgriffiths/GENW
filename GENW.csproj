@@ -55,6 +55,7 @@
     <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="Effect.cs" />
+    <Compile Include="GlobalDraw.cs" />
     <Compile Include="GObjectShape.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="Item.cs" />

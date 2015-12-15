@@ -185,7 +185,7 @@ public partial class LCreature : LObject
 		if (lc.Stamina > lc.HP) lc.data.AddStamina(lc.HP - lc.Stamina);
 
 		lc.RememberDamage(this, finalDamage);
-		if (lc.data.stamina == 0) lc.Kill();
+		if (lc.data.hp == 0) lc.Kill();
 		B.combatAnimations.Add(new DamageAnimation(finalDamage, Battlefield.GC(lc.position), 1.0f, pure));
 	}
 
@@ -280,6 +280,8 @@ public partial class LCreature : LObject
 
 	public override void Run()
 	{
+		if (Stamina == 0) AddEffect("Sleeping", 1);
+
 		if (!IsAIControlled)
 		{
 			B.currentObject = B.NextLObject;
