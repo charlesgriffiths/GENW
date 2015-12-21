@@ -13,8 +13,8 @@
 
 	public GeneralBase<Skill> skills = new GeneralBase<Skill>();
 	public GeneralBase<EffectShape> effects = new GeneralBase<EffectShape>();
-	public GeneralBase<Ability> abilities = new GeneralBase<Ability>();
-	//public GeneralBase<Gift> gifts = new GeneralBase<Gift>();
+	public GeneralBase<CAbility> abilities = new GeneralBase<CAbility>();
+	public GeneralBase<Ability> iAbilityTypes = new GeneralBase<Ability>();
 	public GeneralBase<Origin> origins = new GeneralBase<Origin>();
 	public GeneralBase<Background> backgrounds = new GeneralBase<Background>();
 
@@ -43,7 +43,7 @@
 		skills.Load("skills.xml");
 		effects.Load("effects.xml");
 		abilities.Load("abilities.xml");
-		//gifts.Load("gifts.xml");
+		iAbilityTypes.Load("iAbilityTypes.xml");
 		origins.Load("origins.xml");
 		backgrounds.Load("backgrounds.xml");
 

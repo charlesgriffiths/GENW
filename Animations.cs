@@ -7,7 +7,6 @@ class RMove : Animation
 	private Vector2 delta;
 
 	public RPoint Target { get { return target; } }
-	//public override Vector2 Position { get { return World.Instance.battlefield.GraphicCoordinates(Target); } }
 
 	public RMove(RPoint targeti, Vector2 v, float gameTime)
 	{
@@ -56,15 +55,18 @@ class TextureAnimation : Animation
 	private RPoint position;
 	private RMove rMove;
 
-	public TextureAnimation(string textureName, Vector2 start, Vector2 finish, float gameTime)
+	public TextureAnimation(Texture2D texturei, Vector2 start, Vector2 finish, float gameTime)
 	{
 		position = new RPoint(start);
 		rMove = new RMove(position, finish - start, gameTime);
-		texture = BigBase.Instance.textures.Get(textureName).Single();
+		texture = texturei;
 
 		maxFrameTime = (int)(gameTime * FramesInOneGameTime);
 		frameTime = 0;
 	}
+
+	public TextureAnimation(string textureName, Vector2 start, Vector2 finish, float gameTime) :
+		this(BigBase.Instance.textures.Get(textureName).Single(), start, finish, gameTime) { }
 
 	public override void Draw()
 	{

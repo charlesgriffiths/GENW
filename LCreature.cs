@@ -16,12 +16,12 @@ public partial class LCreature : LObject
 	public int HP { get { return data.hp; } }
 	public int Stamina { get { return data.stamina; } }
 	public bool IsAlive { get { return data.IsAlive; } }
-	public List<Ability> Abilities { get { return data.Abilities; } }
+	public List<CAbility> Abilities { get { return data.Abilities; } }
 
 	private Battlefield B { get { return World.Instance.battlefield; } }
 	private MainScreen M { get { return MainScreen.Instance; } }
 	private Random R { get { return World.Instance.random; } }
-	private GeneralBase<Ability> A { get { return BigBase.Instance.abilities; }	}
+	private GeneralBase<CAbility> A { get { return BigBase.Instance.abilities; }	}
 
 	protected override void Init()
 	{
@@ -422,5 +422,21 @@ public partial class LCreature : LObject
 		else if (HasOneOfEffects("Annoyed", "Attention")) Draw("aggroEffect");
 
 		if (HasEffect("Roots")) M.DrawRectangle(GraphicPosition + new ZPoint(0, 28), new ZPoint(32, 5), Color.DarkGreen);
+	}
+
+	public Inventory Ground
+	{
+		get
+		{
+			Inventory result = new Inventory(3, 1, null, "ground");
+			int pickupDistance = 2;
+			List<LItem>[] list = new List<LItem>[pickupDistance];
+			for (int k = 0; k < pickupDistance; k++)
+			{
+				list[k] = B.Items.Where(i => Distance(i.position) == k).ToList();
+				for (int i = 0; i < list[k].Count && i < 3; i++) result.Add(list[k][i].data, i);
+			}
+			return result;
+		}
 	}
 }

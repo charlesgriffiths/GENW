@@ -108,59 +108,6 @@ public partial class Battlefield
 		MouseTrigger.Clear<MouseTriggerObject<LCreature>>();
 	}
 
-	private void DrawAbilities(LCreature c, Screen screen, ZPoint position)
-	{
-		Func<int, ZPoint> aPosition = k => screen.position + position + new ZPoint(48 * k, 0);
-		ZPoint aSize = new ZPoint(48, 48);
-
-		for (int n = 0; n < 6; n++) MouseTriggerKeyword.Set("ability", n.ToString(), aPosition(n), aSize);
-		var mtk = MouseTriggerKeyword.GetUnderMouse("ability");
-
-		int i = 0;
-		foreach (Ability a in c.Abilities)
-		{
-			bool mouseOn = mtk != null && mtk.parameter == i.ToString();
-
-			M.Draw(a.texture, aPosition(i), mouseOn ? a.color : Color.White);
-
-			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(aPosition(i), aSize, new Color(0, 0, 0, 0.7f));
-
-			else if (c == CurrentLCreature) M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[i].ToString(),
-				aPosition(i) + new ZPoint(37, 33), Color.White);
-
-			if (mouseOn) a.DrawDescription(screen.position + position + new ZPoint(24, 56));
-
-			i++;
-		}
-	}
-
-	private void DrawInfo(LCreature c, ZPoint position)
-	{
-		int length = 288, height = 124 + 48;
-		Screen screen = new Screen(position, new ZPoint(length, height));
-		screen.Fill(Color.Black);
-
-		float hpFraction = (float)c.HP / c.MaxHP;
-		float staminaFraction = (float)c.Stamina / c.MaxHP;
-
-		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(hpFraction * length), 20), new Color(0.2f, 0, 0));
-		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(staminaFraction * length), 20), new Color(0.4f, 0, 0));
-		for (int i = 1; i <= c.MaxHP; i++) screen.DrawRectangle(new ZPoint((int)(i * (float)length / c.MaxHP), 0), new ZPoint(1, 20), Color.Black);
-
-		SpriteFont font = M.fonts.verdanaBold;
-		screen.DrawString(font, /*name*/ c.data.FullName, 23, Color.White);
-
-		screen.Draw(damageIcon, new ZPoint(0, 40));
-		screen.DrawString(font, c.Damage.ToString(), new ZPoint(22, 43), Color.White);
-		screen.DrawString(font, c.Attack.ToString() + "/" + c.Defence, 43, Color.White);
-		screen.DrawString(font, c.Armor.ToString(), new ZPoint(length - 32, 43), Color.White);
-		screen.Draw(armorIcon, new ZPoint(length - 20, 40));
-
-		c.DrawEffects(screen.position + new ZPoint(0, 60), screen.position + new ZPoint(24, 180));
-		if (c.data is Character) (c.data as Character).inventory.Draw(screen.position + new ZPoint(0, 92));
-		DrawAbilities(c, screen, new ZPoint(0, 124));
-	}
-
 	private void DrawEndButton()
 	{
 		int length = 128, height = 32;
@@ -210,9 +157,66 @@ public partial class Battlefield
 		delayedDrawings.Clear();
 
 		DrawScale(false);
-		DrawInfo(spotlightObject as LCreature, new ZPoint(M.size.x - 288 - 8, 8));
+		(spotlightObject as LCreature).DrawInfo(new ZPoint(M.size.x - 288 - 8, 8));
 		if (MyGame.Instance.combatLog) log.Draw();
 		DrawEndButton();
+	}
+}
+
+public partial class LCreature : LObject
+{
+	public void DrawInfo(ZPoint position)
+	{
+		int length = 288, height = 124 + 48;
+		Screen screen = new Screen(position, new ZPoint(length, height));
+		screen.Fill(Color.Black);
+
+		float hpFraction = (float)HP / MaxHP;
+		float staminaFraction = (float)Stamina / MaxHP;
+
+		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(hpFraction * length), 20), new Color(0.2f, 0, 0));
+		screen.DrawRectangle(new ZPoint(0, 0), new ZPoint((int)(staminaFraction * length), 20), new Color(0.4f, 0, 0));
+		for (int i = 1; i <= MaxHP; i++) screen.DrawRectangle(new ZPoint((int)(i * (float)length / MaxHP), 0), new ZPoint(1, 20), Color.Black);
+
+		SpriteFont font = M.fonts.verdanaBold;
+		screen.DrawString(font, data.FullName, 23, Color.White);
+
+		screen.Draw(B.damageIcon, new ZPoint(0, 40));
+		screen.DrawString(font, Damage.ToString(), new ZPoint(22, 43), Color.White);
+		screen.DrawString(font, Attack.ToString() + "/" + Defence, 43, Color.White);
+		screen.DrawString(font, Armor.ToString(), new ZPoint(length - 32, 43), Color.White);
+		screen.Draw(B.armorIcon, new ZPoint(length - 20, 40));
+
+		DrawEffects(screen.position + new ZPoint(0, 60), screen.position + new ZPoint(24, 180));
+		if (data is Character) (data as Character).inventory.Draw(screen.position + new ZPoint(0, 92));
+		Ground.Draw(screen.position + new ZPoint(192, 92));
+		DrawAbilities(screen, new ZPoint(0, 124));
+	}
+
+	private void DrawAbilities(Screen screen, ZPoint position)
+	{
+		Func<int, ZPoint> aPosition = k => screen.position + position + new ZPoint(48 * k, 0);
+		ZPoint aSize = new ZPoint(48, 48);
+
+		for (int n = 0; n < 6; n++) MouseTriggerKeyword.Set("ability", n.ToString(), aPosition(n), aSize);
+		var mtk = MouseTriggerKeyword.GetUnderMouse("ability");
+
+		int i = 0;
+		foreach (CAbility a in Abilities)
+		{
+			bool mouseOn = mtk != null && mtk.parameter == i.ToString();
+
+			M.Draw(a.texture, aPosition(i), mouseOn ? a.color : Color.White);
+
+			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(aPosition(i), aSize, new Color(0, 0, 0, 0.7f));
+
+			else if (this == B.CurrentLCreature) M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[i].ToString(),
+				aPosition(i)/* + new ZPoint(37, 33)*/, Color.White);
+
+			if (mouseOn) a.DrawDescription(screen.position + position + new ZPoint(24, 56));
+
+			i++;
+		}
 	}
 }
 

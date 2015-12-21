@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
@@ -12,6 +11,7 @@ public class Inventory
 
 	private static MainScreen M { get { return MainScreen.Instance; } }
 	private static MyGame G { get { return MyGame.Instance; } }
+	private static Battlefield B { get { return World.Instance.battlefield; } }
 
 	public int Size { get { return width * height; } }
 	public Item this[int k] { get { return data[k]; } }
@@ -51,6 +51,12 @@ public class Inventory
 		else return false;
 	}
 
+	public bool CanAdd(Item item)
+	{
+		for (int i = 0; i < Size; i++) if (CanAdd(item, i)) return true;
+		return false;
+	}
+
 	public void Add(Item item, int cell)
 	{
 		if (data[cell] == null) data[cell] = item;
@@ -74,6 +80,7 @@ public class Inventory
 	}
 
 	public void Add(ItemShape shape, int number) { for (int i = 0; i < number; i++) Add(shape); }
+	public void Add(Item item) { Add(item.data, item.numberOfStacks); }
 	public void Add(string name) { Add(BigBase.Instance.items.Get(name)); }
 	public void Add(string name, int number) { for (int i = 0; i < number; i++) Add(name); }
 
@@ -85,6 +92,9 @@ public class Inventory
 		else if (data[cell].numberOfStacks > 1) data[cell].numberOfStacks--;
 		else data[cell] = null;
 	}
+
+	public void Remove(ItemShape shape) {
+		Remove((from pair in data where pair.Value.data == shape select pair.Key).First());	}
 
 	public void RemoveStack(int cell) { data[cell] = null; }
 
@@ -98,8 +108,8 @@ public class Inventory
 		for (int i = 0; i < Size; i++) MouseTriggerInventory.Set(this, i, screen.position + CellPosition(i), new ZPoint(32, 32));
 		var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
 
-		if (((mti != null && mti.inventory == this) || !IsEmpty) && name != "") screen.DrawString(M.fonts.superSmall, name, Color.White);
-		if (!G.battle) screen.Fill(Stuff.MyColor("Very Dark Grey"));
+		if (((mti != null && mti.inventory == this) || !IsEmpty) && name != "" && !G.battle) screen.DrawString(M.fonts.superSmall, name, Color.White);
+		screen.Fill(name == "ground" ? Stuff.MyColor("Very Dark Blue") : Stuff.MyColor("Very Dark Grey"));
 
 		for (int i = 0; i < Size; i++)
 		{
@@ -109,6 +119,8 @@ public class Inventory
 				screen.Draw(data[i].data.texture, p);
 				if (data[i].numberOfStacks > 1)
 					screen.DrawStringWithShading(M.fonts.small, data[i].numberOfStacks.ToString(), p + new ZPoint(24, 18), Color.White);
+				if (G.battle && name == "" && data[i].data.ability != null)
+					screen.DrawStringWithShading(M.fonts.small, Stuff.ItemHotkeys[i].ToString(), p, Color.White);
 			}
 		}
 		
@@ -116,7 +128,24 @@ public class Inventory
 		{
 			screen.Draw(M.zSelectionTexture, CellPosition(mti.cell));
 			Item item = mti.GetItem();
-            if (item != null) item.data.DrawDescription(G.battle ? position + new ZPoint(24, 88) : new ZPoint(248, 8));
+			if (item != null)
+			{
+				item.data.DrawDescription(G.battle ? name == "ground" ? position + new ZPoint(-168, 88) : position + new ZPoint(24, 88) : new ZPoint(248, 8));
+				if (G.battle && G.RightMouseButtonClicked && B.CurrentLCreature.data is Character)
+				{
+					Character c = B.CurrentLCreature.data as Character;
+					if (this == c.inventory)
+					{
+						B.Add(new LItem(item), B.CurrentLCreature.position);
+						Remove(mti.cell);
+					}
+					else if (name == "ground" && c.inventory.CanAdd(item))
+					{
+						c.inventory.Add(item);
+						B.RemoveItem(item);
+					}
+				}
+			}
 		}
 	}
 

@@ -96,7 +96,7 @@ public partial class Player : GObject
 				for (int i = 0; i < W.map.Size.x; i++)
 					visitedLocations[i, j] = false;
 
-			OpenMap();
+			//OpenMap();
 		}
 
 		for (int j = -2; j <= 2; j++) for (int i = -2; i <=2; i++)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Microsoft.Xna.Framework;
@@ -117,4 +116,19 @@ public class PureLObject : LObject
 		texture = data.texture.Random();
 		Init();
 	}
+}
+
+public class LItem : LObject
+{
+	public Item data;
+
+	public override string Name { get { return data.data.name; } }
+
+	public LItem(Item item)
+	{
+		data = item;
+		texture = data.data.texture;
+	}
+
+	public LItem(ItemShape shape) : this(new Item(shape)) { }
 }

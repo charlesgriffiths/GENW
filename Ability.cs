@@ -4,18 +4,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 public class Ability : NamedObject
 {
-	public Texture2D texture;
-	public string description;
 	public TargetType targetType;
-	public int cost, range;
+	public int range, cost;
 	public float castTime, cooldownTime;
-	public Color color;
 
 	public enum TargetType { Passive, None, Direction, Point, Creature };
 
-	public static Ability Get (string name) { return BigBase.Instance.abilities.Get(name); }
-
-	private static TargetType GetTargetType(string s)
+	public static TargetType GetTargetType(string s)
 	{
 		if (s == "passive") return TargetType.Passive;
 		else if (s == "none") return TargetType.None;
@@ -28,6 +23,48 @@ public class Ability : NamedObject
 			return TargetType.Passive;
 		}
 	}
+
+	public override void Load(XmlNode xnode)
+	{
+		name = MyXml.GetString(xnode, "name");
+		targetType = GetTargetType(MyXml.GetString(xnode, "target"));
+		range = MyXml.GetInt(xnode, "range");
+		cost = MyXml.GetInt(xnode, "cost");
+		castTime = MyXml.GetFloat(xnode, "castTime");
+		cooldownTime = MyXml.GetFloat(xnode, "cooldownTime");
+	}
+}
+
+public class IAbility : Ability
+{
+	public ItemShape itemShape;
+
+	public override void Load(XmlNode xnode) { Log.Error("should not be called"); }
+
+	public IAbility(Ability a, ItemShape s)
+	{
+		itemShape = s;
+		name = a.name;
+		targetType = a.targetType;
+		range = a.range;
+		cost = a.cost;
+		castTime = a.castTime;
+		cooldownTime = a.cooldownTime;
+	}
+}
+
+public class CAbility : Ability
+{
+	public Texture2D texture;
+	public string description;
+	//public int cost;//, range;
+	//public float castTime, cooldownTime;
+	public Color color;
+	//public TargetType targetType;
+
+	public static CAbility Get (string name) { return BigBase.Instance.abilities.Get(name); }
+
+	//public enum TargetType { Passive, None, Direction, Point, Creature };
 
 	public static string Name(string s)
 	{
@@ -43,19 +80,17 @@ public class Ability : NamedObject
 
 	public override void Load(XmlNode xnode)
 	{
-		name = MyXml.GetString(xnode, "name");
-		targetType = GetTargetType(MyXml.GetString(xnode, "target"));
-		cost = MyXml.GetInt(xnode, "cost");
-		range = MyXml.GetInt(xnode, "range");
-		castTime = MyXml.GetFloat(xnode, "castTime");
-		cooldownTime = MyXml.GetFloat(xnode, "cooldownTime");
+		//name = MyXml.GetString(xnode, "name");
+		//targetType = GetTargetType(MyXml.GetString(xnode, "target"));
+		//range = MyXml.GetInt(xnode, "range");
+		base.Load(xnode);
 		color = Stuff.MyColor(MyXml.GetString(xnode, "color"));
 		description = MyXml.GetString(xnode, "description");
 	}
 
 	public static void LoadTextures()
 	{
-		foreach (Ability a in BigBase.Instance.abilities.data)
+		foreach (CAbility a in BigBase.Instance.abilities.data)
 			a.texture = M.game.Content.Load<Texture2D>("abilities/" + a.name);
 	}
 

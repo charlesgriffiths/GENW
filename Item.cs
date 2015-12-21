@@ -26,42 +26,43 @@ public class ItemShape : NamedObject
 	public Texture2D texture;
 	public Bonus bonus;
 	public float value, weight;
-	public string active, description;
+	public string description;
 	public bool isStackable, isEquippable, isArmor;
 	public int hands, craftLevel;
-	//public List<string> properties = new List<string>();
-
+	public IAbility ability;
+	
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
 		value = MyXml.GetFloat(xnode, "value");
 		weight = MyXml.GetFloat(xnode, "weight");
-		active = MyXml.GetString(xnode, "active");
 		description = MyXml.GetString(xnode, "description");
 		bonus = new Bonus(xnode);
 		isArmor = MyXml.GetBool(xnode, "isArmor");
 		hands = MyXml.GetInt(xnode, "hands");
 		isStackable = MyXml.GetBool(xnode, "stackable");
 		isEquippable = MyXml.GetBool(xnode, "equippable");
+
 		craftLevel = MyXml.GetInt(xnode, "craftable");
 		if (craftLevel == 0) craftLevel = 100;
 
-		XmlNode cnode = xnode.FirstChild;
-		for (cnode = cnode.FirstChild; cnode != null; cnode = cnode.NextSibling)
+		string abilityName = MyXml.GetString(xnode, "ability");
+		if (abilityName != "")
 		{
-			int amount = MyXml.GetInt(cnode, "amount");
-			if (amount == 0) amount = 1;
-
-            cComponents.Add(new Tuple<CComponent, int>(BigBase.Instance.ccomponents.Get(MyXml.GetString(cnode, "name")), amount));
+			ability = new IAbility(BigBase.Instance.iAbilityTypes.Get(abilityName), this);
+			isEquippable = true;
 		}
 
-		/*XmlNode xnode2 = xnode.FirstChild;
-		if (xnode2 != null)
+		for (xnode = xnode.FirstChild; xnode != null; xnode = xnode.NextSibling)
 		{
-			for (xnode2 = xnode2.FirstChild; xnode2 != null; xnode2 = xnode2.NextSibling)
-				properties.Add(MyXml.GetString(xnode2, "name"));
+			if (xnode.Name == "component")
+			{
+				int amount = MyXml.GetInt(xnode, "amount");
+				if (amount == 0) amount = 1;
+
+				cComponents.Add(new Tuple<CComponent, int>(BigBase.Instance.ccomponents.Get(MyXml.GetString(xnode, "name")), amount));
+			}
 		}
-		*/
 
 		if (hands > 0 || isArmor) isEquippable = true;
 	}
@@ -75,7 +76,6 @@ public class ItemShape : NamedObject
 	public void DrawDescription(ZPoint position)
 	{
 		Screen screen = new Screen(position, new ZPoint(MyGame.Instance.battle ? 240 : 192, 190));
-		//screen.Fill(new Color(0, 0, 0, 0.9f));
 		screen.DrawString(M.fonts.verdanaBold, name, new ZPoint(0, 0), Color.White);
 		SpriteFont font = M.fonts.small;
 		int previousOffset = 0, hOffset = 0;
@@ -90,7 +90,7 @@ public class ItemShape : NamedObject
 		Action<string, int> drawInt = (s, n) => { if (n != 0) draw(s + " " + Stuff.ShowSgn(n)); };
 
 		skip(8);
-		if (active != "") draw("ACTIVE: " + active);
+		if (ability != null) draw("ABILITY: " + ability.name);
 		if (bonus.mtm != 1) draw("MOVEMENT TIME MULT.: " + bonus.mtm);
 		if (bonus.atm != 1) draw("ATTACK TIME MULT.: " + bonus.atm);
 

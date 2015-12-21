@@ -65,7 +65,7 @@ public class Background : NamedObject
 
 public class Race : NamedObject
 {
-	public Ability ability;
+	public CAbility ability;
 	public Bonus bonus;
 	public string description;
 
@@ -80,7 +80,7 @@ public class Race : NamedObject
 
 public class CClass : NamedObject
 {
-	public Collection<Ability> abilities = new Collection<Ability>();
+	public Collection<CAbility> abilities = new Collection<CAbility>();
 	public Bonus bonus;
 	public string description;
 

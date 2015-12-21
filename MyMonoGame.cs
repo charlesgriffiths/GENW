@@ -41,7 +41,7 @@ public class MyMonoGame : Game
         GTile.LoadTextures();
 		LTile.LoadTextures();
 		EffectShape.LoadTextures();
-		Ability.LoadTextures();
+		CAbility.LoadTextures();
 		GObjectShape.LoadTextures();
 		Texture.LoadTextures();
 		CreepShape.LoadTextures();
@@ -120,8 +120,20 @@ public class MyMonoGame : Game
 			foreach (char key in Stuff.AbilityHotkeys)
 			{
 				int index = Stuff.AbilityHotkeys.IndexOf(key);
-				List<Ability> abilities = B.CurrentLCreature.Abilities;
+				List<CAbility> abilities = B.CurrentLCreature.Abilities;
 				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.CurrentLCreature.UseAbility(abilities[index]);
+			}
+
+			foreach(char key in Stuff.ItemHotkeys)
+			{
+				int index = Stuff.ItemHotkeys.IndexOf(key);
+				LCreature lc = B.CurrentLCreature;
+				if (lc.data is Character)
+				{
+					Character c = lc.data as Character;
+					Item item = c.inventory[index];
+					if (KeyPressed(Stuff.GetKey(key)) && item != null && item.data.ability != null)	lc.UseAbility(item.data.ability);
+				}
 			}
 
 			if (G.editor)

@@ -112,5 +112,5 @@ public partial class GObject
 		return (from c in party where c is Character let ch = c as Character select ch[skill]).Max(); }
 
 	public bool HasAbility(Ability a) {	return party.Where(c => c.Abilities.Contains(a)).Count() > 0; }
-	public bool HasAbility(string abilityName) { return HasAbility(Ability.Get(abilityName)); }
+	public bool HasAbility(string abilityName) { return HasAbility(CAbility.Get(abilityName)); }
 }

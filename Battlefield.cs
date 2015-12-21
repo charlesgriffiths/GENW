@@ -16,7 +16,8 @@ public partial class Battlefield
 	public Ability ability = null;
 	private GObject gObject;
 
-	private Texture2D arrowTexture, targetTexture, damageIcon, armorIcon;
+	private Texture2D arrowTexture, targetTexture;
+	public Texture2D damageIcon, armorIcon;
 
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
@@ -30,8 +31,9 @@ public partial class Battlefield
 
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 
-	public List<LCreature> Creatures { get { return (from c in objects where c is LCreature select c as LCreature).Cast<LCreature>().ToList(); } }
-	public List<LCreature> AliveCreatures { get { return Creatures.Where(c => c.IsAlive).Cast<LCreature>().ToList(); } }
+	public List<LCreature> Creatures { get { return (from c in objects where c is LCreature select c as LCreature).ToList(); } }
+	public List<LCreature> AliveCreatures { get { return Creatures.Where(c => c.IsAlive).ToList(); } }
+	public List<LItem> Items { get { return (from o in objects where o is LItem select o as LItem).ToList(); } }
 
 	public ZPoint Mouse { get { return ZCoordinates(MyGame.Instance.mouseState.Position.ToVector2()); } }
 
@@ -155,8 +157,6 @@ public partial class Battlefield
 		data = new char[width, height];
 
 		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) data[i, j] = dataLines[j][i];
-
-		//screenPosition = new ZPoint(16, 16);
 	}
 
 	public void SetSpotlight()
@@ -180,10 +180,11 @@ public partial class Battlefield
 	private Resolution GetResolution()
 	{
 		Func<LCreature, bool> onBorder = lc => lc.position.x == 0 || lc.position.y == 0 || lc.position.x == Size.x - 1 || lc.position.y == Size.y - 1;
-		Func<LCreature, bool> noEnemiesNearby = lc => AliveCreatures.Where(c => lc.IsEnemyTo(lc) && lc.Distance(c) <= 2).Count() == 0;
+		Func<LCreature, bool> noEnemiesNearby = lc => AliveCreatures.Where(c => lc.IsEnemyTo(c) && lc.Distance(c) <= 2).Count() == 0;
 
 		if (AliveCreatures.Where(c => !c.isInParty).Count() == 0) return Resolution.Victory;
 		else if (AliveCreatures.Where(c => c.isInParty && (!onBorder(c) || !noEnemiesNearby(c))).Count() == 0) return Resolution.Retreat;
+		//else if (AliveCreatures.Where(c => c.isInParty && onBorder(c) && noEnemiesNearby(c)).Count() == P.party.Count) return Resolution.Retreat;
 		else return Resolution.Not;
 	}
 
@@ -203,14 +204,6 @@ public partial class Battlefield
 		Resolution resolution = GetResolution();
 		if (resolution == Resolution.Victory || resolution == Resolution.Retreat)
 		{
-			/*List<Creature> deadParty = P.party.Where(c => !c.IsAlive).Cast<Creature>().ToList();
-			foreach (Creature c in deadParty) P.party.Remove(c);
-
-			var newParty = from lc in AliveCreatures where !P.party.Contains(lc.data) && lc.isInParty select lc.data;
-			foreach (Creature c in newParty) P.party.Add(c);
-
-			P.party = P.party.OrderBy(c => c.Importance).ToList();*/
-
 			reshape(P.party, true);
 			reshape(gObject.party, false);
 
@@ -246,9 +239,15 @@ public partial class Battlefield
 
 			List<ZPoint> result = query.Cast<ZPoint>().ToList();
 
-			if (ability.NameIs("Overgrowth")) result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
+			if (ability is CAbility)
+			{
+				CAbility cAbility = ability as CAbility;
+				if (cAbility.NameIs("Overgrowth")) result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
+			}
 			
 			return result;
 		}
 	}
+
+	public void RemoveItem(Item item) {	objects.Remove(Items.Where(i => i.data == item).Single()); }
 }

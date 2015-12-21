@@ -12,7 +12,7 @@ public class Character : Creature
 	public Origin origin;
 	public Background background;
 
-	public int xp;
+	//public int xp;
 
 	public override string Name { get { return race.name + " " + cClass.name; } }
 	public override CreepType creepType { get {	return BigBase.Instance.creepTypes.Get("Sentient");	} }
@@ -29,13 +29,13 @@ public class Character : Creature
 		return (int)(race.bonus.skills[skill] + origin.bonus.skills[skill] + background.bonus.skills[skill]); } }
 	public int this[string skillName] { get { return this[Skill.Get(skillName)]; } }
 
-	public override List<Ability> Abilities
+	public override List<CAbility> Abilities
 	{
 		get
 		{
-			List<Ability> result = new List<Ability>();
+			List<CAbility> result = new List<CAbility>();
 			result.Add(race.ability);
-			foreach (Ability a in cClass.abilities) result.Add(a);
+			foreach (CAbility a in cClass.abilities) result.Add(a);
 			return result;
 		}
 	}
