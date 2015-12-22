@@ -58,7 +58,7 @@ public class LTileType : NamedObject
 public class LTile : NamedObject
 {
 	public Texture2D texture;
-	private LTileType type;
+	public LTileType type;
 
 	public bool IsWalkable { get { return type.isWalkable; } }
 	public bool IsFlat { get { return type.isFlat; } }

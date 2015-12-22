@@ -42,9 +42,25 @@ public partial class LCreature : LObject
 			{
 				IAbility ia = ability as IAbility;
 
-				if (ia.name == "Drink")
+				if (ability.NameIs("Drink"))
 				{
 					if (ia.itemShape.name == "Nourishing Mix") data.AddStamina(100);
+
+					Inventory inventory = (data as Character).inventory;
+					inventory.Remove(ia.itemShape);
+					inventory.Add("Empty Bottle");
+
+					AnimateByDefault(ability.castTime);
+				}
+				else if (ability.NameIs("Apply to Weapon"))
+				{
+					AddEffect("Poisoned Weapon", 20, ia.itemShape.name);
+
+					Inventory inventory = (data as Character).inventory;
+					inventory.Remove(ia.itemShape);
+					inventory.Add("Empty Bottle");
+
+					AnimateByDefault(ability.castTime);
 				}
 			}
 
@@ -95,7 +111,6 @@ public partial class LCreature : LObject
 				}
 				else if (ca.NameIs("Leap"))
 				{
-					//Log.WriteLine(target.ToString());
 					SetPosition(target, ability.castTime, true);
 					log("leaps to a different location.");
 				}
@@ -105,7 +120,9 @@ public partial class LCreature : LObject
 				IAbility ia = ability as IAbility;
 				if (ia.name == "Destroy Wall")
 				{
-
+					var list = (from pair in B.palette.data where pair.Value.type.name == "ground" select pair.Key).ToList();
+					int r = World.Instance.random.Next(list.Count);
+					B.SetTile(target, list[r]);
 				}
 			}
 		}
@@ -130,16 +147,12 @@ public partial class LCreature : LObject
 			i++;
 		}
 
-		//Log.Write("Direction = " + ZPoint.Name(d) + "; ");
-		//Log.Write("Train length = " + train.Count + "; ");
-
 		if (train.Count > 0)
 		{
 			ZPoint last = train.Last().position;
 			i = 1;
 			while (B.IsWalkable(last.Shift(d, i))) i++;
 			int shift = Math.Min(i - 1, distance);
-			//Log.WriteLine("shift = " + shift);
 			foreach (LObject o in train) o.SetPosition(o.position.Shift(d, shift), gameTime, o == train.First());
 		}
 		else AnimateByDefault(gameTime);
@@ -196,7 +209,7 @@ public partial class LCreature : LObject
 		else if (ability is IAbility)
 		{
 			IAbility ia = ability as IAbility;
-			if (ia.name == "Throw")
+			if (ability.NameIs("Throw"))
 			{
 				ZPoint p = position + direction;
 				while (B.IsFlat(p) && Distance(p) <= ability.range) p = p + direction;
@@ -204,9 +217,38 @@ public partial class LCreature : LObject
 				
 				B.combatAnimations.Add(new TextureAnimation(ia.itemShape.texture, Battlefield.GC(position), Battlefield.GC(p), ability.castTime));
 
-				if (lc != null) DoDamage(lc, Damage * 2, false);
+				if (ia.itemShape.name == "Net")
+				{
+					if (lc != null) lc.AddEffect("Net", 6);
+					else B.Add(new LItem(ia.itemShape), p);
+				}
+				else if (ia.itemShape.name == "Flashbang")
+				{
+					foreach (LCreature c in B.AliveCreatures.Where(c => c.Distance(p) <= ability.range)) c.AddEffect("Blind", 6);
+				}
+				else
+				{
+					if (lc != null) DoDamage(lc, Damage * 2, false);
+					B.Add(new LItem(ia.itemShape), p);
+				}
+
 				(data as Character).inventory.Remove(ia.itemShape);
-				B.Add(new LItem(ia.itemShape), p);
+			}
+			else if (ability.NameIs("Push"))
+			{
+				ZPoint p = position + direction;
+				while (B.IsFlat(p) && Distance(p) <= ability.range) p = p + direction;
+				LCreature lc = B.GetLCreature(p);
+
+				if (lc != null) Kick(lc.position, direction, 2, true, ability.castTime);
+			}
+			else if (ability.NameIs("Power Shot"))
+			{
+				var ray = B.Ray(position, direction, ability.range);
+				foreach (LCreature lc in B.AliveCreatures.Where(c => c.position.IsIn(ray) && c != this))
+					DoDamage(lc, ia.itemShape.bonus.damage + 1, false);
+
+				B.combatAnimations.Add(new TextureAnimation("arrow", Battlefield.GC(ray.First()), Battlefield.GC(ray.Last()), ability.castTime));
 			}
 		}
 	}
@@ -382,7 +424,10 @@ public partial class LCreature : LObject
 			IAbility ia = ability as IAbility;
 			if (ia.name == "Bash")
 			{
+				DoDamage(target, 1, false);
+				target.AddInitiative(-6, ability.castTime, false);
 
+				AnimateByDefault(ability.castTime);
 			}
 		}
 	}

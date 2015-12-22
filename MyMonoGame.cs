@@ -214,8 +214,6 @@ public class MyMonoGame : Game
 			}
 		}
 
-		//G.previousKeyboardState = G.keyboardState;
-		//G.previousMouseState = G.mouseState;
 		base.Update(gameTime);
 	}
 

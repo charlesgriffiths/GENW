@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Palette : NamedObject
 {
-	private Dictionary<char, LTile> data = new Dictionary<char, LTile>();
+	public Dictionary<char, LTile> data = new Dictionary<char, LTile>();
 
 	public LTile this[char code] { get { return data[code]; } }
 	public int Size { get { return data.Count; } }

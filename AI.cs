@@ -16,7 +16,7 @@ partial class LCreature : LObject
 
 	private Action AI()
 	{
-		if (HasEffect("Sleeping") || HasEffect("Unconscious")) return new AWait(MovementTime);
+		if (HasOneOfEffects("Sleeping", "Unconscious", "Paralyzed")) return new AWait(MovementTime);
         if (HasEffect("Power Strike"))
 		{
 			LCreature lc = B.GetLCreature(position + (ZPoint.Direction)GetEffect("Power Strike").parameter);

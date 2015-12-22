@@ -50,6 +50,7 @@ public partial class LCreature : LObject
 				result += 2;
 
 			if (HasEffect("Attention") && IsFriendTo(GetEffect("Attention").parameter as LCreature)) result += 1;
+			if (HasEffect("net")) result -= 2;
 
 			if (HasEffect("Destined to Die")) result -= HasEffect("Attention") ? 6 : 3;
 			if (HasEffect("Success Prediction Failed")) result -= HasEffect("Attention") ? 4 : 2;
@@ -102,7 +103,7 @@ public partial class LCreature : LObject
 	{
 		get
 		{
-			if (HasEffect("Power Strike") || HasEffect("Sleeping") || HasEffect("Unconscious")) return true;
+			if (HasOneOfEffects("Power Strike", "Sleeping", "Unconscious", "Paralyzed")) return true;
 			else if (HasEffect("Mind Controlled")) return false;
 			else return isAIControlled;
 		}
@@ -200,12 +201,12 @@ public partial class LCreature : LObject
 
 		int hitChance = HitChance(lc);
 		int damage = Damage;
+		ZPoint.Direction direction = (lc.position - position).GetDirection();
 
 		if (lc.HasEffect("Sleeping")) hitChance = 100;
-		if (HasAbility("Backstab"))
+		if (HasAbility("Backstab") && Distance(lc) == 1)
 		{
-			ZPoint.Direction d = (lc.position - position).GetDirection();
-			LCreature behind = B.GetLCreature(position.Shift(d, 2));
+			LCreature behind = B.GetLCreature(position.Shift(direction, 2));
 			if (behind != null && behind.IsEnemyTo(lc))
 			{
 				hitChance = 100;
@@ -228,6 +229,24 @@ public partial class LCreature : LObject
 			if (HasEffect("Melded")) damage *= 2;
 
 			DoDamage(lc, damage, false);
+
+			if(HasItemAbility("Cleave") && Distance(lc) == 1)
+			{
+				ZPoint[] secondaryTargets = new ZPoint[2];
+				secondaryTargets[0] = lc.position + ZPoint.Next(direction);
+				secondaryTargets[1] = lc.position + ZPoint.Previous(direction);
+				foreach (ZPoint p in secondaryTargets)
+				{
+					LCreature secondaryTarget = B.GetLCreature(p);
+					if (secondaryTarget != null) DoDamage(secondaryTarget, damage, false);
+				}
+			}
+
+			if (HasEffect("Poisoned Weapon"))
+			{
+				Effect e = GetEffect("Poisoned Weapon");
+				if (e.parameter as string == "Paralyzing Poison") lc.AddEffect("Paralyzed", 3);
+			}
 
 			RemoveEffect("Destined to Succeed");
 
@@ -252,7 +271,7 @@ public partial class LCreature : LObject
 		else Move(d, control);
 	}
 
-	private bool CanMove { get { return !HasEffect("Roots") && !HasEffect("Net"); } }
+	private bool CanMove { get { return !HasOneOfEffects("Roots", "Net"); } }
 
 	public void Move(ZPoint.Direction d, bool control)
 	{
@@ -296,11 +315,7 @@ public partial class LCreature : LObject
 	protected override void PassTurn(float time)
 	{
 		foreach (Effect e in effects) e.timeLeft -= time;
-		foreach (Effect e in effects.Where(f => f.timeLeft <= 0).ToList())
-		{
-			//effects.Remove(e);
-			RemoveEffect(e.data.name);
-		}
+		foreach (Effect e in effects.Where(f => f.timeLeft <= 0).ToList()) RemoveEffect(e.data.name);
 
 		controlMovementCounter = 3;
 		base.PassTurn(time);
@@ -367,6 +382,7 @@ public partial class LCreature : LObject
 				B.log.Add(UniqueName, LogColor);
 				B.log.Add(" feels depressed.", Color.Pink);
 			}
+			else if (e.NameIs("Net")) B.Add(new LItem("Net"), position);
 			else
 			{
 				B.log.AddLine(UniqueName, LogColor);
@@ -409,17 +425,19 @@ public partial class LCreature : LObject
 		base.Draw();
 		if (!IsAlive) return;
 
-		Action<string> Draw = textureName => Battlefield.Draw(textureName, rPosition);
+		Action<string> draw = textureName => Battlefield.Draw(textureName, rPosition);
+
+		if (HasEffect("Net")) draw("net");
 				
-		if (HasEffect("Unconscious")) Draw("otherEffect");
-		else if (HasEffect("Sleeping")) Draw("sleeping");
-		else if (HasEffect("Mind Controlled")) Draw("psionicEffect");
-		else if (HasEffect("Mind Tricked")) Draw("questionMark");
-		else if (HasEffect("Power Strike")) Draw("timeEffect");
-		else if (HasOneOfEffects("Blind", "Blindsight")) Draw("visionEffect");
-		else if (HasOneOfEffects("Destined to Die", "Success Prediction Failed", "Marked Prey")) Draw("negativeEffect");
-		else if (HasOneOfEffects("Destined to Succeed", "Death Prediction Failed", "Faked Death", "True Strike")) Draw("positiveEffect");
-		else if (HasOneOfEffects("Annoyed", "Attention")) Draw("aggroEffect");
+		if (HasEffect("Unconscious")) draw("otherEffect");
+		else if (HasEffect("Sleeping")) draw("sleeping");
+		else if (HasEffect("Mind Controlled")) draw("psionicEffect");
+		else if (HasEffect("Mind Tricked")) draw("questionMark");
+		else if (HasEffect("Power Strike")) draw("timeEffect");
+		else if (HasOneOfEffects("Blind", "Blindsight")) draw("visionEffect");
+		else if (HasOneOfEffects("Destined to Die", "Success Prediction Failed", "Marked Prey")) draw("negativeEffect");
+		else if (HasOneOfEffects("Destined to Succeed", "Death Prediction Failed", "Faked Death", "True Strike")) draw("positiveEffect");
+		else if (HasOneOfEffects("Annoyed", "Attention")) draw("aggroEffect");
 
 		if (HasEffect("Roots")) M.DrawRectangle(GraphicPosition + new ZPoint(0, 28), new ZPoint(32, 5), Color.DarkGreen);
 	}
@@ -438,5 +456,16 @@ public partial class LCreature : LObject
 			}
 			return result;
 		}
+	}
+
+	public bool HasItemAbility(string name)
+	{
+		if (!(data is Character)) return false;
+
+		Inventory i = (data as Character).inventory;
+		Ability a = BigBase.Instance.iAbilityTypes.Get(name);
+
+		foreach (Item item in i.Items) if (item.data.ability != null && item.data.ability.name == a.name) return true;
+		return false;
 	}
 }

@@ -64,6 +64,9 @@ public class ZPoint
 		else return Direction.Down;
 	}
 
+	public static Direction Next(Direction d) {	return GetDirection(((int)d + 1) % 4); }
+	public static Direction Previous(Direction d) { return GetDirection(((int)d + 3) % 4); }
+
 	public static Direction GetDirection(ZPoint p)
 	{
 		if (p.x == 1 && p.y == 0) return Direction.Right;

@@ -30,6 +30,8 @@ public class ItemShape : NamedObject
 	public bool isStackable, isEquippable, isArmor;
 	public int hands, craftLevel;
 	public IAbility ability;
+
+	public static ItemShape Get(string name) { return BigBase.Instance.items.Get(name); }
 	
 	public override void Load(XmlNode xnode)
 	{

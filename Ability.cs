@@ -33,6 +33,12 @@ public class Ability : NamedObject
 		castTime = MyXml.GetFloat(xnode, "castTime");
 		cooldownTime = MyXml.GetFloat(xnode, "cooldownTime");
 	}
+
+	public virtual bool NameIs(string s)
+	{
+		Log.Error("Ability.NameIs should not be called");
+		return false;
+	}
 }
 
 public class IAbility : Ability
@@ -51,22 +57,19 @@ public class IAbility : Ability
 		castTime = a.castTime;
 		cooldownTime = a.cooldownTime;
 	}
+
+	public override bool NameIs(string s) { return name == BigBase.Instance.iAbilityTypes.Get(s).name; }
 }
 
 public class CAbility : Ability
 {
 	public Texture2D texture;
 	public string description;
-	//public int cost;//, range;
-	//public float castTime, cooldownTime;
 	public Color color;
-	//public TargetType targetType;
 
 	public static CAbility Get (string name) { return BigBase.Instance.abilities.Get(name); }
 
-	//public enum TargetType { Passive, None, Direction, Point, Creature };
-
-	public static string Name(string s)
+	private static string Name(string s)
 	{
 		if (BigBase.Instance.abilities.Get(s) != null) return s;
 		else
@@ -76,13 +79,10 @@ public class CAbility : Ability
 		}
 	}
 
-	public bool NameIs(string s) { return name == Name(s); }
+	public override bool NameIs(string s) { return name == Name(s); }
 
 	public override void Load(XmlNode xnode)
 	{
-		//name = MyXml.GetString(xnode, "name");
-		//targetType = GetTargetType(MyXml.GetString(xnode, "target"));
-		//range = MyXml.GetInt(xnode, "range");
 		base.Load(xnode);
 		color = Stuff.MyColor(MyXml.GetString(xnode, "color"));
 		description = MyXml.GetString(xnode, "description");

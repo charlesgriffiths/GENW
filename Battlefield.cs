@@ -42,15 +42,12 @@ public partial class Battlefield
 		get
 		{
 			if (InRange(p)) return palette[data[p.x, p.y]];
-			else
-			{
-				Log.Error("battlefield index out of range");
-				return null;
-			}
+			else { Log.Error("battlefield index out of range");	return null; }
 		}
 	}
 
-	public void SetTile(char value) { ZPoint p = Mouse;	if (InRange(p)) data[p.x, p.y] = value;	}
+	public void SetTile(ZPoint p, char value) { if (InRange(p)) data[p.x, p.y] = value; }
+	public void SetTile(char value) { SetTile(Mouse, value); }
 
 	private bool InRange(ZPoint p) { return p.InBoundaries(new ZPoint(0, 0), Size - new ZPoint(1, 1)); }
 
@@ -223,6 +220,16 @@ public partial class Battlefield
 		}
 	}
 
+	public List<ZPoint> Ray(ZPoint position, ZPoint.Direction d, int range)
+	{
+		List<ZPoint> result = new List<ZPoint>();
+		ZPoint p = position + d;
+		result.Add(position);
+		while (IsFlat(p) && MyMath.ManhattanDistance(p, position) <= range) { result.Add(p); p += d; }
+		if (!p.TheSameAs(position)) result.Add(p);
+		return result;
+	}
+
 	public List<ZPoint> Range { get { return EveryPoint.Where(p => CurrentLCreature.Distance(p) <= ability.range).ToList(); } }
 
 	public List<ZPoint> AbilityZone
@@ -231,7 +238,9 @@ public partial class Battlefield
 		{
 			System.Collections.IEnumerable query;
 
-			if (ability.targetType == Ability.TargetType.Point)
+			if (ability.name == "Destroy Wall") query = Range.Where(p => this[p].type.name == "wall");
+
+			else if (ability.targetType == Ability.TargetType.Point)
 				query = from p in Range where IsWalkable(p) select p;
 			else if (ability.targetType == Ability.TargetType.Direction)
 				query = from p in EveryPoint where CurrentLCreature.Distance(p) == 1 select p;
@@ -239,11 +248,8 @@ public partial class Battlefield
 
 			List<ZPoint> result = query.Cast<ZPoint>().ToList();
 
-			if (ability is CAbility)
-			{
-				CAbility cAbility = ability as CAbility;
-				if (cAbility.NameIs("Overgrowth")) result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
-			}
+			if (ability.name == "Overgrowth")
+				result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
 			
 			return result;
 		}
