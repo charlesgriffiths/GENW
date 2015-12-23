@@ -24,10 +24,10 @@ public class ZPoint
 
 	public Direction GetDirection()
 	{
-		Log.Assert(ManhattanNorm == 1, "wrong parameter in GetDirection");
+		Log.Assert(x == 0 || y == 0, "wrong parameter in GetDirection");
 
-		if (x == 0) return y == 1 ? Direction.Down : Direction.Up;
-		else if (x == 1) return Direction.Right;
+		if (x == 0) return y > 0 ? Direction.Down : Direction.Up;
+		else if (x > 0) return Direction.Right;
 		else return Direction.Left;
 	}
 

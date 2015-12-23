@@ -124,6 +124,13 @@ public partial class LCreature : LObject
 					int r = World.Instance.random.Next(list.Count);
 					B.SetTile(target, list[r]);
 				}
+				else if (ia.name == "Hurl")
+				{
+					if (ia.itemShape.name == "Flashbang")
+						foreach (LCreature c in B.AliveCreatures.Where(c => c.Distance(target) <= ability.range)) c.AddEffect("Blind", 6);
+
+					B.combatAnimations.Add(new TextureAnimation(ia.itemShape.texture, Battlefield.GC(position), Battlefield.GC(target), ia.castTime));
+				}
 			}
 		}
 
@@ -222,10 +229,6 @@ public partial class LCreature : LObject
 					if (lc != null) lc.AddEffect("Net", 6);
 					else B.Add(new LItem(ia.itemShape), p);
 				}
-				else if (ia.itemShape.name == "Flashbang")
-				{
-					foreach (LCreature c in B.AliveCreatures.Where(c => c.Distance(p) <= ability.range)) c.AddEffect("Blind", 6);
-				}
 				else
 				{
 					if (lc != null) DoDamage(lc, Damage * 2, false);
@@ -244,11 +247,10 @@ public partial class LCreature : LObject
 			}
 			else if (ability.NameIs("Power Shot"))
 			{
-				var ray = B.Ray(position, direction, ability.range);
+				var ray = B.Ray(position, direction, ability.range, true);
+				B.combatAnimations.Add(new TextureAnimation("arrow", Battlefield.GC(ray.First()), Battlefield.GC(ray.Last()), ability.castTime));
 				foreach (LCreature lc in B.AliveCreatures.Where(c => c.position.IsIn(ray) && c != this))
 					DoDamage(lc, ia.itemShape.bonus.damage + 1, false);
-
-				B.combatAnimations.Add(new TextureAnimation("arrow", Battlefield.GC(ray.First()), Battlefield.GC(ray.Last()), ability.castTime));
 			}
 		}
 	}

@@ -50,7 +50,8 @@ public partial class LCreature : LObject
 				result += 2;
 
 			if (HasEffect("Attention") && IsFriendTo(GetEffect("Attention").parameter as LCreature)) result += 1;
-			if (HasEffect("net")) result -= 2;
+			if (HasEffect("Net")) result -= 2;
+			if (HasEffect("Blind")) result -= 3;
 
 			if (HasEffect("Destined to Die")) result -= HasEffect("Attention") ? 6 : 3;
 			if (HasEffect("Success Prediction Failed")) result -= HasEffect("Attention") ? 4 : 2;
@@ -122,6 +123,9 @@ public partial class LCreature : LObject
 		return true;
 	}
 
+	public int Range {
+		get { return data is Character ? (from i in (data as Character).inventory.Items select i.data.range).Max() : 1; } }
+
 	public override void Kill()
 	{
 		texture = BigBase.Instance.textures.Get("blood").Random();
@@ -163,12 +167,16 @@ public partial class LCreature : LObject
 
 	private void AnimateAttack(ZPoint p, float gameTime)
 	{
-		Vector2 v = p - position;
-		v.Normalize();
-		v *= 0.5f;
+		if (Range == 1)
+		{
+			Vector2 v = p - position;
+			v.Normalize();
+			v *= 0.5f;
 
-		B.combatAnimations.Add(new RMove(rPosition, v, 0.5f * gameTime));
-		B.combatAnimations.Add(new RMove(rPosition, -v, 0.5f * gameTime));
+			B.combatAnimations.Add(new RMove(rPosition, v, 0.5f * gameTime));
+			B.combatAnimations.Add(new RMove(rPosition, -v, 0.5f * gameTime));
+		}
+		else B.combatAnimations.Add(new TextureAnimation("arrow", Battlefield.GC(position), Battlefield.GC(p), gameTime));
 	}
 
 	private int DamageDealtBy(LCreature lc) { return damageDealt.ContainsKey(lc) ? damageDealt[lc] : 0;	}

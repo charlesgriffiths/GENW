@@ -28,7 +28,7 @@ public class ItemShape : NamedObject
 	public float value, weight;
 	public string description;
 	public bool isStackable, isEquippable, isArmor;
-	public int hands, craftLevel;
+	public int hands, craftLevel, range;
 	public IAbility ability;
 
 	public static ItemShape Get(string name) { return BigBase.Instance.items.Get(name); }
@@ -44,6 +44,9 @@ public class ItemShape : NamedObject
 		hands = MyXml.GetInt(xnode, "hands");
 		isStackable = MyXml.GetBool(xnode, "stackable");
 		isEquippable = MyXml.GetBool(xnode, "equippable");
+
+		range = MyXml.GetInt(xnode, "range");
+		if (range == 0) range = 1;
 
 		craftLevel = MyXml.GetInt(xnode, "craftable");
 		if (craftLevel == 0) craftLevel = 100;

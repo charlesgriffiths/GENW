@@ -154,15 +154,24 @@ public partial class Battlefield
 	private List<ZPoint> YellowZone { get { return (from p in TotalFramedZone where p.onFrontier select p.data).Cast<ZPoint>().ToList(); } }
 
 	private List<ZPoint> ReachableCreaturePositions
-	{ get { return (from c in AliveCreatures where !c.isInParty && c.IsAdjacentTo(GreenZone) select c.position).Cast<ZPoint>().ToList(); } }
+	{
+		get
+		{
+			return (from c in AliveCreatures where !c.isInParty && /*c.IsAdjacentTo(GreenZone)*/
+					c.IsReachableFrom(GreenZone) select c.position).Cast<ZPoint>().ToList();
+		}
+	}
 
 	public void GoTo()
 	{
-		if (Mouse.IsIn(TotalZone) || Mouse.IsIn(ReachableCreaturePositions))
+		bool melee = CurrentLCreature.Range == 1, move = Mouse.IsIn(TotalZone), attack = Mouse.IsIn(ReachableCreaturePositions);
+		if ((melee && (move || attack)) || (move && !attack))
 		{
 			ZPoint start = CurrentLCreature.position;
 			foreach (ZPoint.Direction d in Path(start, Mouse)) CurrentLCreature.MoveOrAttack(d, true);
 		}
+		else if (IsReachable(Mouse, CurrentLCreature.position, CurrentLCreature.Range))
+			CurrentLCreature.DoAttack(GetLCreature(Mouse));
 	}
 }
 

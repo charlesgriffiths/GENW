@@ -220,14 +220,29 @@ public partial class Battlefield
 		}
 	}
 
-	public List<ZPoint> Ray(ZPoint position, ZPoint.Direction d, int range)
+	public List<ZPoint> Ray(ZPoint position, ZPoint.Direction d, int range, bool penetration)
 	{
 		List<ZPoint> result = new List<ZPoint>();
 		ZPoint p = position + d;
 		result.Add(position);
-		while (IsFlat(p) && MyMath.ManhattanDistance(p, position) <= range) { result.Add(p); p += d; }
+
+		while ((IsFlat(p) || (penetration && GetLCreature(p) != null)) && MyMath.ManhattanDistance(p, position) <= range)
+		{
+			result.Add(p);
+			p += d;
+		}
+
 		if (!p.TheSameAs(position)) result.Add(p);
 		return result;
+	}
+
+	public bool IsReachable(ZPoint p, ZPoint q, int range)
+	{
+		if (p.x != q.x && p.y != q.y) return false;
+		if (MyMath.ManhattanDistance(p, q) > range) return false;
+		ZPoint.Direction d = (p - q).GetDirection();
+		for (ZPoint z = q + d; !z.TheSameAs(p); z += d) if (!IsFlat(z)) return false;
+		return true;
 	}
 
 	public List<ZPoint> Range { get { return EveryPoint.Where(p => CurrentLCreature.Distance(p) <= ability.range).ToList(); } }

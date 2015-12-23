@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Xml;
+using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -73,12 +74,8 @@ public abstract class LObject
 	}
 
 	public bool IsAdjacentTo(LObject o) { return position.IsAdjacentTo(o.position); }
-
-	public bool IsAdjacentTo(List<ZPoint> zone)
-	{
-		var query = from p in zone where p.IsAdjacentTo(position) select p;
-		return query.Count() > 0;
-	}
+	public bool IsAdjacentTo(List<ZPoint> zone)	{ return zone.Where(p => p.IsAdjacentTo(position)).Count() > 0; }
+	public bool IsReachableFrom(List<ZPoint> zone) { return (zone.Where(p => B.IsReachable(p, position, B.CurrentLCreature.Range))).Count() > 0; }
 
 	public int Distance(LObject o) { return MyMath.ManhattanDistance(position, o.position); }
 	public int Distance(ZPoint p) { return MyMath.ManhattanDistance(position, p); }
