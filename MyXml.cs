@@ -25,11 +25,12 @@ static class MyXml
 		return GetString(xmlNode, attribute)[0];
 	}
 
-	public static int GetInt(XmlNode xmlNode, string attribute)
+	public static int GetInt(XmlNode xmlNode, string attribute, int dflt)
 	{
 		string s = GetString(xmlNode, attribute);
-		return s == "" ? 0 : int.Parse(s);
+		return s == "" ? dflt : int.Parse(s);
     }
+	public static int GetInt(XmlNode xmlNode, string attribute) { return GetInt(xmlNode, attribute, 0); }
 
 	public static float GetFloat(XmlNode xmlNode, string attribute)
 	{

@@ -44,7 +44,7 @@ public partial class LCreature : LObject
 
 				if (ability.NameIs("Drink"))
 				{
-					if (ia.itemShape.name == "Nourishing Mix") data.AddStamina(100);
+					if (ia.itemShape.name == "Nourishing Mix") AddStamina(100, true);
 
 					Inventory inventory = (data as Character).inventory;
 					inventory.Remove(ia.itemShape);
@@ -98,7 +98,7 @@ public partial class LCreature : LObject
 					}
 					else if (o == this)
 					{
-						data.AddHP(1);
+						AddHP(1, true);
 						log("regenerates.");
 					}
 					else if (o is LCreature)
@@ -127,7 +127,7 @@ public partial class LCreature : LObject
 				else if (ia.name == "Hurl")
 				{
 					if (ia.itemShape.name == "Flashbang")
-						foreach (LCreature c in B.AliveCreatures.Where(c => c.Distance(target) <= ability.range)) c.AddEffect("Blind", 6);
+						foreach (LCreature c in B.AliveCreatures.Where(c => c.Distance(target) <= 3)) c.AddEffect("Blind", 6);
 
 					B.combatAnimations.Add(new TextureAnimation(ia.itemShape.texture, Battlefield.GC(position), Battlefield.GC(target), ia.castTime));
 				}
@@ -372,7 +372,7 @@ public partial class LCreature : LObject
 				B.log.RemoveLastLine();
 				if (target.HasEffect("Sleeping")) logn(target, "falls asleep within a dream.");
 
-				if (!IsEnemyTo(target)) target.data.AddStamina(1);
+				if (!IsEnemyTo(target)) target.AddStamina(1, true);
 				target.AddEffect("Sleeping", 10);
 			}
 			else if (ca.NameIs("Mind Trick"))
@@ -415,7 +415,7 @@ public partial class LCreature : LObject
 			}
 			else if (ca.NameIs("First Aid"))
 			{
-				target.data.AddHP(1);
+				target.AddHP(1, true);
 
 				AnimateByDefault(ability.castTime);
 				log("heals " + target.UniqueName + " a little.");
@@ -438,7 +438,7 @@ public partial class LCreature : LObject
 	{
 		RemoveEffects("Melded", "Hidden", "Fake Death");
 
-		data.AddStamina(-ability.cost);
+		AddStamina(-ability.cost, false);
 
 		B.log.AddLine(UniqueName, LogColor);
 	}

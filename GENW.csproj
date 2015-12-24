@@ -110,9 +110,13 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="bin\WindowsGL\Debug\Data\codex.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\creepShapes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\creepShapes.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="bin\WindowsGL\Debug\Data\creepTypes.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="bin\WindowsGL\Debug\Data\effects.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\gObjects.xml">
       <SubType>Designer</SubType>
@@ -129,6 +133,7 @@
     <Content Include="bin\WindowsGL\Debug\Data\lTileTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\origins.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\palettes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\pureShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\races.xml">
       <SubType>Designer</SubType>
     </Content>

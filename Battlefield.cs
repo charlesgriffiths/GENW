@@ -204,10 +204,15 @@ public partial class Battlefield
 			reshape(P.party, true);
 			reshape(gObject.party, false);
 
-			if (resolution == Resolution.Victory) gObject.Kill();
 			MyGame.Instance.battle = false;
 		}
 		else Log.Error("can't end battle");
+
+		if (resolution == Resolution.Victory)
+		{
+			foreach (LItem lItem in Items) P.ground.Add(lItem.data);
+			gObject.Kill();
+		}
 	}
 
 	public List<ZPoint> EveryPoint

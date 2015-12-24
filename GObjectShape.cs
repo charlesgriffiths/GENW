@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Xml;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
 public class GObjectShape : NamedObject
@@ -26,7 +27,7 @@ public class GObjectShape : NamedObject
 		if (dialogName != "") dialog = BigBase.Instance.dialogs.Get(dialogName);
 
 		for (xnode = xnode.FirstChild; xnode != null; xnode = xnode.NextSibling)
-			partyShape.Add(MyXml.GetString(xnode, "name"), MyXml.GetInt(xnode, "quantity"));
+			partyShape.Add(MyXml.GetString(xnode, "name"), Math.Max(MyXml.GetInt(xnode, "quantity"), 1));
 	}
 
 	public static void LoadTextures()

@@ -47,7 +47,7 @@ public class Character : Creature
 		BigBase b = BigBase.Instance;
 
 		uniqueName = uniqueNamei;
-		inventory = new Inventory(6, 1, this, "");
+		inventory = new Inventory(6, 1, this, "", true);
 
 		race = b.races.Get(raceName);
 		cClass = b.classes.Get(className);

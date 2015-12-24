@@ -80,7 +80,7 @@ public class ItemShape : NamedObject
 
 	public void DrawDescription(ZPoint position)
 	{
-		Screen screen = new Screen(position, new ZPoint(MyGame.Instance.battle ? 240 : 192, 190));
+		Screen screen = new Screen(position, new ZPoint(MyGame.Instance.battle ? 240 : 192, 1));
 		screen.DrawString(M.fonts.verdanaBold, name, new ZPoint(0, 0), Color.White);
 		SpriteFont font = M.fonts.small;
 		int previousOffset = 0, hOffset = 0;
@@ -162,17 +162,10 @@ public class Item
 	public ItemShape data;
 	public int numberOfStacks;
 
-	public Item(ItemShape shape)
-	{
+	public Item(ItemShape shape, int n) {
 		data = shape;
-		numberOfStacks = 1;
-	}
+		numberOfStacks = n;	}
 
-	public Item(Item item)
-	{
-		data = item.data;
-		numberOfStacks = 1;
-	}
-
-	//public bool HasProperty(string propertyName) { return data.properties.Contains(propertyName); }
+	public Item(ItemShape shape) : this(shape, 1) { }
+	public Item(string shapeName, int n) : this(ItemShape.Get(shapeName), n) { }
 }

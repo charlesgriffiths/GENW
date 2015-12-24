@@ -8,6 +8,8 @@ public class Texture : NamedObject
 	public List<Texture2D> data = new List<Texture2D>();
 	public int numberOfVariations;
 
+	public static Texture2D Get(string name) { return BigBase.Instance.textures.Get(name).data[0]; }
+
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");

@@ -78,29 +78,35 @@ class TextureAnimation : Animation
 	public override bool SpendsTime { get { return true; } }
 }
 
-class DamageAnimation : Animation
+class TextAnimation : Animation
 {
-	private Vector2 position;
-	private Texture2D texture;
-	private int damage;
+	Vector2 position;
+	Texture2D texture;
+	SpriteFont font;
+	Color color;
+	string text;
+	bool up;
 
-	//public override Vector2 Position { get { return position; } }
-
-	public DamageAnimation(int damagei, Vector2 positioni, float seconds, bool isPure)
+	public TextAnimation(string texti, Texture2D texturei, SpriteFont fonti, Color colori, Vector2 positioni, float seconds, bool upi)
 	{
-		damage = damagei;
+		text = texti;
 		position = positioni;
+		texture = texturei;
+		font = fonti;
+		color = colori;
+		up = upi;
+
 		maxFrameTime = (int)(seconds * 60.0f);
 		frameTime = 0;
 
-		texture = BigBase.Instance.textures.Get(isPure ? "pureDamage" : "damage").Single();
+		//texture = BigBase.Instance.textures.Get(isPure ? "pureDamage" : "damage").Single();
 	}
 
 	public override void Draw()
 	{
 		MainScreen m = MainScreen.Instance;
-		m.Draw(texture, position);
-		m.DrawString(m.fonts.verdanaBold, damage.ToString(), new ZPoint(position) + new ZPoint(10, 10 - (int)(frameTime * 0.35f)), Color.White);
+		if (texture != null) m.Draw(texture, position);
+		m.DrawString(font, text, new ZPoint(position) + new ZPoint(10, 10 + (up ? -1 : 1) * (int)(frameTime * 0.35f)), color);
 		base.Draw();
 	}
 }

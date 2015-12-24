@@ -8,6 +8,7 @@ public partial class LCreature : LObject
 	public Creature data;
 	private List<Effect> effects = new List<Effect>();
 	private Dictionary<LCreature, int> damageDealt = new Dictionary<LCreature, int>();
+	//private Dictionary<Ability, float> cooldowns = new float[6]; - это лучше сделать после введения опыта.
 
 	public bool isInParty;
 	private bool isAIControlled;
@@ -25,8 +26,8 @@ public partial class LCreature : LObject
 
 	protected override void Init()
 	{
-		initiative = 0.0f;
 		controlMovementCounter = 3;
+		//for (int i = 0; i < 6; i++) cooldowns[i] = 0;
 		base.Init();
 	}
 
@@ -129,6 +130,7 @@ public partial class LCreature : LObject
 	public override void Kill()
 	{
 		texture = BigBase.Instance.textures.Get("blood").Random();
+		B.Add(new LItem("Meat"), position);
 		base.Kill();
 	}
 
@@ -156,6 +158,22 @@ public partial class LCreature : LObject
 		isAIControlled = isAIControlledi;
 		texture = data.texture;
 		Init();
+	}
+
+	private void AddHP(int n, bool animate)
+	{
+		int difference = Math.Max(0, Math.Min(MaxHP, HP + n)) - HP;
+		if (animate && difference > 0) B.combatAnimations.Add(new TextAnimation("+" + difference, null, 
+			M.fonts.verdanaBold, Color.Green, Battlefield.GC(position), 1, true));
+		data.AddHP(n);
+	}
+
+	private void AddStamina(int n, bool animate)
+	{
+		int difference = Math.Max(0, Math.Min(HP, Stamina + n)) - Stamina;
+		if (animate && difference != 0) B.combatAnimations.Add(new TextAnimation(Stuff.ShowSgn(difference), null, M.fonts.verdanaBold,
+			difference > 0 ? Color.Gray : Color.Red, Battlefield.GC(position), 1, difference > 0));
+		data.AddStamina(n);
 	}
 
 	private void AnimateFailedMovement(ZPoint.Direction d)
@@ -188,14 +206,16 @@ public partial class LCreature : LObject
 
 	public void DoDamage(LCreature lc, int damage, bool pure)
 	{
+		bool pastLife = lc.IsAlive;
 		int finalDamage = pure || HasAbility("Prodigious Precision") ? damage : Math.Max(damage - lc.Armor, 0);
 
-		lc.data.AddHP(-finalDamage);
-		if (lc.Stamina > lc.HP) lc.data.AddStamina(lc.HP - lc.Stamina);
+		lc.AddHP(-finalDamage, false);
 
 		lc.RememberDamage(this, finalDamage);
-		if (lc.data.hp == 0) lc.Kill();
-		B.combatAnimations.Add(new DamageAnimation(finalDamage, Battlefield.GC(lc.position), 1.0f, pure));
+		if (!lc.IsAlive && pastLife) lc.Kill();
+
+		B.combatAnimations.Add(new TextAnimation(finalDamage.ToString(), Texture.Get(pure ? "pureDamage" : "damage"),
+			M.fonts.verdanaBold, Color.White, Battlefield.GC(lc.position), 1, true));
 	}
 
 	public int HitChance(LCreature lc) { return (int)(100.0f * (Math.Max(0.0f, Math.Min(4.0f + Attack - lc.Defence, 8.0f)) / 8.0f)); }
@@ -454,7 +474,7 @@ public partial class LCreature : LObject
 	{
 		get
 		{
-			Inventory result = new Inventory(3, 1, null, "ground");
+			Inventory result = new Inventory(3, 1, null, "ground", true);
 			int pickupDistance = 2;
 			List<LItem>[] list = new List<LItem>[pickupDistance];
 			for (int k = 0; k < pickupDistance; k++)

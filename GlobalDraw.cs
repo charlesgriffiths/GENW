@@ -42,7 +42,7 @@ public partial class Player : GObject
 			Creature c = mtc.t;
 			Screen icon = new Screen(position + new ZPoint(0, vStep * party.IndexOf(c)), new ZPoint(32, 32));
 			icon.DrawString(M.fonts.verySmall, c.stamina.ToString() + "/" + c.hp + "/" + c.MaxHP, 27, Color.White);
-			c.DrawInfo(position + new ZPoint(6 * 32 + 48, 0));
+			c.DrawInfo(position + new ZPoint(6 * 32 + 48, 40));
 		}
 
 		Action<Inventory> draw = i =>
@@ -52,11 +52,27 @@ public partial class Player : GObject
 		};
 
 		draw(inventory);
-
 		if (!crafting.IsEmpty) DrawCrafting(screen.position + new ZPoint(240, iOffset));
-
 		draw(crafting);
-		//draw(ground);
+		if (!ground.IsEmpty) draw(ground);
+		if (barter != null) DrawBarter(new ZPoint(hiOffset + 6 * 32 + 16, 8));
+	}
+
+	private void DrawBarter(ZPoint position)
+	{
+		toSell.Draw(position);
+		toBuy.Draw(position + new ZPoint(32 * 12 + 16, 0));
+		barter.inventory.Draw(position + new ZPoint(32 * 24 + 24, 0));
+
+		M.DrawRectangle(position + new ZPoint(32 * 31, 0), new ZPoint(32, 32), Stuff.MyColor("Very Dark Grey"));
+		M.Draw(barter.dialog.texture, position + new ZPoint(32 * 31, 0));
+
+		// тут нужно сделать, собственно, кнопку торговли.
+
+		float loss = toBuy.Value * 2 - toSell.Value * (1 + 0.25f * Max(Skill.Get("Speech")));
+		Color color = loss > 0 ? Color.Red : Color.Green;
+		M.DrawRectangle(position + new ZPoint(32 * 12 + 7, 0), new ZPoint(2, 56), color);
+		M.DrawRectangle(position + new ZPoint(32 * 12 + 8, 40), new ZPoint((int)(loss * 10), 16), color);
 	}
 
 	private void DrawCrafting(ZPoint position)
@@ -135,7 +151,6 @@ public abstract partial class Creature
 	public void DrawInfo(ZPoint position)
 	{
 		Screen screen = new Screen(position, new ZPoint(192, 1));
-		//screen.offset = 0;
 		screen.DrawString(M.fonts.verdanaBold, FullName, ZPoint.Zero, Color.White);
 		
 		if (this is Character)

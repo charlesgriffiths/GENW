@@ -8,6 +8,7 @@ public class Inventory
 	private Character character;
 	private string name;
 	private int width, height;
+	public bool isInParty;
 
 	private static MainScreen M { get { return MainScreen.Instance; } }
 	private static MyGame G { get { return MyGame.Instance; } }
@@ -18,7 +19,7 @@ public class Inventory
 	public int Width { get { return width; } }
 	public int Height { get { return height; } }
 
-	public Inventory(int widthi, int heighti, Character c, string namei)
+	public Inventory(int widthi, int heighti, Character c, string namei, bool isInPartyi)
 	{
 		width = widthi;
 		height = heighti;
@@ -28,10 +29,12 @@ public class Inventory
 
 		character = c;
 		name = namei;
+		isInParty = isInPartyi;
 	}
 
 	public List<Item> Items { get { return (from pair in data where pair.Value != null select pair.Value).Cast<Item>().ToList(); } }
 	public bool IsEmpty { get { return Items.Count == 0; } }
+	public float Value { get { return (from i in Items select i.data.value * i.numberOfStacks).Sum(); } }
 
 	private bool HasRoomFor(ItemShape itemShape)
 	{
@@ -130,7 +133,7 @@ public class Inventory
 			Item item = mti.GetItem();
 			if (item != null)
 			{
-				item.data.DrawDescription(G.battle ? name == "ground" ? position + new ZPoint(-168, 88) : position + new ZPoint(24, 88) : new ZPoint(248, 8));
+				item.data.DrawDescription(G.battle ? name == "ground" ? position + new ZPoint(-168, 88) : position + new ZPoint(24, 88) : new ZPoint(248, 48));
 				if (G.battle && G.RightMouseButtonClicked && B.CurrentLCreature.data is Character)
 				{
 					Character c = B.CurrentLCreature.data as Character;

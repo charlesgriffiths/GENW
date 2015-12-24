@@ -154,7 +154,7 @@ public class MyMonoGame : Game
 				{
 					bool shift = G.keyboardState.IsKeyDown(Keys.LeftShift);
 
-                    G.dndItem = new Item(mti.GetItem());
+                    G.dndItem = new Item(mti.GetItem().data);
 					G.inventory = mti.inventory;
 					G.cell = mti.cell;
 
@@ -180,15 +180,16 @@ public class MyMonoGame : Game
 				var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<Creature>>();
 
 				if (mti != null && G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null && mti.GetItem().data != G.dndItem.data)
-				{
-					G.inventory.Add(new Item(mti.GetItem()), G.cell);
+				{ // поменять местами 2 предмета
+					G.inventory.Add(new Item(mti.GetItem().data), G.cell);
 					G.inventory[G.cell].numberOfStacks = mti.GetItem().numberOfStacks;
 					mti.inventory.RemoveStack(mti.cell);
-					mti.inventory.Add(new Item(G.dndItem), mti.cell);
+					mti.inventory.Add(new Item(G.dndItem.data), mti.cell);
 					mti.inventory[mti.cell].numberOfStacks = G.dndItem.numberOfStacks;
 				}
-				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell)) mti.inventory.Add(G.dndItem, mti.cell);
-				else if (mtc != null && mtc.t.CanEat(G.dndItem)) mtc.t.Eat(G.dndItem);
+				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell) && G.inventory.isInParty == mti.inventory.isInParty)
+					mti.inventory.Add(G.dndItem, mti.cell);
+				else if (mtc != null && mtc.t.CanEat(G.dndItem) && G.inventory.isInParty) mtc.t.Eat(G.dndItem);
 				else G.inventory.Add(G.dndItem, G.cell);
 
 				if (mti != null && mti.inventory == W.player.crafting) W.player.UpdateCrafting();

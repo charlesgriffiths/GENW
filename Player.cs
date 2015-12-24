@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 public partial class Player : GObject
 {
-	public Inventory crafting = new Inventory(6, 1, null, "CRAFTING");
-	public Dictionary<ItemShape, int> craftableShapes = new Dictionary<ItemShape, int>();
+	public Inventory crafting = new Inventory(6, 1, null, "CRAFTING", true);
+	public Inventory ground = new Inventory(6, 2, null, "GROUND", true);
+	private Inventory toSell = new Inventory(12, 1, null, "SELL", true);
+	private Inventory toBuy = new Inventory(12, 1, null, "BUY", false);
+	public GObject barter = null;
 
-	//private Inventory ground = new Inventory(6, 2, null, "GROUND");
+	public Dictionary<ItemShape, int> craftableShapes = new Dictionary<ItemShape, int>();
 
 	public bool[,] visitedLocations;
 	private List<GObject> visibleObjects = new List<GObject>();
@@ -18,6 +21,7 @@ public partial class Player : GObject
 		shape.speed = 1.0f;
 		shape.isActive = true;
 		uniqueName = shape.name;
+		inventory.isInParty = true;
 
 		Character playerCharacter = new Character(shape.name, "Ratling", "Assassin", "Iron Alliance", "Engineer");
 		playerCharacter.inventory.Add("Club");
@@ -68,6 +72,7 @@ public partial class Player : GObject
 		base.Move(d);
 
 		foreach (Creature c in party) c.AddFatigue(W.map[position.Shift(d)].type.travelTime * c.MaxHP);
+		ground.Clear();
 		UpdateVisitedLocations();
 	}
 
@@ -120,6 +125,5 @@ public partial class Player : GObject
 			craftableShapes.Add(itemShape, 0);
 	}
 
-	public void OpenMap() {
-		for (int j = 0; j < W.map.Size.y; j++) for (int i = 0; i < W.map.Size.x; i++) visitedLocations[i, j] = true; }
+	public void OpenMap() {	for (int j = 0; j < W.map.Size.y; j++) for (int i = 0; i < W.map.Size.x; i++) visitedLocations[i, j] = true; }
 }

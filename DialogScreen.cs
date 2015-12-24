@@ -37,7 +37,6 @@ public class DialogScreen
 			ZPoint p = new ZPoint(8, screen.offset);
 
 			MouseTriggerKeyword.Set("dialog", (i + 1).ToString(), screen.position + p, new ZPoint(font.MeasureString(r.text)) + new ZPoint(20, 0));
-			//MouseTriggerKeyword mt = MouseTriggerKeyword.GetUnderMouse();
 			var mtk = MouseTrigger.GetUnderMouse<MouseTriggerKeyword>();
 
 			Color color = Color.White;
@@ -64,7 +63,8 @@ public class DialogScreen
 	{
 		string nextNode = r.jump;
 
-		if (r.name == "fight") World.Instance.battlefield.StartBattle(gObject);
+		if (r.name == "FIGHT") World.Instance.battlefield.StartBattle(gObject);
+		else if (r.name == "TRADE") P.barter = gObject;
 
 		if (dialog.name == "The First Dialog")
 		{

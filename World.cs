@@ -40,14 +40,18 @@ public class World
 
 		for (xnode = xnode.NextSibling.FirstChild; xnode != null; xnode = xnode.NextSibling)
 		{
-			GObject item = new GObject(BigBase.Instance.gShapes.Get(MyXml.GetString(xnode, "name")));
-			item.uniqueName = MyXml.GetString(xnode, "uniqueName");
+			GObject o = new GObject(BigBase.Instance.gShapes.Get(MyXml.GetString(xnode, "name")));
+			o.uniqueName = MyXml.GetString(xnode, "uniqueName");
 
 			string dialogName = MyXml.GetString(xnode, "dialog");
-			if (dialogName != "") item.dialog = BigBase.Instance.dialogs.Get(dialogName);
+			if (dialogName != "") o.dialog = BigBase.Instance.dialogs.Get(dialogName);
 
-			item.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 0.01f);
-			gObjects.Add(item);
+			o.SetPosition(new HexPoint(MyXml.GetInt(xnode, "x"), MyXml.GetInt(xnode, "y")), 0.01f);
+
+			for (XmlNode xitem = xnode.FirstChild; xitem != null; xitem = xitem.NextSibling)
+				o.inventory.Add(new Item(MyXml.GetString(xitem, "name"), MyXml.GetInt(xitem, "amount", 1)));
+
+			gObjects.Add(o);
 		}
 
 		Log.WriteLine("OK");
