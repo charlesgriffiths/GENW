@@ -24,11 +24,12 @@ public partial class LCreature : LObject
 	private Random R { get { return World.Instance.random; } }
 	private GeneralBase<CAbility> A { get { return BigBase.Instance.abilities; }	}
 
-	protected override void Init()
+	protected void Init()
 	{
 		controlMovementCounter = 3;
+		initiative = 0;
 		//for (int i = 0; i < 6; i++) cooldowns[i] = 0;
-		base.Init();
+		//base.Init();
 	}
 
 	public override bool IsWalkable { get { return !IsAlive; } }

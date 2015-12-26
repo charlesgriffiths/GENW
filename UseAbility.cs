@@ -294,7 +294,7 @@ public partial class LCreature : LObject
 			else if (ca.NameIs("Pommel Strike"))
 			{
 				DoDamage(target, 1, false);
-				target.SetInitiative(target.initiative - 6.0f, ability.castTime, false);
+				target.AddInitiative(-6, ability.castTime, false, true);
 
 				AnimateByDefault(ability.castTime);
 				log("strikes " + target.UniqueName + " unexpectedly.");
@@ -408,8 +408,8 @@ public partial class LCreature : LObject
 			}
 			else if (ca.NameIs("Grimoire Slam"))
 			{
-				target.AddInitiative(-2.0f, ability.castTime, false);
 				Kick(position, (target.position - position).GetDirection(), 1, false, ability.castTime);
+				target.AddInitiative(-2, ability.castTime, false, true);
 
 				log("slams " + target.UniqueName + " with a book!");
 			}
@@ -427,7 +427,7 @@ public partial class LCreature : LObject
 			if (ia.name == "Bash")
 			{
 				DoDamage(target, 1, false);
-				target.AddInitiative(-6, ability.castTime, false);
+				target.AddInitiative(-6, ability.castTime, false, true);
 
 				AnimateByDefault(ability.castTime);
 			}

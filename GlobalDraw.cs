@@ -67,12 +67,25 @@ public partial class Player : GObject
 		M.DrawRectangle(position + new ZPoint(32 * 31, 0), new ZPoint(32, 32), Stuff.MyColor("Very Dark Grey"));
 		M.Draw(barter.dialog.texture, position + new ZPoint(32 * 31, 0));
 
-		// тут нужно сделать, собственно, кнопку торговли.
+		MouseTriggerKeyword.Set("trade", position + new ZPoint(0, 40), new ZPoint(32 * 24 + 16, 16));
+		var mtk = MouseTriggerKeyword.GetUnderMouse("trade");
 
 		float loss = toBuy.Value * 2 - toSell.Value * (1 + 0.25f * Max(Skill.Get("Speech")));
-		Color color = loss > 0 ? Color.Red : Color.Green;
+		Color color = loss < 0 ? mtk != null ? Stuff.MyColor("Light Blue") : Color.Green : Color.Red;
 		M.DrawRectangle(position + new ZPoint(32 * 12 + 7, 0), new ZPoint(2, 56), color);
 		M.DrawRectangle(position + new ZPoint(32 * 12 + 8, 40), new ZPoint((int)(loss * 10), 16), color);
+
+		if (mtk != null && G.LeftMouseButtonClicked)
+		{
+			List<Item> list = new List<Item>();
+			foreach (Item item in toSell.Items) list.Add(item);
+			toSell.Clear();
+
+			foreach (Item item in toBuy.Items) toSell.Add(item);
+			toBuy.Clear();
+
+			foreach (Item item in list) toBuy.Add(item);
+		}
 	}
 
 	private void DrawCrafting(ZPoint position)

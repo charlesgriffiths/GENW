@@ -17,32 +17,30 @@ public partial class Player : GObject
 	public Player()
 	{
 		shape = new GObjectShape();
-		shape.name = "Karl";
+		shape.name = "Nicolas";
 		shape.speed = 1.0f;
 		shape.isActive = true;
 		uniqueName = shape.name;
 		inventory.isInParty = true;
 
-		Character playerCharacter = new Character(shape.name, "Ratling", "Assassin", "Iron Alliance", "Engineer");
+		Character playerCharacter = new Character(shape.name, "Human", "Alchemist", "Iron Alliance", "Merchant");
 		playerCharacter.inventory.Add("Club");
 		playerCharacter.inventory.Add("Leather Armor");
 		party.Add(playerCharacter);
 
-		Character c2 = new Character("Bob", "Vorcha", "Alchemist", "Iron Alliance", "Pitfighter");
+		Character c2 = new Character("Karl", "Floran", "Ranger", "Eden", "Hunter");
 		c2.inventory.Add("Iron Dagger");
-		c2.inventory.Add("Force Staff");
 		party.Add(c2);
 
-		//party.Add(new Creep("Krokar"));
+		party.Add(new Creep("Krokar"));
 
 		inventory.Add("Net");
 		inventory.Add("Rope");
 		inventory.Add("Inperium Coins", 5);
 		inventory.Add("Alliance Coins", 7);
-		inventory.Add("Longbow", 2);
+		inventory.Add("Longbow");
 		inventory.Add("Pickaxe", 3);
 		inventory.Add("Buckler");
-		inventory.Add("Chainmail");
 		inventory.Add("Banana", 4);
 		inventory.Add("Meat", 2);
 		inventory.Add("Deformed Banana", 4);
@@ -51,8 +49,6 @@ public partial class Player : GObject
 		inventory.Add("Paralyzing Poison");
 		inventory.Add("Flashbang");
 		inventory.Add("Nourishing Mix");
-		inventory.Add("King Bolete", 2);
-		inventory.Add("Fut Mushroom", 2);
 		inventory.Add("Vatra Mushroom", 2);
 	}
 
@@ -72,7 +68,18 @@ public partial class Player : GObject
 		base.Move(d);
 
 		foreach (Creature c in party) c.AddFatigue(W.map[position.Shift(d)].type.travelTime * c.MaxHP);
+
 		ground.Clear();
+		if (barter != null)
+		{
+			foreach (Item item in toBuy.Items) if (barter.inventory.CanAdd(item)) barter.inventory.Add(item);
+			foreach (Item item in toSell.Items) if (inventory.CanAdd(item)) inventory.Add(item);
+
+			toBuy.Clear();
+			toSell.Clear();
+			barter = null;
+		}
+
 		UpdateVisitedLocations();
 	}
 

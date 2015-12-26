@@ -126,7 +126,7 @@ public partial class Battlefield
 
 	public void Draw()
 	{
-		M.Fill(new Color(0, 0, 0, 0.8f));
+		M.Fill(new Color(0, 0, 0, 0.6f));
 
 		foreach (LObject l in objects)
 		{

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Xml;
+﻿using System.Xml;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -26,12 +25,7 @@ public abstract class LObject
 	public virtual bool IsWalkable { get { return true; } }
 	public virtual bool IsFlat { get { return true; } }
 	public virtual bool IsVisible { get { return true; } }
-	protected ZPoint GraphicPosition { get { return new ZPoint(Battlefield.GC(rPosition)); } }
-
-	protected virtual void Init()
-	{
-		initiative = 0.0f;
-	}
+	protected ZPoint GraphicPosition { get { return new ZPoint(Battlefield.GC(rPosition)); } } // вот это нужно почаще применять!
 
 	public virtual int Importance { get { return 4; } }
 
@@ -51,7 +45,12 @@ public abstract class LObject
 		initiative = initiativei;
 	}
 
-	protected void AddInitiative(float value, float gameTime, bool commonQueue) { SetInitiative(initiative + value, gameTime, commonQueue); }
+	protected void AddInitiative(float value, float gameTime, bool commonQueue, bool animate)
+	{
+		if (animate) B.combatAnimations.Add(new TextAnimation(value.ToString(), null, M.fonts.verdanaBold, Color.Blue, 
+			Battlefield.GC(position), 1, true));
+		SetInitiative(initiative + value, gameTime, commonQueue);
+	}
 
 	public virtual void Kill() {}
 
@@ -106,11 +105,22 @@ public class PureLObject : LObject
 	public override bool IsFlat { get { return data.isFlat; } }
 	public override string Name { get {	return data.texture.name; }	}
 
+	public PureLObject() { Log.Error("this PureLObject constructor should not be called"); }
 	public PureLObject(string name)
 	{
 		data = BigBase.Instance.pureShapes.Get(name);
 		texture = data.texture.Random();
-		Init();
+		//Init();
+	}
+}
+
+public class LContainer : PureLObject
+{
+	public List<Item> items;
+
+	public LContainer(Inventory inventory) : base("Chest")
+	{
+		items = inventory.Items;
 	}
 }
 

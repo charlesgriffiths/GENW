@@ -54,10 +54,13 @@ public partial class Battlefield
 	
 	public LObject GetLObject(ZPoint p)
 	{
+//		Type t = typeof(Race);
+//		Object something = Activator.CreateInstance(t);
+
 		foreach (LObject l in objects) if (l.position.TheSameAs(p)) return l;
 		return null;
 	}
-	
+
 	public LCreature GetLCreature(ZPoint p)
 	{
 		var query = from c in AliveCreatures where c.position.TheSameAs(p) select c;
@@ -125,6 +128,7 @@ public partial class Battlefield
 		foreach (Creature c in g.party) objects.Add(new LCreature(c, false, true));
 
 		for (int i = 0; i <= Size.x * Size.y / 10; i++)	objects.Add(new PureLObject("Tree"));
+		if (!g.inventory.IsEmpty) objects.Add(new LContainer(g.inventory));
 		
 		foreach (LObject l in objects)
 		{
