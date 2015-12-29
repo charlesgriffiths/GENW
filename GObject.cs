@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 public partial class GObject
 {
 	protected GObjectShape shape;
-	public List<Creature> party = new List<Creature>();
+	public List<LocalObject> party = new List<LocalObject>();
 	public Inventory inventory = new Inventory(6, 5, null, "", false);
 
 	public HexPoint position = new HexPoint();
@@ -18,6 +19,10 @@ public partial class GObject
 	public Dialog dialog;
 
 	protected static MyGame G { get { return MyGame.Instance; } }
+	protected static World W { get { return World.Instance; } }
+	protected static Player P { get { return World.Instance.player; } }
+	protected static MainScreen M { get { return MainScreen.Instance; } }
+	protected static Random R { get { return World.Instance.random; } }
 
 	public string Name { get { return shape.name; } }
 	public float Speed { get { return shape.speed; } }
@@ -28,9 +33,6 @@ public partial class GObject
 		get { return shape.texture; }
 		set { shape.texture = value; }
 	}
-
-	protected World W { get { return World.Instance; } }
-	protected MainScreen M { get { return MainScreen.Instance; } }
 
 	protected GObject() {}
 
@@ -76,8 +78,8 @@ public partial class GObject
 
 	public static void CheckForEvents()
 	{
-		var query = from pc in World.Instance.player.party where pc.UniqueName == "Boo-Boo" select pc;
-		if (query.Count() == 0 && World.Instance.random.Next(300) == 0) MainScreen.Instance.dialogScreen.StartDialog("Boo-Boo Died");
+		if (P.party.Where(pc => pc.uniqueName == "Boo-Boo").Count() == 0 && R.Next(300) == 0)
+			M.dialogScreen.StartDialog("Boo-Boo Died");
 	}
 
 	public virtual void Move(HexPoint.HexDirection d)
@@ -109,8 +111,8 @@ public partial class GObject
 	}
 
 	public int Max(Skill skill) {
-		return (from c in party where c is Character let ch = c as Character select ch[skill]).Max(); }
+		return (from c in party where c.skills != null select c.skills[skill]).Max(); }
 
-	public bool HasAbility(Ability a) {	return party.Where(c => c.Abilities.Contains(a)).Count() > 0; }
+	public bool HasAbility(Ability a) {	return party.Where(c => c.HasAbility(a.name)).Count() > 0; }
 	public bool HasAbility(string abilityName) { return HasAbility(CAbility.Get(abilityName)); }
 }

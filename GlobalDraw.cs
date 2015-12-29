@@ -15,33 +15,33 @@ public partial class Player : GObject
 	{
 		Screen screen = new Screen(position, new ZPoint(1, 1));
 		int vOffset = 0, iOffset = 0, hiOffset = 40, vStep = 40;
-		MouseTrigger.Clear<MouseTriggerObject<Creature>>();
+		MouseTrigger.Clear<MouseTriggerObject<LocalObject>>();
 
-		foreach (Creature c in party)
+		foreach (var c in party)
 		{
 			Screen icon = new Screen(position + new ZPoint(0, vOffset), new ZPoint(32, 32));
 			icon.Fill(Stuff.MyColor("Very Dark Grey"));
-			icon.Draw(c.texture, ZPoint.Zero);
-			MouseTriggerObject<Creature>.Set(c, icon.position, icon.size);
+			icon.Draw(c.GetTexture, ZPoint.Zero);
+			MouseTriggerObject<LocalObject>.Set(c, icon.position, icon.size);
 
-			float hpMissing = 1 - (float)c.hp / c.MaxHP;
-			float staminaMissing = 1 - (float)c.stamina / c.MaxHP;
+			float hpMissing = 1 - (float)c.hp.value / c.hp.Max;
+			float staminaMissing = 1 - (float)c.hp.stamina / c.hp.Max;
 
 			icon.DrawRectangle(new ZPoint(0, 32), new ZPoint(32, -(int)(staminaMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 			icon.DrawRectangle(new ZPoint(0, 32), new ZPoint(32, -(int)(hpMissing * 32)), new Color(0.2f, 0.0f, 0.0f, 0.2f));
 
-			if (c is Character) (c as Character).inventory.Draw(position + new ZPoint(hiOffset, iOffset));
+			if (c.inventory != null) c.inventory.Draw(position + new ZPoint(hiOffset, iOffset));
 
 			vOffset += vStep;
-			if (c is Character) iOffset += vStep;
+			if (c.inventory != null) iOffset += vStep;
 		}
 
-		var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<Creature>>();
+		var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<LocalObject>>();
 		if (mtc != null)
 		{
-			Creature c = mtc.t;
+			LocalObject c = mtc.t;
 			Screen icon = new Screen(position + new ZPoint(0, vStep * party.IndexOf(c)), new ZPoint(32, 32));
-			icon.DrawString(M.fonts.verySmall, c.stamina.ToString() + "/" + c.hp + "/" + c.MaxHP, 27, Color.White);
+			icon.DrawString(M.fonts.verySmall, c.hp.stamina.ToString() + "/" + c.hp + "/" + c.hp.Max, 27, Color.White);
 			c.DrawInfo(position + new ZPoint(6 * 32 + 48, 40));
 		}
 
@@ -157,11 +157,11 @@ public partial class Player : GObject
 	}
 }
 
-public abstract partial class Creature
-{
-	private static MainScreen M { get { return MainScreen.Instance; } }
+//public abstract partial class Creature
+//{
+	//private static MainScreen M { get { return MainScreen.Instance; } }
 
-	public void DrawInfo(ZPoint position)
+	/*public void DrawInfo(ZPoint position)
 	{
 		Screen screen = new Screen(position, new ZPoint(192, 1));
 		screen.DrawString(M.fonts.verdanaBold, FullName, ZPoint.Zero, Color.White);
@@ -181,5 +181,5 @@ public abstract partial class Creature
 				screen.offset = trueOffset;
 			}
 		}
-	}
-}
+	}*/
+//}

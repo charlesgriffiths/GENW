@@ -40,31 +40,37 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Ability.cs" />
-    <Compile Include="AI.cs" />
     <Compile Include="Animation.cs" />
     <Compile Include="Animations.cs" />
     <Compile Include="Battlefield.cs" />
     <Compile Include="BattlefieldDraw.cs" />
     <Compile Include="BigBase.cs" />
-    <Compile Include="Character.cs" />
     <Compile Include="CombatLog.cs" />
     <Compile Include="Console.cs" />
-    <Compile Include="Creature.cs" />
-    <Compile Include="Creep.cs" />
     <Compile Include="Dialog.cs" />
     <Compile Include="DialogScreen.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="Effect.cs" />
+    <Compile Include="Attack.cs" />
+    <Compile Include="Defence.cs" />
+    <Compile Include="LocalDrawing.cs" />
+    <Compile Include="Eating.cs" />
+    <Compile Include="Fatigue.cs" />
+    <Compile Include="HPComponent.cs" />
+    <Compile Include="Initiative.cs" />
+    <Compile Include="Movement.cs" />
+    <Compile Include="LocalPosition.cs" />
+    <Compile Include="LocalShape.cs" />
+    <Compile Include="Team.cs" />
+    <Compile Include="LocalObject.cs" />
     <Compile Include="GlobalDraw.cs" />
     <Compile Include="GObjectShape.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="Item.cs" />
-    <Compile Include="LCreature.cs" />
     <Compile Include="MouseTrigger.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="MyMonoGame.cs" />
     <Compile Include="GObject.cs" />
-    <Compile Include="LObject.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MyMath.cs" />
     <Compile Include="MainScreen.cs" />
@@ -110,10 +116,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="bin\WindowsGL\Debug\Data\codex.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\creepShapes.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="bin\WindowsGL\Debug\Data\creepTypes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\creatureTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\dialogs.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -131,9 +134,9 @@
     </Content>
     <Content Include="bin\WindowsGL\Debug\Data\lTiles.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\lTileTypes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\objectShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\origins.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\palettes.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\pureShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\races.xml">
       <SubType>Designer</SubType>
     </Content>

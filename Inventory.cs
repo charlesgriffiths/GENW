@@ -1,11 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 public class Inventory
 {
 	private Dictionary<int, Item> data = new Dictionary<int, Item>();
-	private Character character;
+	private LocalObject owner;
 	private string name;
 	private int width, height;
 	public bool isInParty;
@@ -19,7 +20,7 @@ public class Inventory
 	public int Width { get { return width; } }
 	public int Height { get { return height; } }
 
-	public Inventory(int widthi, int heighti, Character c, string namei, bool isInPartyi)
+	public Inventory(int widthi, int heighti, LocalObject owneri, string namei, bool isInPartyi)
 	{
 		width = widthi;
 		height = heighti;
@@ -27,7 +28,7 @@ public class Inventory
 		Log.Assert(Size > 0 && Size <= 100, "wrong inventory size");
 		for (int i = 0; i < Size; i++) data.Add(i, null);
 
-		character = c;
+		owner = owneri;
 		name = namei;
 		isInParty = isInPartyi;
 	}
@@ -47,7 +48,7 @@ public class Inventory
 	{
 		if (data[cell] == null)
 		{
-			if (character == null) return true;
+			if (owner == null) return true;
 			else return item.data.isEquippable && HasRoomFor(item.data);
 		}
 		else if (data[cell].data == item.data && data[cell].data.isStackable) return true;
@@ -133,19 +134,21 @@ public class Inventory
 			Item item = mti.GetItem();
 			if (item != null)
 			{
-				item.data.DrawDescription(G.battle ? name == "ground" ? position + new ZPoint(-168, 88) : position + new ZPoint(24, 88) : new ZPoint(248, 48));
-				if (G.battle && G.RightMouseButtonClicked && B.CurrentLCreature.data is Character)
+				item.data.DrawDescription(G.battle ? name == "ground" ? position + new ZPoint(-168, 88) : position + 
+					new ZPoint(24, 88) : new ZPoint(248, 48));
+
+				if (G.battle && G.RightMouseButtonClicked && B.current.inventory != null)
 				{
-					Character c = B.CurrentLCreature.data as Character;
-					if (this == c.inventory)
+					Inventory inventory = B.current.inventory;
+					if (this == inventory)
 					{
-						B.Add(new LItem(item), B.CurrentLCreature.position);
+						//B.Add(new LItem(item), B.currentObject.position.value);
 						Remove(mti.cell);
 					}
-					else if (name == "ground" && c.inventory.CanAdd(item))
+					else if (name == "ground" && inventory.CanAdd(item))
 					{
-						c.inventory.Add(item);
-						B.RemoveItem(item);
+						inventory.Add(item);
+						//B.RemoveItem(item);
 					}
 				}
 			}
@@ -169,4 +172,19 @@ public class Inventory
 	}
 
 	public bool Contains(ItemShape shape) { return Items.Where(i => i.data == shape).Count() > 0; }
+
+	public int Sum(Func<Bonus, int> func) { return (from i in Items select func(i.data.bonus)).Sum(); }
+	public float Prod(Func<Bonus, float> func)
+	{
+		float result = 1;
+		foreach (float f in from i in Items select func(i.data.bonus)) result *= f;
+		return result;
+	}
+
+	public bool HasAbility(string name)
+	{
+		Ability a = BigBase.Instance.iAbilityTypes.Get(name);
+		foreach (Item item in Items) if (item.data.ability != null && item.data.ability.name == a.name) return true;
+		return false;
+	}
 }

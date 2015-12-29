@@ -1,4 +1,4 @@
-﻿class BigBase
+﻿public class BigBase
 {
 	private static readonly BigBase instance = new BigBase();
 	public static BigBase Instance { get { return instance; } }
@@ -22,9 +22,12 @@
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
 
 	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
-	public GeneralBase<PureShape> pureShapes = new GeneralBase<PureShape>();
-	public GeneralBase<CreepType> creepTypes = new GeneralBase<CreepType>();
-	public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
+	//public GeneralBase<PureShape> pureShapes = new GeneralBase<PureShape>();
+	//public GeneralBase<CreepType> creepTypes = new GeneralBase<CreepType>();
+	//public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
+	public GeneralBase<CreatureType> creatureTypes = new GeneralBase<CreatureType>();
+	public GeneralBase<LocalShape> shapes = new GeneralBase<LocalShape>();
+
 	public GeneralBase<Race> races = new GeneralBase<Race>();
 	public GeneralBase<CClass> classes = new GeneralBase<CClass>();
 	public GeneralBase<ItemShape> items = new GeneralBase<ItemShape>();
@@ -51,9 +54,11 @@
 		gShapes.Load("gObjects.xml");
 
 		textures.Load("textures.xml");
-		pureShapes.Load("pureShapes.xml");
-		creepTypes.Load("creepTypes.xml");
-		creepShapes.Load("creepShapes.xml");
+		//pureShapes.Load("pureShapes.xml");
+		//creepShapes.Load("creepShapes.xml");
+		creatureTypes.Load("creatureTypes.xml");
+		shapes.Load("objectShapes.xml");
+
 		races.Load("races.xml");
 		classes.Load("classes.xml");
 		items.Load("items.xml");

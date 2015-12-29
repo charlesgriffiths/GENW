@@ -30,21 +30,21 @@ class RMove : Animation
 
 class ScalingAnimation : Animation
 {
-	private LObject target;
+	private LocalObject target;
 	private float delta;
 
-	public ScalingAnimation(LObject targeti, float finalScaling, float gameTime)
+	public ScalingAnimation(LocalObject targeti, float finalScaling, float gameTime)
 	{
 		target = targeti;
 		maxFrameTime = 2 * (int)(6.0f / gameTime);
-		delta = (finalScaling - target.scaling) / maxFrameTime;
+		delta = (finalScaling - target.drawing.scaling) / maxFrameTime;
 		frameTime = 0;
 	}
 
 	public override void Draw()
 	{
-		if (frameTime * 2 < maxFrameTime) target.scaling += delta;
-		else target.scaling -= delta;
+		if (frameTime * 2 < maxFrameTime) target.drawing.scaling += delta;
+		else target.drawing.scaling -= delta;
 		base.Draw();
 	}
 }

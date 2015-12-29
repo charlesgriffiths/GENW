@@ -44,7 +44,9 @@ public class MyMonoGame : Game
 		CAbility.LoadTextures();
 		GObjectShape.LoadTextures();
 		Texture.LoadTextures();
-		CreepShape.LoadTextures();
+		//CreepShape.LoadTextures();
+		CClass.LoadTextures();
+		LocalShape.LoadTextures();
 		ItemShape.LoadTextures();
 		Dialog.LoadTextures();
 
@@ -93,7 +95,7 @@ public class MyMonoGame : Game
 		else if (G.battle && B.ability != null)
 		{
 			if (G.mouseState.LeftButton == ButtonState.Pressed && B.Mouse.IsIn(B.AbilityZone))
-				B.CurrentLCreature.UseAbility(B.ability, B.Mouse);
+				B.current.abilities.Use(B.ability, B.Mouse);
 
 			if (KeyPressed(Keys.Escape)) B.ability = null;
 		}
@@ -104,35 +106,34 @@ public class MyMonoGame : Game
 				var mtk = MouseTrigger.GetUnderMouse<MouseTriggerKeyword>();
 				if (mtk != null)
 				{
-					if (mtk.name == "End Battle") B.EndBattle();
+					//if (mtk.name == "End Battle") B.EndBattle();
 				}
 				else B.SetSpotlight();
 			}
 			if (G.RightMouseButtonClicked) B.GoTo();
 
-			if (KeyPressed(Keys.Space)) B.CurrentLCreature.Wait();
+			if (KeyPressed(Keys.Space)) B.current.initiative.Wait();
 
-			else if (KeyPressed(Keys.Right)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Up)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Left)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Down)) B.CurrentLCreature.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Right)) B.current.attack.MoveOrAttack(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Up)) B.current.attack.MoveOrAttack(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Left)) B.current.attack.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Down)) B.current.attack.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
 
 			foreach (char key in Stuff.AbilityHotkeys)
 			{
 				int index = Stuff.AbilityHotkeys.IndexOf(key);
-				List<CAbility> abilities = B.CurrentLCreature.Abilities;
-				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.CurrentLCreature.UseAbility(abilities[index]);
+				List<CAbility> abilities = B.current.abilities.list;
+				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.current.abilities.Use(abilities[index]);
 			}
 
 			foreach(char key in Stuff.ItemHotkeys)
 			{
 				int index = Stuff.ItemHotkeys.IndexOf(key);
-				LCreature lc = B.CurrentLCreature;
-				if (lc.data is Character)
+				LocalObject lc = B.current;
+				if (lc.inventory != null)
 				{
-					Character c = lc.data as Character;
-					Item item = c.inventory[index];
-					if (KeyPressed(Stuff.GetKey(key)) && item != null && item.data.ability != null)	lc.UseAbility(item.data.ability);
+					Item item = lc.inventory[index];
+					if (KeyPressed(Stuff.GetKey(key)) && item != null && item.data.ability != null)	lc.abilities.Use(item.data.ability);
 				}
 			}
 
@@ -177,7 +178,7 @@ public class MyMonoGame : Game
 			if (G.dndItem != null && G.LeftMouseButtonReleased)
 			{
 				var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
-				var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<Creature>>();
+				var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<LocalObject>>();
 
 				if (mti != null && G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null && mti.GetItem().data != G.dndItem.data)
 				{ // поменять местами 2 предмета
@@ -189,7 +190,7 @@ public class MyMonoGame : Game
 				}
 				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell) && G.inventory.isInParty == mti.inventory.isInParty)
 					mti.inventory.Add(G.dndItem, mti.cell);
-				else if (mtc != null && mtc.t.CanEat(G.dndItem) && G.inventory.isInParty) mtc.t.Eat(G.dndItem);
+				else if (mtc != null && mtc.t.eating.CanEat(G.dndItem) && G.inventory.isInParty) mtc.t.eating.Eat(G.dndItem);
 				else G.inventory.Add(G.dndItem, G.cell);
 
 				if (mti != null && mti.inventory == W.player.crafting) W.player.UpdateCrafting();

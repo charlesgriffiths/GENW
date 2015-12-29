@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Collections.Generic;
 
-public partial class LCreature : LObject
+public partial class Abilities : LocalComponent
 {
-	private void AnimateByDefault(float gameTime) { SetPosition(position, gameTime, true); }
+	private void AnimateByDefault(float gameTime) { t.p.Set(t.p.value, gameTime, true); }
 
-	public void UseAbility(Ability ability)
+	public void Use(Ability ability)
 	{
 		Ability.TargetType tt = ability.targetType;
 
@@ -24,14 +24,14 @@ public partial class LCreature : LObject
 
 				if (ca.NameIs("Meld"))
 				{
-					AddEffect("Melded", 20);
+					t.effects.Add("Melded", 20);
 
 					AnimateByDefault(ability.castTime);
 					log("melds with surroundings.");
 				}
 				else if (ca.NameIs("Hide in Shadows"))
 				{
-					AddEffect("Hidden", 20);
+					t.effects.Add("Hidden", 20);
 
 					AnimateByDefault(ability.castTime);
 					log("hides in shadows.");
@@ -44,36 +44,36 @@ public partial class LCreature : LObject
 
 				if (ability.NameIs("Drink"))
 				{
-					if (ia.itemShape.name == "Nourishing Mix") AddStamina(100, true);
+					if (ia.itemShape.name == "Nourishing Mix") t.hp.AddStamina(100, true);
 
-					Inventory inventory = (data as Character).inventory;
-					inventory.Remove(ia.itemShape);
-					inventory.Add("Empty Bottle");
+					//Inventory inventory = (data as Character).inventory;
+					t.inventory.Remove(ia.itemShape);
+					t.inventory.Add("Empty Bottle");
 
 					AnimateByDefault(ability.castTime);
 				}
 				else if (ability.NameIs("Apply to Weapon"))
 				{
-					AddEffect("Poisoned Weapon", 20, ia.itemShape.name);
+					t.effects.Add("Poisoned Weapon", 20, ia.itemShape.name);
 
-					Inventory inventory = (data as Character).inventory;
-					inventory.Remove(ia.itemShape);
-					inventory.Add("Empty Bottle");
+					//Inventory inventory = (data as Character).inventory;
+					t.inventory.Remove(ia.itemShape);
+					t.inventory.Add("Empty Bottle");
 
 					AnimateByDefault(ability.castTime);
 				}
 			}
 
-			PassTurn(ability.castTime);
+			t.initiative.PassTurn(ability.castTime);
 		}
 	}
 
-	public void UseAbility(Ability ability, ZPoint target)
+	public void Use(Ability ability, ZPoint target)
 	{
 		PayAbilityCost(ability);
 
-		if (ability.targetType == Ability.TargetType.Creature) UseAbility(ability, B.GetLCreature(target));
-		else if (ability.targetType == Ability.TargetType.Direction) UseAbility(ability, ZPoint.GetDirection(target - position));
+		if (ability.targetType == Ability.TargetType.Creature) Use(ability, B.Get(target));
+		else if (ability.targetType == Ability.TargetType.Direction) Use(ability, ZPoint.GetDirection(target - t.p.value));
 		else
 		{
 			if (ability is CAbility)
@@ -83,35 +83,35 @@ public partial class LCreature : LObject
 
 				if (ca.NameIs("Overgrowth"))
 				{
-					LObject o = B.GetLObject(target);
+					LocalObject o = B.Get(target);
 
 					if (o == null && B.IsWalkable(target))
 					{
-						B.Add(new PureLObject("Tree"), target);
+						//B.Add(new PureLObject("Tree"), target);
 						log("grows a tree.");
 					}
-					else if (o is PureLObject && o.Name == "Tree")
+					else if (o.TypeName == "Tree")
 					{
 						B.Remove(o);
-						B.Add(new LCreature(new Creep("Treant"), true, false), target);
+						B.Add(new LocalObject(LocalShape.Get("Treant")), target, true, false);
 						log("transforms a tree into a treant!");
 					}
-					else if (o == this)
+					else if (o == t)
 					{
-						AddHP(1, true);
+						t.hp.Add(1, true);
 						log("regenerates.");
 					}
-					else if (o is LCreature)
+					else if (o.effects != null)
 					{
 						B.log.RemoveLastLine();
-						(o as LCreature).AddEffect("Roots", 10);
+						o.effects.Add("Roots", 10);
 					}
 
 					AnimateByDefault(ability.castTime);
 				}
 				else if (ca.NameIs("Leap"))
 				{
-					SetPosition(target, ability.castTime, true);
+					t.p.Set(target, ability.castTime, true);
 					log("leaps to a different location.");
 				}
 			}
@@ -127,28 +127,28 @@ public partial class LCreature : LObject
 				else if (ia.name == "Hurl")
 				{
 					if (ia.itemShape.name == "Flashbang")
-						foreach (LCreature c in B.AliveCreatures.Where(c => c.Distance(target) <= 3)) c.AddEffect("Blind", 6);
+						foreach (LocalObject c in B.ActiveObjects.Where(c => c.p.Distance(target) <= 3)) c.effects.Add("Blind", 6);
 
-					B.combatAnimations.Add(new TextureAnimation(ia.itemShape.texture, Battlefield.GC(position), Battlefield.GC(target), ia.castTime));
+					B.combatAnimations.Add(new TextureAnimation(ia.itemShape.texture, t.p.GC, Battlefield.GC(target), ia.castTime));
 				}
 			}
 		}
 
-		LCreature lc = B.GetLCreature(target);
+		LocalObject lc = B.Get(target);
 		if (lc != null) lc.RemoveEffect("Sleeping");
 
 		B.ability = null;
-		PassTurn(ability.castTime);
+		t.initiative.PassTurn(ability.castTime);
 	}
 
 	private void Kick(ZPoint p, ZPoint.Direction d, int distance, bool self, float gameTime)
 	{
-		List<LObject> train = new List<LObject>();
+		List<LocalObject> train = new List<LocalObject>();
 		int i = self ? 0 : 1;
 		while (true)
 		{
 			ZPoint shifted = p.Shift(d, i);
-			LCreature lc = B.GetLCreature(shifted);
+			LocalObject lc = B.Get(shifted);
 			if (lc == null) break;
 			else train.Add(lc);
 			i++;
@@ -156,16 +156,16 @@ public partial class LCreature : LObject
 
 		if (train.Count > 0)
 		{
-			ZPoint last = train.Last().position;
+			ZPoint last = train.Last().p.value;
 			i = 1;
 			while (B.IsWalkable(last.Shift(d, i))) i++;
 			int shift = Math.Min(i - 1, distance);
-			foreach (LObject o in train) o.SetPosition(o.position.Shift(d, shift), gameTime, o == train.First());
+			foreach (LocalObject o in train) o.p.Set(o.p.value.Shift(d, shift), gameTime, o == train.First());
 		}
 		else AnimateByDefault(gameTime);
 	}
 
-	public void UseAbility(Ability ability, ZPoint.Direction direction)
+	public void Use(Ability ability, ZPoint.Direction direction)
 	{
 		if (ability is CAbility)
 		{
@@ -174,37 +174,37 @@ public partial class LCreature : LObject
 
 			if (ca.NameIs("Bull Rush"))
 			{
-				Kick(position, direction, 2, true, ability.castTime);
+				Kick(t.p.value, direction, 2, true, ability.castTime);
 				log("bull-rushes somebody.");
 			}
 			else if (ca.NameIs("Kick"))
 			{
-				Kick(position, direction, 2, false, ability.castTime);
+				Kick(t.p.value, direction, 2, false, ability.castTime);
 				log("kicks somebody.");
 			}
 			else if (ca.NameIs("Power Strike"))
 			{
-				AddEffect("Power Strike", 10, direction);
+				t.effects.Add("Power Strike", 10, direction);
 
 				AnimateByDefault(ability.castTime);
-				LCreature lc = B.GetLCreature(position + direction);
-				log("prepares to do a powerful attack" + (lc != null ? " on " + lc.UniqueName : "") + ".");
+				LocalObject lc = B.Get(t.p.value + direction);
+				log("prepares to do a powerful attack" + (lc != null ? " on " + lc.CommonName : "") + ".");
 			}
 			else if (ca.NameIs("Hurl Rock"))
 			{
-				ZPoint p = position + direction;
-				while (B.IsFlat(p) && Distance(p) <= ability.range) p = p + direction;
-				LCreature lc = B.GetLCreature(p);
+				ZPoint p = t.p.value + direction;
+				while (B.IsFlat(p) && t.p.Distance(p) <= ability.range) p = p + direction;
+				LocalObject lc = B.Get(p);
 
-				B.combatAnimations.Add(new TextureAnimation("stone", Battlefield.GC(position), Battlefield.GC(p), 0.5f * ability.castTime));
+				B.combatAnimations.Add(new TextureAnimation("stone", t.p.GC, Battlefield.GC(p), 0.5f * ability.castTime));
 				log("throws a rock and hits");
 
 				if (lc != null)
 				{
 					Kick(p, direction, 1, true, 0.5f * ability.castTime);
-					DoDamage(lc, 2, false);
+					t.p.DoDamage(lc, 2, false);
 
-					log(lc.UniqueName + ".");
+					log(lc.CommonName + ".");
 				}
 				else
 				{
@@ -218,144 +218,144 @@ public partial class LCreature : LObject
 			IAbility ia = ability as IAbility;
 			if (ability.NameIs("Throw"))
 			{
-				ZPoint p = position + direction;
-				while (B.IsFlat(p) && Distance(p) <= ability.range) p = p + direction;
-				LCreature lc = B.GetLCreature(p);
+				ZPoint p = t.p.value + direction;
+				while (B.IsFlat(p) && t.p.Distance(p) <= ability.range) p = p + direction;
+				LocalObject lc = B.Get(p);
 				
-				B.combatAnimations.Add(new TextureAnimation(ia.itemShape.texture, Battlefield.GC(position), Battlefield.GC(p), ability.castTime));
+				B.combatAnimations.Add(new TextureAnimation(ia.itemShape.texture, t.p.GC, Battlefield.GC(p), ability.castTime));
 
 				if (ia.itemShape.name == "Net")
 				{
-					if (lc != null) lc.AddEffect("Net", 6);
-					else B.Add(new LItem(ia.itemShape), p);
+					if (lc != null) lc.effects.Add("Net", 6);
+					//else B.Add(new LItem(ia.itemShape), p);
 				}
 				else
 				{
-					if (lc != null) DoDamage(lc, Damage * 2, false);
-					B.Add(new LItem(ia.itemShape), p);
+					if (lc != null) t.p.DoDamage(lc, t.attack.Damage * 2, false);
+					//B.Add(new LItem(ia.itemShape), p);
 				}
 
-				(data as Character).inventory.Remove(ia.itemShape);
+				t.inventory.Remove(ia.itemShape);
 			}
 			else if (ability.NameIs("Push"))
 			{
-				ZPoint p = position + direction;
-				while (B.IsFlat(p) && Distance(p) <= ability.range) p = p + direction;
-				LCreature lc = B.GetLCreature(p);
+				ZPoint p = t.p.value + direction;
+				while (B.IsFlat(p) && t.p.Distance(p) <= ability.range) p = p + direction;
+				LocalObject lc = B.Get(p);
 
-				if (lc != null) Kick(lc.position, direction, 2, true, ability.castTime);
+				if (lc != null) Kick(lc.p.value, direction, 2, true, ability.castTime);
 			}
 			else if (ability.NameIs("Power Shot"))
 			{
-				var ray = B.Ray(position, direction, ability.range, true);
+				var ray = B.Ray(t.p.value, direction, ability.range, true);
 				B.combatAnimations.Add(new TextureAnimation("arrow", Battlefield.GC(ray.First()), Battlefield.GC(ray.Last()), ability.castTime));
-				foreach (LCreature lc in B.AliveCreatures.Where(c => c.position.IsIn(ray) && c != this))
-					DoDamage(lc, ia.itemShape.bonus.damage + 1, false);
+				foreach (LocalObject lc in B.ActiveObjects.Where(c => c.p.value.IsIn(ray) && c != t))
+					t.p.DoDamage(lc, ia.itemShape.bonus.damage + 1, false);
 			}
 		}
 	}
 
-	public void UseAbility(Ability ability, LCreature target)
+	public void Use(Ability ability, LocalObject target)
 	{
 		if (ability is CAbility)
 		{
 			CAbility ca = ability as CAbility;
 			Action<string> log = s => B.log.Add(" " + s, ca.color);
-			Action<LCreature, string> logn = (lc, s) => { B.log.AddLine(lc.UniqueName, lc.LogColor); log(s); };
+			Action<LocalObject, string> logn = (lc, s) => { B.log.AddLine(lc.CommonName, lc.LogColor); log(s); };
 
 			if (ca.NameIs("Leadership"))
 			{
-				if (target.data.creepType.name == "Sentient")
+				if (target.GetCreatureType.name == "Sentient")
 				{
-					target.isInParty = true;
-					target.isAIControlled = false;
+					target.team.isInParty = true;
+					target.initiative.isAIControlled = false;
 
-					log("persuades " + target.UniqueName + " to join the party!");
+					log("persuades " + target.CommonName + " to join the party!");
 				}
-				else log("tries to persuade " + target.UniqueName + "to join the party, but " + target.UniqueName + " being "
-				   + target.data.creepType.name + " is deaf to the arguments.");
+				else log("tries to persuade " + target.CommonName + "to join the party, but " + target.CommonName + " being "
+				   + target.GetCreatureType.name + " is deaf to the arguments.");
 
 				AnimateByDefault(ability.castTime);
 			}
 			else if (ca.NameIs("Animal Friend"))
 			{
-				if (target.data.creepType.name == "Animal")
+				if (target.GetCreatureType.name == "Animal")
 				{
-					target.isInParty = true;
-					target.isAIControlled = false;
+					target.team.isInParty = true;
+					target.initiative.isAIControlled = false;
 
-					log("pets " + target.UniqueName + ".");
+					log("pets " + target.CommonName + ".");
 				}
-				else log("tries to pet " + target.UniqueName + ", but " + target.UniqueName + " being " + target.data.creepType.name
+				else log("tries to pet " + target.CommonName + ", but " + target.CommonName + " being " + target.GetCreatureType.name
 				   + " is unresponsive and looks skeptical");
 
 				AnimateByDefault(ability.castTime);
 			}
 			else if (ca.NameIs("Pommel Strike"))
 			{
-				DoDamage(target, 1, false);
-				target.AddInitiative(-6, ability.castTime, false, true);
+				t.p.DoDamage(target, 1, false);
+				target.initiative.Add(-6, ability.castTime, false, true);
 
 				AnimateByDefault(ability.castTime);
-				log("strikes " + target.UniqueName + " unexpectedly.");
+				log("strikes " + target.CommonName + " unexpectedly.");
 			}
 			else if (ca.NameIs("Decapitate"))
 			{
-				AnimateAttack(target.position, ability.castTime);
+				t.attack.Animate(target.p.value, ability.castTime);
 
-				if (target.Stamina <= 5)
+				if (target.hp.stamina <= 5)
 				{
-					DoDamage(target, 5, false);
-					log("decapitates " + target.UniqueName + "!");
+					t.p.DoDamage(target, 5, false);
+					log("decapitates " + target.CommonName + "!");
 				}
 				else
 				{
-					DoDamage(target, 1, false);
-					log("tries to decapitate " + target.UniqueName + ", but " + target.UniqueName + " still has enough stamina to dodge that.");
+					t.p.DoDamage(target, 1, false);
+					log("tries to decapitate " + target.CommonName + ", but " + target.CommonName + " still has enough stamina to dodge that.");
 				}
 			}
 			else if (ca.NameIs("Psionic Blast"))
 			{
-				DoDamage(target, 4, true);
+				t.p.DoDamage(target, 4, true);
 
 				AnimateByDefault(ability.castTime);
-				log("makes " + target.UniqueName + " feel pain.");
+				log("makes " + target.CommonName + " feel pain.");
 			}
 			else if (ca.NameIs("True Strike"))
 			{
 				AnimateByDefault(ability.castTime);
 				B.log.RemoveLastLine();
 
-				target.AddEffect("True Strike", 10);
+				target.effects.Add("True Strike", 10);
 			}
 			else if (ca.NameIs("Marked Prey"))
 			{
-				target.AddEffect("Marked Prey", 7);
+				target.effects.Add("Marked Prey", 7);
 
 				AnimateByDefault(ability.castTime);
-				log("marks " + target.UniqueName + ".");
+				log("marks " + target.CommonName + ".");
 			}
 			else if (ca.NameIs("Dirty Fighting"))
 			{
 				AnimateByDefault(ability.castTime);
-				log("throws sand into " + target.UniqueName + "'s face!");
+				log("throws sand into " + target.CommonName + "'s face!");
 
-				target.AddEffect("Blind", 6);
+				target.effects.Add("Blind", 6);
 			}
 			else if (ca.NameIs("Fake Death"))
 			{
 				AnimateByDefault(ability.castTime);
 				B.log.RemoveLastLine();
 
-				target.AddEffect("Fake Death", 20);
+				target.effects.Add("Fake Death", 20);
 			}
 			else if (ca.NameIs("Mind Bond"))
 			{
 				AnimateByDefault(ability.castTime);
-				log("holds " + target.UniqueName + "'s mind.");
+				log("holds " + target.CommonName + "'s mind.");
 
-				target.AddEffect("Unconscious", 6);
-				AddEffect("Sleeping", 6);
+				target.effects.Add("Unconscious", 6);
+				t.effects.Add("Sleeping", 6);
 
 				B.log.RemoveLastLine();
 			}
@@ -364,7 +364,7 @@ public partial class LCreature : LObject
 				AnimateByDefault(ability.castTime);
 				B.log.RemoveLastLine();
 
-				target.AddEffect("Blindsight", 6, this);
+				target.effects.Add("Blindsight", 6, this);
 			}
 			else if (ca.NameIs("Sleep"))
 			{
@@ -372,53 +372,53 @@ public partial class LCreature : LObject
 				B.log.RemoveLastLine();
 				if (target.HasEffect("Sleeping")) logn(target, "falls asleep within a dream.");
 
-				if (!IsEnemyTo(target)) target.AddStamina(1, true);
-				target.AddEffect("Sleeping", 10);
+				if (!t.team.IsEnemyTo(target)) target.hp.AddStamina(1, true);
+				target.effects.Add("Sleeping", 10);
 			}
 			else if (ca.NameIs("Mind Trick"))
 			{
 				AnimateByDefault(ability.castTime);
 				B.log.RemoveLastLine();
 
-				target.AddEffect("Mind Tricked", 10, this);
+				target.effects.Add("Mind Tricked", 10, this);
 			}
 			else if (ca.NameIs("Mind Control"))
 			{
 				AnimateByDefault(ability.castTime);
 				B.log.RemoveLastLine();
 
-				target.AddEffect("Mind Controlled", 10, this);
-				AddEffect("Sleeping", 10);
+				target.effects.Add("Mind Controlled", 10, this);
+				t.effects.Add("Sleeping", 10);
 
 				B.log.RemoveLastLine();
 			}
 			else if (ca.NameIs("Attention"))
 			{
-				target.AddEffect("Attention", 10, this);
+				target.effects.Add("Attention", 10, this);
 
 				AnimateByDefault(ability.castTime);
-				log("is now the main object of " + target.UniqueName + "'s thoughts.");
+				log("is now the main object of " + target.CommonName + "'s thoughts.");
 			}
 			else if (ca.NameIs("Prediction"))
 			{
-				target.AddEffect(IsEnemyTo(target) ? "Destined to Die" : "Destined to Succeed", 10, this);
+				target.effects.Add(t.team.IsEnemyTo(target) ? "Destined to Die" : "Destined to Succeed", 10, this);
 
 				AnimateByDefault(ability.castTime);
-				log("predicts that " + target.UniqueName + " will " + (IsEnemyTo(target) ? "die" : "succeed") + " tonight.");
+				log("predicts that " + target.CommonName + " will " + (t.team.IsEnemyTo(target) ? "die" : "succeed") + " tonight.");
 			}
 			else if (ca.NameIs("Grimoire Slam"))
 			{
-				Kick(position, (target.position - position).GetDirection(), 1, false, ability.castTime);
-				target.AddInitiative(-2, ability.castTime, false, true);
+				Kick(t.p.value, (target.p.value - t.p.value).GetDirection(), 1, false, ability.castTime);
+				target.initiative.Add(-2, ability.castTime, false, true);
 
-				log("slams " + target.UniqueName + " with a book!");
+				log("slams " + target.CommonName + " with a book!");
 			}
 			else if (ca.NameIs("First Aid"))
 			{
-				target.AddHP(1, true);
+				target.hp.Add(1, true);
 
 				AnimateByDefault(ability.castTime);
-				log("heals " + target.UniqueName + " a little.");
+				log("heals " + target.CommonName + " a little.");
 			}
 		}
 		else if (ability is IAbility)
@@ -426,8 +426,8 @@ public partial class LCreature : LObject
 			IAbility ia = ability as IAbility;
 			if (ia.name == "Bash")
 			{
-				DoDamage(target, 1, false);
-				target.AddInitiative(-6, ability.castTime, false, true);
+				t.p.DoDamage(target, 1, false);
+				target.initiative.Add(-6, ability.castTime, false, true);
 
 				AnimateByDefault(ability.castTime);
 			}
@@ -436,10 +436,10 @@ public partial class LCreature : LObject
 
 	private void PayAbilityCost(Ability ability)
 	{
-		RemoveEffects("Melded", "Hidden", "Fake Death");
+		t.RemoveEffect("Melded", "Hidden", "Fake Death");
 
-		AddStamina(-ability.cost, false);
+		t.hp.AddStamina(-ability.cost, false);
 
-		B.log.AddLine(UniqueName, LogColor);
+		B.log.AddLine(t.CommonName, t.LogColor);
 	}
 }

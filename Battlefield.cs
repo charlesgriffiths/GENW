@@ -2,7 +2,6 @@
 using System.Xml;
 using System.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework.Graphics;
 
 public partial class Battlefield
@@ -10,9 +9,9 @@ public partial class Battlefield
 	private char[,] data;
 	public Palette palette;
 
-	private Collection<LObject> objects = new Collection<LObject>();
+	private List<LocalObject> objects = new List<LocalObject>();
 
-	public LObject currentObject, spotlightObject;
+	public LocalObject current, spotlight;
 	public Ability ability = null;
 	private GObject gObject;
 
@@ -28,12 +27,14 @@ public partial class Battlefield
 	
 	private static MainScreen M { get { return MainScreen.Instance; } }
 	private static Player P { get { return World.Instance.player; } }
+	private static Random R { get { return World.Instance.random; } }
 
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 
-	public List<LCreature> Creatures { get { return (from c in objects where c is LCreature select c as LCreature).ToList(); } }
-	public List<LCreature> AliveCreatures { get { return Creatures.Where(c => c.IsAlive).ToList(); } }
-	public List<LItem> Items { get { return (from o in objects where o is LItem select o as LItem).ToList(); } }
+	//public List<LCreature> Creatures { get { return (from c in objects where c is LCreature select c as LCreature).ToList(); } }
+	//public List<LCreature> AliveCreatures { get { return Creatures.Where(c => c.IsAlive).ToList(); } }
+	public List<LocalObject> ActiveObjects { get { return objects.Where(u => u.initiative != null).ToList(); } }
+	public List<LocalObject> Items { get { return objects.Where(o => o.item != null).ToList(); } }
 
 	public ZPoint Mouse { get { return ZCoordinates(MyGame.Instance.mouseState.Position.ToVector2()); } }
 
@@ -51,32 +52,26 @@ public partial class Battlefield
 
 	private bool InRange(ZPoint p) { return p.InBoundaries(new ZPoint(0, 0), Size - new ZPoint(1, 1)); }
 
-	
-	public LObject GetLObject(ZPoint p)
-	{
-//		Type t = typeof(Race);
-//		Object something = Activator.CreateInstance(t);
+	public LocalObject Get(ZPoint p)	{
+		var query = from o in objects where o.p.value.TheSameAs(p) orderby o.Importance select o;
+		return query.Count() > 0 ? query.First() : null; }
 
-		foreach (LObject l in objects) if (l.position.TheSameAs(p)) return l;
-		return null;
-	}
-
-	public LCreature GetLCreature(ZPoint p)
+	/*public LCreature GetLCreature(ZPoint p)
 	{
 		var query = from c in AliveCreatures where c.position.TheSameAs(p) select c;
 		if (query.Count() > 0) return query.First() as LCreature;
 		else return null;
-	}
+	}*/
 
-	public LCreature CurrentLCreature { get { return currentObject as LCreature; } }
+	//public LCreature CurrentLCreature { get { return currentObject as LCreature; } }
 
 	public bool IsWalkable(ZPoint p)
 	{
 		if (!InRange(p)) return false;
 		if (!this[p].IsWalkable) return false;
 
-		LObject lObject = GetLObject(p);
-		if (lObject != null && !lObject.IsWalkable) return false;
+		LocalObject o = Get(p);
+		if (o != null && !o.p.IsWalkable) return false;
 	
 		return true;
     }
@@ -86,8 +81,8 @@ public partial class Battlefield
 		if (!InRange(p)) return false;
 		if (!this[p].IsFlat) return false;
 
-		LObject lObject = GetLObject(p);
-		if (lObject != null && !lObject.IsFlat) return false;
+		LocalObject o = Get(p);
+		if (o != null && !o.p.IsFlat) return false;
 
 		return true;
 	}
@@ -106,11 +101,22 @@ public partial class Battlefield
 		return new ZPoint(0, 0);
 	}
 
-	public void Remove(LObject o) { objects.Remove(o); }
-	public void Add(LObject o, ZPoint position)
+	public void Remove(LocalObject o) { objects.Remove(o); }
+	public void Add(LocalObject o, ZPoint position, bool isInParty = false, bool isAIControlled = false)
 	{
-		o.SetPosition(position, 0.01f, false);
-		o.SetInitiative((from q in AliveCreatures select q.initiative).Average(), 0.01f, false);
+		o.p = new LocalPosition(o);
+		if (position != null) o.p.Set(position, 0.01f, false);
+
+		o.drawing = new LocalDrawing(o);
+
+		if (o.GetCreatureType != null)
+		{
+			o.effects = new Effects(o);
+			o.team = new Team(isInParty, o);
+			o.initiative = new Initiative(isAIControlled, o);
+			o.initiative.Set(ActiveObjects.Count > 0 ? (from q in ActiveObjects select q.initiative.value).Average() : 0, 0.01f, false);
+		}
+
 		objects.Add(o);
 	}
 
@@ -124,24 +130,33 @@ public partial class Battlefield
 		Load(battlefieldName);
 
 		objects.Clear();
-		foreach (Creature c in P.party) objects.Add(new LCreature(c, true, false));
-		foreach (Creature c in g.party) objects.Add(new LCreature(c, false, true));
-
-		for (int i = 0; i <= Size.x * Size.y / 10; i++)	objects.Add(new PureLObject("Tree"));
-		if (!g.inventory.IsEmpty) objects.Add(new LContainer(g.inventory));
-		
-		foreach (LObject l in objects)
+		foreach (LocalObject c in P.party)
 		{
-			l.SetPosition(RandomFreeTile(), 0.01f, false);
-			if (l is LCreature && (l as LCreature).data.UniqueName == P.uniqueName) l.SetInitiative(0.1f, 0.01f, false);
-			else l.SetInitiative(-World.Instance.random.Next(100) / 100.0f, 0.01f, false);
+			//objects.Add(new LCreature(c, true, false));
+			Add(c, null, true, false);
+		}
+		foreach (LocalObject c in g.party)
+		{
+			//objects.Add(new LCreature(c, false, true));
+			Add(c, null, false, true);
 		}
 
-		if(NextLObject is LCreature) { if ((NextLObject as LCreature).IsAIControlled) NextLObject.Run(); }
-		else NextLObject.Run();
+		//for (int i = 0; i <= Size.x * Size.y / 10; i++)	objects.Add(new PureLObject("Tree"));
+		//if (!g.inventory.IsEmpty) objects.Add(new LContainer(g.inventory));
+		
+		foreach (LocalObject l in objects)
+		{
+			l.p.Set(RandomFreeTile(), 0.01f, false);
+			if (l.initiative != null) l.initiative.Set(l.uniqueName == P.uniqueName ? 0.1f : -R.Next(100) / 100.0f, 0.01f, false);
+		}
 
-		currentObject = NextLObject;
-		spotlightObject = currentObject;
+		//if(NextLObject is LCreature) { if ((NextLObject as LCreature).IsAIControlled) NextLObject.Run(); }
+		//else NextLObject.Run();
+		LocalObject next = NextObject;
+		if (next.initiative.IsAIControlled) next.initiative.Run();
+
+		current = next;
+		spotlight = current;
 		MyGame.Instance.battle = true;
 	}
 
@@ -163,41 +178,41 @@ public partial class Battlefield
 	public void SetSpotlight()
 	{
 		ZPoint p = Mouse;
-        var query = from c in AliveCreatures where c.position.TheSameAs(p) orderby c.Importance select c;
-		if (query.Count() > 0) spotlightObject = query.First();
+        var query = from c in objects where c.p.TheSameAs(p) orderby c.Importance select c;
+		if (query.Count() > 0) spotlight = query.First();
 	}
 
-	public LObject NextLObject
+	public LocalObject NextObject
 	{
 		get
 		{
-			var query = from c in AliveCreatures orderby -c.initiative select c;
-			if (query.Count() != 0) return query.First();
-			else return null;
+			//var query = from c in AliveCreatures orderby -c.initiative select c;
+			var query = from o in objects where o.initiative != null orderby -o.initiative.value select o;
+			return query.Count() != 0 ? query.First() : null;
 		}
 	}
 
 	private enum Resolution { Not, Victory, Retreat };
 	private Resolution GetResolution()
 	{
-		Func<LCreature, bool> onBorder = lc => lc.position.x == 0 || lc.position.y == 0 || lc.position.x == Size.x - 1 || lc.position.y == Size.y - 1;
-		Func<LCreature, bool> noEnemiesNearby = lc => AliveCreatures.Where(c => lc.IsEnemyTo(c) && lc.Distance(c) <= 2).Count() == 0;
+		Func<LocalObject, bool> onBorder = lc => lc.p.x == 0 || lc.p.y == 0 || lc.p.x == Size.x - 1 || lc.p.y == Size.y - 1;
+		Func<LocalObject, bool> noEnemiesNearby = lc => ActiveObjects.Where(c => lc.team.IsEnemyTo(c) && lc.p.Distance(c) <= 2).Count() == 0;
 
-		if (AliveCreatures.Where(c => !c.isInParty).Count() == 0) return Resolution.Victory;
-		else if (AliveCreatures.Where(c => c.isInParty && (!onBorder(c) || !noEnemiesNearby(c))).Count() == 0) return Resolution.Retreat;
+		if (ActiveObjects.Where(c => !c.team.isInParty).Count() == 0) return Resolution.Victory;
+		else if (ActiveObjects.Where(c => c.team.isInParty && (!onBorder(c) || !noEnemiesNearby(c))).Count() == 0) return Resolution.Retreat;
 		//else if (AliveCreatures.Where(c => c.isInParty && onBorder(c) && noEnemiesNearby(c)).Count() == P.party.Count) return Resolution.Retreat;
 		else return Resolution.Not;
 	}
 
-	public void EndBattle()
+	/*public void EndBattle()
 	{
-		Action<List<Creature>, bool> reshape = (party, isInParty) =>
+		Action<List<LocalObject>, bool> reshape = (party, isInParty) =>
 		{
-			List<Creature> deadParty = party.Where(c => !c.IsAlive).ToList();
-			foreach (Creature c in deadParty) party.Remove(c);
+			List<LocalObject> deadParty = party.Where(c => !c.IsAlive).ToList();
+			foreach (LocalObject c in deadParty) party.Remove(c);
 
 			var newParty = from lc in AliveCreatures where !party.Contains(lc.data) && (isInParty ? lc.isInParty : !lc.isInParty) select lc.data;
-			foreach (Creature c in newParty) party.Add(c);
+			foreach (LocalObject c in newParty) party.Add(c);
 
 			party = party.OrderBy(c => c.Importance).ToList();
 		};
@@ -217,7 +232,7 @@ public partial class Battlefield
 			foreach (LItem lItem in Items) P.ground.Add(lItem.data);
 			gObject.Kill();
 		}
-	}
+	}*/
 
 	public List<ZPoint> EveryPoint
 	{
@@ -235,7 +250,7 @@ public partial class Battlefield
 		ZPoint p = position + d;
 		result.Add(position);
 
-		while ((IsFlat(p) || (penetration && GetLCreature(p) != null)) && MyMath.ManhattanDistance(p, position) <= range)
+		while ((IsFlat(p) || (penetration && Get(p) != null)) && MyMath.ManhattanDistance(p, position) <= range)
 		{
 			result.Add(p);
 			p += d;
@@ -254,7 +269,7 @@ public partial class Battlefield
 		return true;
 	}
 
-	public List<ZPoint> Range { get { return EveryPoint.Where(p => CurrentLCreature.Distance(p) <= ability.range).ToList(); } }
+	public List<ZPoint> Range { get { return EveryPoint.Where(p => current.p.Distance(p) <= ability.range).ToList(); } }
 
 	public List<ZPoint> AbilityZone
 	{
@@ -267,17 +282,17 @@ public partial class Battlefield
 			else if (ability.targetType == Ability.TargetType.Point)
 				query = from p in Range where IsWalkable(p) select p;
 			else if (ability.targetType == Ability.TargetType.Direction)
-				query = from p in EveryPoint where CurrentLCreature.Distance(p) == 1 select p;
-			else query = from c in AliveCreatures where CurrentLCreature.Distance(c) <= ability.range select c.position;
+				query = from p in EveryPoint where current.p.Distance(p) == 1 select p;
+			else query = from c in ActiveObjects where current.p.Distance(c) <= ability.range select c.p.value;
 
 			List<ZPoint> result = query.Cast<ZPoint>().ToList();
 
 			if (ability.name == "Overgrowth")
-				result.AddRange(from p in Range let o = GetLObject(p) where o != null && o.Name == "Tree" select p);
+				result.AddRange(from p in Range let o = Get(p) where o != null && o.TypeName == "Tree" select p);
 			
 			return result;
 		}
 	}
 
-	public void RemoveItem(Item item) {	objects.Remove(Items.Where(i => i.data == item).Single()); }
+	//public void RemoveItem(Item item) {	objects.Remove(Items.Where(i => i.data == item).Single()); }
 }

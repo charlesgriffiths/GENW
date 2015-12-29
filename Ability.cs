@@ -1,4 +1,6 @@
-﻿using System.Xml;
+﻿using System;
+using System.Xml;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -68,7 +70,7 @@ public class CAbility : Ability
 	public Color color;
 
 	public static CAbility Get (string name) { return BigBase.Instance.abilities.Get(name); }
-
+	
 	private static string Name(string s)
 	{
 		if (BigBase.Instance.abilities.Get(s) != null) return s;
@@ -97,8 +99,6 @@ public class CAbility : Ability
 	public void DrawDescription(ZPoint position)
 	{
 		Screen screen = new Screen(position, new ZPoint(240, 190));
-		//screen.Fill(new Color(0, 0, 0.5f, 0.5f));
-
 		screen.DrawString(M.fonts.verdanaBold, name, new ZPoint(0, 0), Color.White);
 		SpriteFont font = M.fonts.small;
 
@@ -113,5 +113,50 @@ public class CAbility : Ability
 
 		screen.offset += 8;
 		screen.DrawString(font, description, new ZPoint(0, screen.offset), Color.White, screen.size.x);
+	}
+}
+
+public partial class Abilities : LocalComponent
+{
+	public Abilities(LocalObject o) : base(o) { }
+
+	public List<CAbility> list
+	{
+		get
+		{
+			List<CAbility> result = new List<CAbility>();
+			if (t.shape != null) foreach (var a in t.shape.abilities) result.Add(a);
+			if (t.race != null) result.Add(t.race.ability);
+			if (t.cclass != null) foreach (var a in t.cclass.abilities) result.Add(a);
+			return result;
+		}
+	}
+
+	public bool Has(string name) { return list.Contains(BigBase.Instance.abilities.Get(name)); }
+
+	public void Draw(Screen screen, ZPoint position)
+	{
+		Func<int, ZPoint> aPosition = k => screen.position + position + new ZPoint(48 * k, 0);
+		ZPoint aSize = new ZPoint(48, 48);
+
+		for (int n = 0; n < 6; n++) MouseTriggerKeyword.Set("ability", n.ToString(), aPosition(n), aSize);
+		var mtk = MouseTriggerKeyword.GetUnderMouse("ability");
+
+		int i = 0;
+		foreach (CAbility a in list)
+		{
+			bool mouseOn = mtk != null && mtk.parameter == i.ToString();
+
+			M.Draw(a.texture, aPosition(i), mouseOn ? a.color : Color.White);
+
+			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(aPosition(i), aSize, new Color(0, 0, 0, 0.7f));
+
+			else if (t == B.current) M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[i].ToString(),
+				aPosition(i)/* + new ZPoint(37, 33)*/, Color.White);
+
+			if (mouseOn) a.DrawDescription(screen.position + position + new ZPoint(24, 56));
+
+			i++;
+		}
 	}
 }

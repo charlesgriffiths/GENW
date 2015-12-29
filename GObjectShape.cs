@@ -45,13 +45,8 @@ partial class GObject
 		dialog = shapei.dialog;
 
 		foreach (KeyValuePair<string, int> pair in shape.partyShape)
-		{
 			for (int i = 0; i < pair.Value; i++)
-			{
-				Creep item = new Creep(pair.Key);
-				party.Add(item);
-			}
-		}
+				party.Add(new LocalObject(LocalShape.Get(pair.Key)));
 
 		initiative = -0.1f;
 	}

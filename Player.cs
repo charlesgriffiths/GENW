@@ -23,16 +23,17 @@ public partial class Player : GObject
 		uniqueName = shape.name;
 		inventory.isInParty = true;
 
-		Character playerCharacter = new Character(shape.name, "Human", "Alchemist", "Iron Alliance", "Merchant");
-		playerCharacter.inventory.Add("Club");
-		playerCharacter.inventory.Add("Leather Armor");
-		party.Add(playerCharacter);
+		LocalObject c1 = new LocalObject(shape.name, Race.Get("Human"), CClass.Get("Alchemist"), Background.Get("Merchant"), Origin.Get("Iron Alliance"));
+		c1.inventory.Add("Club");
+		c1.inventory.Add("Leather Armor");
+		party.Add(c1);
 
-		Character c2 = new Character("Karl", "Floran", "Ranger", "Eden", "Hunter");
+		LocalObject c2 = new LocalObject("Karl", Race.Get("Floran"), CClass.Get("Ranger"), Background.Get("Hunter"), Origin.Get("Eden"));
 		c2.inventory.Add("Iron Dagger");
 		party.Add(c2);
 
-		party.Add(new Creep("Krokar"));
+		//party.Add(new Creep("Krokar"));
+		party.Add(new LocalObject(LocalShape.Get("Krokar")));
 
 		inventory.Add("Net");
 		inventory.Add("Rope");
@@ -67,7 +68,7 @@ public partial class Player : GObject
 	{
 		base.Move(d);
 
-		foreach (Creature c in party) c.AddFatigue(W.map[position.Shift(d)].type.travelTime * c.MaxHP);
+		foreach (LocalObject c in party) c.fatigue.Add(W.map[position.Shift(d)].type.travelTime * c.hp.Max);
 
 		ground.Clear();
 		if (barter != null)

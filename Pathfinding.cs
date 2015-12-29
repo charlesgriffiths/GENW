@@ -37,7 +37,10 @@ public partial class Player : GObject
 
 		while (true)
 		{
-			List<FramedHexPoint> frontier = (from p in visited where p.onFrontier orderby p.cost + HexPoint.Distance(p.data, position) select p).Cast<FramedHexPoint>().ToList();
+			List<FramedHexPoint> frontier = (from p in visited where p.onFrontier
+											 orderby p.cost + HexPoint.Distance(p.data, position)
+											 select p).Cast<FramedHexPoint>().ToList();
+
 			if (frontier.Count() == 0) return;
 
 			foreach (FramedHexPoint p in frontier)
@@ -108,7 +111,7 @@ public partial class Battlefield
 		return result;
 	}
 
-	private void DrawPath(ZPoint start, List<ZPoint.Direction> path, LCreature c)
+	private void DrawPath(ZPoint start, List<ZPoint.Direction> path, LocalObject c)
 	{
 		ZPoint position = start;
 		int i = 1;
@@ -116,7 +119,7 @@ public partial class Battlefield
 		foreach (ZPoint.Direction d in path)
 		{
 			if (c != null && i == path.Count())
-				delayedDrawings.Add(new DelayedDrawing(M.fonts.verdanaBold, CurrentLCreature.HitChance(c).ToString() + "%",
+				delayedDrawings.Add(new DelayedDrawing(M.fonts.verdanaBold, current.attack.HitChance(c).ToString() + "%",
 					new ZPoint(GraphicCoordinates(position)) + 16 * new ZPoint(d) + new ZPoint(1, 8), Color.Red));
 			else
 			{
@@ -133,9 +136,9 @@ public partial class Battlefield
 		get
 		{
 			List<FramedZPoint> visited = new List<FramedZPoint>();
-			visited.Add(new FramedZPoint(CurrentLCreature.position, true));
+			visited.Add(new FramedZPoint(current.p.value, true));
 
-			for (int i = 0; i <= CurrentLCreature.controlMovementCounter; i++)
+			for (int i = 0; i <= current.movement.counter; i++)
 			{
 				List<FramedZPoint> frontier = (from p in visited where p.onFrontier select p).Cast<FramedZPoint>().ToList();
 				foreach (FramedZPoint p in frontier)
@@ -157,21 +160,21 @@ public partial class Battlefield
 	{
 		get
 		{
-			return (from c in AliveCreatures where !c.isInParty && /*c.IsAdjacentTo(GreenZone)*/
-					c.IsReachableFrom(GreenZone) select c.position).Cast<ZPoint>().ToList();
+			return (from c in ActiveObjects where !c.team.isInParty && /*c.IsAdjacentTo(GreenZone)*/
+					c.p.IsReachableFrom(GreenZone) select c.p.value).Cast<ZPoint>().ToList();
 		}
 	}
 
 	public void GoTo()
 	{
-		bool melee = CurrentLCreature.Range == 1, move = Mouse.IsIn(TotalZone), attack = Mouse.IsIn(ReachableCreaturePositions);
+		bool melee = current.p.Range == 1, move = Mouse.IsIn(TotalZone), attack = Mouse.IsIn(ReachableCreaturePositions);
 		if ((melee && (move || attack)) || (move && !attack))
 		{
-			ZPoint start = CurrentLCreature.position;
-			foreach (ZPoint.Direction d in Path(start, Mouse)) CurrentLCreature.MoveOrAttack(d, true);
+			ZPoint start = current.p.value;
+			foreach (ZPoint.Direction d in Path(start, Mouse)) current.attack.MoveOrAttack(d, true);
 		}
-		else if (IsReachable(Mouse, CurrentLCreature.position, CurrentLCreature.Range))
-			CurrentLCreature.DoAttack(GetLCreature(Mouse));
+		else if (IsReachable(Mouse, current.p.value, current.p.Range))
+			current.attack.Execute(Get(Mouse));
 	}
 }
 

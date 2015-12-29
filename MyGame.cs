@@ -34,7 +34,10 @@ public class MyGame
 
 	public ZPoint Mouse { get { return new ZPoint(mouseState.Position.ToVector2()); } }
 
-	public bool LeftMouseButtonClicked { get { return mouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released; } }
-	public bool RightMouseButtonClicked { get { return mouseState.RightButton == ButtonState.Pressed && previousMouseState.RightButton == ButtonState.Released; } }
-	public bool LeftMouseButtonReleased { get { return mouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed; } }
+	public bool LeftMouseButtonClicked { get { return mouseState.LeftButton == ButtonState.Pressed && 
+			previousMouseState.LeftButton == ButtonState.Released; } }
+	public bool RightMouseButtonClicked { get { return mouseState.RightButton == ButtonState.Pressed && 
+			previousMouseState.RightButton == ButtonState.Released; } }
+	public bool LeftMouseButtonReleased { get { return mouseState.LeftButton == ButtonState.Released && 
+			previousMouseState.LeftButton == ButtonState.Pressed; } }
 }

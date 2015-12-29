@@ -68,7 +68,7 @@ public class DialogScreen
 
 		if (dialog.name == "The First Dialog")
 		{
-			if (r.name == "Boo-Boo") P.party.Add(new Creep("Krokar", "Boo-Boo"));
+			if (r.name == "Boo-Boo") P.party.Add(new LocalObject(LocalShape.Get("Krokar"), "Boo-Boo"));
 			else if (r.name == "escherian shard") { }
 		}
 		else if (dialog.name == "Wild Dogs Encounter")
