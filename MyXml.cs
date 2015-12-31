@@ -12,13 +12,11 @@ static class MyXml
 	public static string GetString(XmlNode xmlNode, string attribute) {	return ((XmlElement)xmlNode).GetAttribute(attribute); }
 	public static char GetChar(XmlNode xmlNode, string attribute) {	return GetString(xmlNode, attribute)[0]; }
 
-	public static int GetInt(XmlNode xmlNode, string attribute) { return GetInt(xmlNode, attribute, 0); }
-	public static int GetInt(XmlNode xmlNode, string attribute, int dflt) {
+	public static int GetInt(XmlNode xmlNode, string attribute, int dflt = 0) {
 		string s = GetString(xmlNode, attribute);
 		return s == "" ? dflt : int.Parse(s); }
 
-	public static float GetFloat(XmlNode xmlNode, string attribute) { return GetFloat(xmlNode, attribute, 0); }
-	public static float GetFloat(XmlNode xmlNode, string attribute, float dflt)	{
+	public static float GetFloat(XmlNode xmlNode, string attribute, float dflt = 0)	{
 		string s = GetString(xmlNode, attribute);
 		return s == "" ? dflt : float.Parse(s);	}
 

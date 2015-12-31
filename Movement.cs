@@ -13,7 +13,7 @@ public class Movement : LocalComponent
 	{
 		get
 		{
-			float result = t.shape != null ? t.shape.movementTime : 1;
+			float result = t.shape != null ? t.shape.data.movementTime : 1;
 			if (t.inventory != null) result *= t.inventory.Prod(b => b.mtm);
 			return result;
 		}

@@ -46,7 +46,6 @@ public partial class Abilities : LocalComponent
 				{
 					if (ia.itemShape.name == "Nourishing Mix") t.hp.AddStamina(100, true);
 
-					//Inventory inventory = (data as Character).inventory;
 					t.inventory.Remove(ia.itemShape);
 					t.inventory.Add("Empty Bottle");
 
@@ -56,7 +55,6 @@ public partial class Abilities : LocalComponent
 				{
 					t.effects.Add("Poisoned Weapon", 20, ia.itemShape.name);
 
-					//Inventory inventory = (data as Character).inventory;
 					t.inventory.Remove(ia.itemShape);
 					t.inventory.Add("Empty Bottle");
 

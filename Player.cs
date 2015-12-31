@@ -1,56 +1,42 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 
-public partial class Player : GObject
+public partial class Player : GlobalObject
 {
 	public Inventory crafting = new Inventory(6, 1, null, "CRAFTING", true);
 	public Inventory ground = new Inventory(6, 2, null, "GROUND", true);
 	private Inventory toSell = new Inventory(12, 1, null, "SELL", true);
 	private Inventory toBuy = new Inventory(12, 1, null, "BUY", false);
-	public GObject barter = null;
+	public GlobalObject barter = null;
 
 	public Dictionary<ItemShape, int> craftableShapes = new Dictionary<ItemShape, int>();
 
 	public bool[,] visitedLocations;
-	private List<GObject> visibleObjects = new List<GObject>();
+	private List<GlobalObject> visibleObjects = new List<GlobalObject>();
 
 	public Player()
 	{
-		shape = new GObjectShape();
+		shape = new GlobalShape();
 		shape.name = "Nicolas";
 		shape.speed = 1.0f;
 		shape.isActive = true;
 		uniqueName = shape.name;
 		inventory.isInParty = true;
 
-		LocalObject c1 = new LocalObject(shape.name, Race.Get("Human"), CClass.Get("Alchemist"), Background.Get("Merchant"), Origin.Get("Iron Alliance"));
-		c1.inventory.Add("Club");
-		c1.inventory.Add("Leather Armor");
+		LocalObject c1 = new LocalObject(shape.name, Race.Get("Morlock"), CClass.Get("Fighter"), Background.Get("Merchant"), Origin.Get("Iron Alliance"));
+		c1.inventory.Add("Staff");
 		party.Add(c1);
 
-		LocalObject c2 = new LocalObject("Karl", Race.Get("Floran"), CClass.Get("Ranger"), Background.Get("Hunter"), Origin.Get("Eden"));
-		c2.inventory.Add("Iron Dagger");
-		party.Add(c2);
+		//LocalObject c2 = new LocalObject("Karl", Race.Get("Floran"), CClass.Get("Seer"), Background.Get("Hunter"), Origin.Get("Eden"));
+		//party.Add(c2);
 
-		//party.Add(new Creep("Krokar"));
-		party.Add(new LocalObject(LocalShape.Get("Krokar")));
+		party.Add(new LocalObject(LocalShape.Get("Krokar"), "Boo-Boo"));
 
-		inventory.Add("Net");
-		inventory.Add("Rope");
-		inventory.Add("Inperium Coins", 5);
-		inventory.Add("Alliance Coins", 7);
-		inventory.Add("Longbow");
-		inventory.Add("Pickaxe", 3);
-		inventory.Add("Buckler");
-		inventory.Add("Banana", 4);
-		inventory.Add("Meat", 2);
-		inventory.Add("Deformed Banana", 4);
-		inventory.Add("Empty Bottle");
-		inventory.Add("Bottle of Water");
-		inventory.Add("Paralyzing Poison");
-		inventory.Add("Flashbang");
-		inventory.Add("Nourishing Mix");
-		inventory.Add("Vatra Mushroom", 2);
+		inventory.Add("Inperium Coins", 4);
+		inventory.Add("Alliance Coins", 10);
+		inventory.Add("Bottle of Water", 2);
+		inventory.Add("King Bolete", 3);
+		inventory.Add("Potato", 5);
 	}
 
 	public override void Kill()
@@ -59,7 +45,7 @@ public partial class Player : GObject
 		MainScreen.Instance.game.Exit();
 	}
 
-	public override void ProcessCollisions(GObject g)
+	public override void ProcessCollisions(GlobalObject g)
 	{
 		if (g.dialog != null) M.dialogScreen.StartDialog(g.dialog, g);
 	}
@@ -86,8 +72,8 @@ public partial class Player : GObject
 
 	private bool NewObjectsVisible()
 	{
-		List<GObject> newVisibleObjects = (from o in W.gObjects where W.map.IsInView(position, o.position) select o).Cast<GObject>().ToList();
-		List<GObject> query = (from o in newVisibleObjects where !visibleObjects.Contains(o) select o).Cast<GObject>().ToList();
+		List<GlobalObject> newVisibleObjects = (from o in W.gObjects where W.map.IsInView(position, o.position) select o).ToList();
+		List<GlobalObject> query = (from o in newVisibleObjects where !visibleObjects.Contains(o) select o).ToList();
 		visibleObjects = newVisibleObjects;
 		return query.Count > 0;
 	}

@@ -125,7 +125,7 @@ public partial class Abilities : LocalComponent
 		get
 		{
 			List<CAbility> result = new List<CAbility>();
-			if (t.shape != null) foreach (var a in t.shape.abilities) result.Add(a);
+			if (t.shape != null) foreach (var a in t.shape.data.abilities) result.Add(a);
 			if (t.race != null) result.Add(t.race.ability);
 			if (t.cclass != null) foreach (var a in t.cclass.abilities) result.Add(a);
 			return result;

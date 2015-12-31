@@ -13,7 +13,7 @@ public partial class Battlefield
 
 	public LocalObject current, spotlight;
 	public Ability ability = null;
-	private GObject gObject;
+	private GlobalObject global;
 
 	private Texture2D arrowTexture, targetTexture;
 	public Texture2D damageIcon, armorIcon;
@@ -102,7 +102,7 @@ public partial class Battlefield
 	}
 
 	public void Remove(LocalObject o) { objects.Remove(o); }
-	public void Add(LocalObject o, ZPoint position, bool isInParty = false, bool isAIControlled = false)
+	public void Add(LocalObject o, ZPoint position = null, bool isInParty = false, bool isAIControlled = false)
 	{
 		o.p = new LocalPosition(o);
 		if (position != null) o.p.Set(position, 0.01f, false);
@@ -120,9 +120,9 @@ public partial class Battlefield
 		objects.Add(o);
 	}
 
-	public void StartBattle(GObject g)
+	public void StartBattle(GlobalObject g)
 	{
-		gObject = g;
+		global = g;
 		GTile gTile = World.Instance.map[g.position];
 		string battlefieldName;
 		if (gTile.type.name == "mountainPass") battlefieldName = "Custom Mountain";
@@ -130,19 +130,11 @@ public partial class Battlefield
 		Load(battlefieldName);
 
 		objects.Clear();
-		foreach (LocalObject c in P.party)
-		{
-			//objects.Add(new LCreature(c, true, false));
-			Add(c, null, true, false);
-		}
-		foreach (LocalObject c in g.party)
-		{
-			//objects.Add(new LCreature(c, false, true));
-			Add(c, null, false, true);
-		}
+		foreach (LocalObject c in P.party) Add(c, null, true, false);
+		foreach (LocalObject c in g.party) Add(c, null, false, true);
 
-		//for (int i = 0; i <= Size.x * Size.y / 10; i++)	objects.Add(new PureLObject("Tree"));
-		//if (!g.inventory.IsEmpty) objects.Add(new LContainer(g.inventory));
+		for (int i = 0; i <= Size.x * Size.y / 10; i++) Add(new LocalObject(LocalShape.Get("Tree")));
+		for (int i = 0; i * 6 < g.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", g.inventory));
 		
 		foreach (LocalObject l in objects)
 		{
@@ -294,5 +286,8 @@ public partial class Battlefield
 		}
 	}
 
-	//public void RemoveItem(Item item) {	objects.Remove(Items.Where(i => i.data == item).Single()); }
+	public void RemoveItem(Item item)
+	{
+		objects.Remove(Items.Where(i => i.item == item).Single());
+	}
 }

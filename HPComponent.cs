@@ -19,7 +19,7 @@ public class HPComponent : LocalComponent
 	{
 		get
 		{
-			int result = t.shape != null ? t.shape.maxHP : 10;
+			int result = t.shape != null ? t.shape.data.maxHP : 10;
 			if (t.inventory != null) result += t.inventory.Sum(b => b.hp);
 			if (t.skills != null) result += t.skills["Endurance"];
 			return result;
@@ -31,7 +31,7 @@ public class HPComponent : LocalComponent
 		get
 		{
 			int result = 0;
-			if (t.shape != null) result += t.shape.armor;
+			if (t.shape != null) result += t.shape.data.armor;
 			if (t.inventory != null) result += t.inventory.Sum(b => b.armor);
 			return result;
 		}
@@ -43,8 +43,8 @@ public class HPComponent : LocalComponent
 		if (animate && difference != 0) B.combatAnimations.Add(new TextAnimation(Stuff.ShowSgn(difference), null, M.fonts.verdanaBold,
 			difference > 0 ? Color.Gray : Color.Red, t.p.GC, 1, difference > 0));
 
-		//stamina = Math.Max(0, Math.Min(hp, stamina + n));
 		stamina += difference;
+		if (stamina == 0 && t.effects != null) t.effects.Add("Sleeping", 3);
 	}
 
 	public void Add(int n, bool animate = false)
@@ -53,9 +53,9 @@ public class HPComponent : LocalComponent
 		if (animate && difference > 0) B.combatAnimations.Add(new TextAnimation("+" + difference, null,
 			M.fonts.verdanaBold, Color.Green, t.p.GC, 1, true));
 
-		//hp = Math.Max(0, Math.Min(MaxHP, hp + n));
 		value += difference;
 		if (stamina > value) stamina = value;
+		if (value == 0 && t.p != null) t.p.Kill();
 	}
 
 	public int DamageDealtBy(LocalObject u) { return damageDealt.ContainsKey(u) ? damageDealt[u] : 0; }
@@ -64,8 +64,4 @@ public class HPComponent : LocalComponent
 		if (damageDealt.ContainsKey(u)) damageDealt[u] += damage;
 		else damageDealt.Add(u, damage);
 	}
-
-	//public void Kill()
-	//{
-	//}
 }

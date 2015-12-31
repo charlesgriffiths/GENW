@@ -23,8 +23,8 @@ public class LocalPosition : LocalComponent
 	{
 		get
 		{
-			if (t.item != null) return true;
-			else return t.hp.value < 0;
+			if (t.hp != null) return t.hp.value <= 0;
+			else return true;
 		}
 	}
 
@@ -69,7 +69,7 @@ public class LocalPosition : LocalComponent
 		return true;
 	}
 
-	public int Range { get { return t.inventory != null ? (from i in t.inventory.Items select i.data.range).Max() : 1; } }
+	public int Range { get { return t.inventory != null && !t.inventory.IsEmpty ? (from i in t.inventory.Items select i.data.range).Max() : 1; } }
 
 	public void DoDamage(LocalObject u, int damage, bool pure)
 	{
@@ -90,13 +90,19 @@ public class LocalPosition : LocalComponent
 		get
 		{
 			Inventory result = new Inventory(3, 1, null, "ground", true);
-			int pickupDistance = 2;
-			List<LocalObject>[] list = new List<LocalObject>[pickupDistance];
-			for (int k = 0; k < pickupDistance; k++)
+			int pickupDistance = 1;
+			List<LocalObject>[] list = new List<LocalObject>[pickupDistance + 1];
+
+			for (int k = 0; k <= pickupDistance; k++)
 			{
-				list[k] = B.Items.Where(i => Distance(i) == k).ToList();
-				for (int i = 0; i < list[k].Count && i < 3; i++) result.Add(list[k][i].item.data, i);
+				list[k] = B.Items.Where(o => Distance(o) == k).ToList();
+				for (int i = 0; i < list[k].Count; i++)
+				{
+					Item item = list[k][i].item;
+					if (result.CanAdd(item)) result.Add(item, true);
+				}
 			}
+
 			return result;
 		}
 	}
@@ -138,5 +144,12 @@ public class LocalPosition : LocalComponent
 		if (t.inventory != null) t.inventory.Draw(screen.position + new ZPoint(0, 92));
 		if (t.abilities != null) t.abilities.Draw(screen, new ZPoint(0, 124));
 		Ground.Draw(screen.position + new ZPoint(192, 92));
+	}
+
+	public void Kill()
+	{
+		B.Remove(t);
+		B.Add(new LocalObject(LocalShape.Get("Blood")), value);
+		// тут на самом деле будет много кода для убиения всех возможных объектов: деревьев, сундуков.
 	}
 }

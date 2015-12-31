@@ -10,7 +10,7 @@ public class Defence : LocalComponent
 		get
 		{
 			int result = 0;
-			if (t.shape != null) result += t.shape.defence;
+			if (t.shape != null) result += t.shape.data.defence;
 			if (t.skills != null) result += t.skills["Agility"];
 			if (t.inventory != null) result += t.inventory.Sum(b => b.defence);
 

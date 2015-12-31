@@ -64,13 +64,13 @@
     <Compile Include="Team.cs" />
     <Compile Include="LocalObject.cs" />
     <Compile Include="GlobalDraw.cs" />
-    <Compile Include="GObjectShape.cs" />
+    <Compile Include="GlobalShape.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="MouseTrigger.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="MyMonoGame.cs" />
-    <Compile Include="GObject.cs" />
+    <Compile Include="GlobalObject.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MyMath.cs" />
     <Compile Include="MainScreen.cs" />
@@ -134,7 +134,7 @@
     </Content>
     <Content Include="bin\WindowsGL\Debug\Data\lTiles.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\lTileTypes.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\objectShapes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\localShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\origins.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\palettes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\races.xml">
@@ -145,6 +145,7 @@
     </Content>
     <Content Include="bin\WindowsGL\Debug\Data\textures.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\tips.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\types.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\world.xml">
       <SubType>Designer</SubType>
     </Content>

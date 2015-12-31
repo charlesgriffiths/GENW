@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-public partial class Player : GObject
+public partial class Player : GlobalObject
 {
 	public void LoadTextures()
 	{
@@ -41,7 +41,7 @@ public partial class Player : GObject
 		{
 			LocalObject c = mtc.t;
 			Screen icon = new Screen(position + new ZPoint(0, vStep * party.IndexOf(c)), new ZPoint(32, 32));
-			icon.DrawString(M.fonts.verySmall, c.hp.stamina.ToString() + "/" + c.hp + "/" + c.hp.Max, 27, Color.White);
+			icon.DrawString(M.fonts.verySmall, c.hp.stamina.ToString() + "/" + c.hp.value + "/" + c.hp.Max, 27, Color.White);
 			c.DrawInfo(position + new ZPoint(6 * 32 + 48, 40));
 		}
 

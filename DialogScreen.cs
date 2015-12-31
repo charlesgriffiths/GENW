@@ -6,7 +6,7 @@ public class DialogScreen
 {
 	private DialogNode dialogNode;
 	private Dialog dialog;
-	private GObject gObject;
+	private GlobalObject global;
 
 	public Screen screen;
 
@@ -63,8 +63,8 @@ public class DialogScreen
 	{
 		string nextNode = r.jump;
 
-		if (r.name == "FIGHT") World.Instance.battlefield.StartBattle(gObject);
-		else if (r.name == "TRADE") P.barter = gObject;
+		if (r.name == "FIGHT") World.Instance.battlefield.StartBattle(global);
+		else if (r.name == "TRADE") P.barter = global;
 
 		if (dialog.name == "The First Dialog")
 		{
@@ -73,7 +73,7 @@ public class DialogScreen
 		}
 		else if (dialog.name == "Wild Dogs Encounter")
 		{
-			int threshold = gObject.Name == "Wild Dogs Large Pack" ? 6 : 1;
+			int threshold = global.Name == "Wild Dogs Large Pack" ? 6 : 1;
 			if (r.name == "condition1") nextNode = P.party.Count <= threshold ? "1positive" : "1negative";
 			else if (r.name == "condition2") nextNode = P.party.Count <= threshold + 1 ? "2positive" : "2negative";
 		}
@@ -92,13 +92,13 @@ public class DialogScreen
 		StartDialog(BigBase.Instance.dialogs.Get(dialogName), null);
 	}
 
-	public void StartDialog(Dialog d, GObject g)
+	public void StartDialog(Dialog d, GlobalObject g)
 	{
 		dialog = d;
 		if (d.isUnique && d.happened) return;
 
 		dialogNode = d.nodes["entry"];
-		gObject = g;
+		global = g;
 		d.happened = true;
 		MyGame.Instance.dialog = true;
 	}

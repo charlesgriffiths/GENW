@@ -30,7 +30,7 @@ public class LocalObject
 	public Fatigue fatigue;
 	public Eating eating;
 
-	public LocalShape shape;
+	public ShapeComponent shape;
 	public Item item;
 
 	public Inventory inventory;
@@ -48,7 +48,7 @@ public class LocalObject
 		{
 			if (cclass != null) return race.name + " " + cclass.name;
 			else if (item != null) return item.data.name;
-			else return shape.name;
+			else return shape.data.name;
 		}
 	}
 
@@ -79,7 +79,7 @@ public class LocalObject
 		get
 		{
 			if (item != null) return item.data.texture;
-			else if (shape != null) return shape.texture;
+			else if (shape != null) return shape.GetTexture;
 			else return cclass.textures[race];
 		}
 	}
@@ -110,45 +110,46 @@ public class LocalObject
 	{
 		get
 		{
-			if (shape != null) return shape.creatureType;
+			if (shape != null) return shape.data.creatureType;
 			else if (cclass != null) return BigBase.Instance.creatureTypes.Get("Sentient");
 			else return null;
 		}
 	}
 
-	/*public LocalObject(ItemShape itemShape)
+	public LocalObject(Item _item)
 	{
-		item = new Item(itemShape);
-	}*/
-
-	public LocalObject(LocalShape _shape, string _uniqueName = "")
-	{
-		shape = _shape;
-		uniqueName = _uniqueName;
-
-		hp = new HPComponent(this);
-		movement = new Movement(this);
-		defence = new Defence(this);
-		attack = new Attack(this);
-		abilities = new Abilities(this);
-		fatigue = new Fatigue(this);
-		eating = new Eating(this);
+		item = _item;
 	}
 
-	/*public LocalObject(Inventory _inventory)
+	public LocalObject(LocalShape localShape, string _uniqueName = "", Inventory _inventory = null)
 	{
-	}*/
+		uniqueName = _uniqueName;
+		shape = new ShapeComponent(localShape, this);
+
+		if (localShape.type == LocalType.Get("Destructible") || localShape.type == LocalType.Get("Container"))
+		{
+			hp = new HPComponent(this);
+		}
+		else if (localShape.type == LocalType.Get("Creature"))
+		{
+			hp = new HPComponent(this);
+			movement = new Movement(this);
+			defence = new Defence(this);
+			attack = new Attack(this);
+			abilities = new Abilities(this);
+			fatigue = new Fatigue(this);
+			eating = new Eating(this);
+		}
+
+		if (_inventory != null)
+		{
+			inventory = new Inventory(6, 1, this, "", false);
+			_inventory.MoveTo(inventory);
+		}
+	}
 
 	public LocalObject(string _uniqueName, Race _race, CClass _cclass, Background _background, Origin _origin)
 	{
-		hp = new HPComponent(this);
-		movement = new Movement(this);
-		defence = new Defence(this);
-		attack = new Attack(this);
-		abilities = new Abilities(this);
-		fatigue = new Fatigue(this);
-		eating = new Eating(this);
-
 		uniqueName = _uniqueName;
 		race = _race;
 		cclass = _cclass;
@@ -157,5 +158,13 @@ public class LocalObject
 
 		skills = new Skills(this);
 		inventory = new Inventory(6, 1, this, "", true);
+
+		hp = new HPComponent(this);
+		movement = new Movement(this);
+		defence = new Defence(this);
+		attack = new Attack(this);
+		abilities = new Abilities(this);
+		fatigue = new Fatigue(this);
+		eating = new Eating(this);
 	}
 }

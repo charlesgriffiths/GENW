@@ -11,7 +11,7 @@ public class World
 	public Map map = new Map();
 	public Battlefield battlefield = new Battlefield();
 	public Player player;
-	public List<GObject> gObjects = new List<GObject>();
+	public List<GlobalObject> gObjects = new List<GlobalObject>();
 
 	public ZPoint viewRadius = new ZPoint(16, 8);
 	public ZPoint camera = new ZPoint();
@@ -40,7 +40,7 @@ public class World
 
 		for (xnode = xnode.NextSibling.FirstChild; xnode != null; xnode = xnode.NextSibling)
 		{
-			GObject o = new GObject(BigBase.Instance.gShapes.Get(MyXml.GetString(xnode, "name")));
+			GlobalObject o = new GlobalObject(BigBase.Instance.gShapes.Get(MyXml.GetString(xnode, "name")));
 			o.uniqueName = MyXml.GetString(xnode, "uniqueName");
 
 			string dialogName = MyXml.GetString(xnode, "dialog");
@@ -67,33 +67,33 @@ public class World
 	public void Draw()
 	{
 		map.Draw(false);
-		foreach (GObject g in gObjects) g.Draw();
+		foreach (GlobalObject g in gObjects) g.Draw();
 		player.Draw();
 		map.Draw(true);
-		foreach (GObject g in gObjects) g.DrawAnnotation();
+		foreach (GlobalObject g in gObjects) g.DrawAnnotation();
 		map.DrawMask();
 
 		if (MyGame.Instance.battle) battlefield.Draw();
 		else player.DrawParty(new ZPoint(8, 8));
 	}
 
-	public GObject NextGObject
+	public GlobalObject NextGObject
 	{
 		get
 		{
-			GObject result = player;
-			foreach (GObject g in gObjects) if (g.initiative > result.initiative && g.IsActive) result = g;
+			GlobalObject result = player;
+			foreach (GlobalObject g in gObjects) if (g.initiative > result.initiative && g.IsActive) result = g;
 			return result;
 		}
 	}
 
-	public List<GObject> this[HexPoint p]
+	public List<GlobalObject> this[HexPoint p]
 	{
 		get
 		{
-			List<GObject> result = new List<GObject>();
+			List<GlobalObject> result = new List<GlobalObject>();
 			if (player.position.TheSameAs(p)) result.Add(player);
-			foreach (GObject g in gObjects) if (g.position.TheSameAs(p)) result.Add(g);
+			foreach (GlobalObject g in gObjects) if (g.position.TheSameAs(p)) result.Add(g);
 			return result;
         }
 	}

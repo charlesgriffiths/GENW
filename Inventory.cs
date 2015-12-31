@@ -44,20 +44,20 @@ public class Inventory
 		return totalHands <= 2 && !armorAlreadyEquipped;
 	}
 
-	public bool CanAdd(Item item, int cell)
+	public bool CanAdd(Item item, int cell, bool ignoreStacking = false)
 	{
 		if (data[cell] == null)
 		{
 			if (owner == null) return true;
 			else return item.data.isEquippable && HasRoomFor(item.data);
 		}
-		else if (data[cell].data == item.data && data[cell].data.isStackable) return true;
+		else if (data[cell].data == item.data && data[cell].data.isStackable && !ignoreStacking) return true;
 		else return false;
 	}
 
-	public bool CanAdd(Item item)
+	public bool CanAdd(Item item, bool ignoreStackibg = false)
 	{
-		for (int i = 0; i < Size; i++) if (CanAdd(item, i)) return true;
+		for (int i = 0; i < Size; i++) if (CanAdd(item, i, ignoreStackibg)) return true;
 		return false;
 	}
 
@@ -79,12 +79,16 @@ public class Inventory
 			}
 		}
 
-		var EmptyCells = from i in data where i.Value == null select i.Key;
-		if (EmptyCells.Count() > 0) data[EmptyCells.First()] = new Item(shape);
+		data[(from pair in data where pair.Value == null select pair.Key).First()] = new Item(shape);
+	}
+
+	public void Add(Item item, bool ignoreStacking = false)
+	{
+		if (ignoreStacking)	data[(from pair in data where pair.Value == null select pair.Key).First()] = item;
+		else Add(item.data, item.numberOfStacks);
 	}
 
 	public void Add(ItemShape shape, int number) { for (int i = 0; i < number; i++) Add(shape); }
-	public void Add(Item item) { Add(item.data, item.numberOfStacks); }
 	public void Add(string name) { Add(BigBase.Instance.items.Get(name)); }
 	public void Add(string name, int number) { for (int i = 0; i < number; i++) Add(name); }
 
@@ -123,7 +127,7 @@ public class Inventory
 				screen.Draw(data[i].data.texture, p);
 				if (data[i].numberOfStacks > 1)
 					screen.DrawStringWithShading(M.fonts.small, data[i].numberOfStacks.ToString(), p + new ZPoint(24, 18), Color.White);
-				if (G.battle && name == "" && data[i].data.ability != null)
+				if (G.battle && owner == B.current && name == "" && data[i].data.ability != null)
 					screen.DrawStringWithShading(M.fonts.small, Stuff.ItemHotkeys[i].ToString(), p, Color.White);
 			}
 		}
@@ -142,13 +146,13 @@ public class Inventory
 					Inventory inventory = B.current.inventory;
 					if (this == inventory)
 					{
-						//B.Add(new LItem(item), B.currentObject.position.value);
+						B.Add(new LocalObject(item), B.current.p.value);
 						Remove(mti.cell);
 					}
 					else if (name == "ground" && inventory.CanAdd(item))
 					{
 						inventory.Add(item);
-						//B.RemoveItem(item);
+						B.RemoveItem(item);
 					}
 				}
 			}
@@ -186,5 +190,19 @@ public class Inventory
 		Ability a = BigBase.Instance.iAbilityTypes.Get(name);
 		foreach (Item item in Items) if (item.data.ability != null && item.data.ability.name == a.name) return true;
 		return false;
+	}
+
+	public void MoveTo(Inventory inventory)
+	{
+		int counter = 0;
+		for (int i = 0; i < Size && counter < inventory.Size; i++)
+		{
+			if (data[i] != null)
+			{
+				inventory.Add(data[i]);
+				RemoveStack(i);
+				counter++;
+			}
+		}
 	}
 }

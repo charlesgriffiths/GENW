@@ -42,9 +42,8 @@ public class MyMonoGame : Game
 		LTile.LoadTextures();
 		EffectShape.LoadTextures();
 		CAbility.LoadTextures();
-		GObjectShape.LoadTextures();
+		GlobalShape.LoadTextures();
 		Texture.LoadTextures();
-		//CreepShape.LoadTextures();
 		CClass.LoadTextures();
 		LocalShape.LoadTextures();
 		ItemShape.LoadTextures();

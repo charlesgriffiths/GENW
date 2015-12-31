@@ -12,7 +12,7 @@ public class Attack : LocalComponent
 		get
 		{
 			int result = 0;
-			if (t.shape != null) result += t.shape.attack;
+			if (t.shape != null) result += t.shape.data.attack;
 			if (t.skills != null) result += t.skills["Agility"];
 			if (t.inventory != null) result += t.inventory.Sum(b => b.attack);
 
@@ -39,7 +39,7 @@ public class Attack : LocalComponent
 	{
 		get
 		{
-			float result = t.shape != null ? t.shape.attackTime : 3;
+			float result = t.shape != null ? t.shape.data.attackTime : 3;
 			if (t.inventory != null) result *= t.inventory.Prod(b => b.atm);
 			return result;
 		}
@@ -49,7 +49,7 @@ public class Attack : LocalComponent
 	{
 		get
 		{
-			int result = t.shape != null ? t.shape.damage : 1;
+			int result = t.shape != null ? t.shape.data.damage : 1;
 			if (t.skills != null) result += t.skills["Strength"];
 			if (t.inventory != null) result += t.inventory.Sum(b => b.damage);
 			return result;

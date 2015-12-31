@@ -3,7 +3,7 @@ using System.Xml;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
-public class GObjectShape : NamedObject
+public class GlobalShape : NamedObject
 {
 	private string textureName;
 	public Texture2D texture;
@@ -32,22 +32,7 @@ public class GObjectShape : NamedObject
 
 	public static void LoadTextures()
 	{
-		foreach (GObjectShape s in BigBase.Instance.gShapes.data)
+		foreach (GlobalShape s in BigBase.Instance.gShapes.data)
 			s.texture = MainScreen.Instance.game.Content.Load<Texture2D>("global/" + s.textureName);
-	}
-}
-
-partial class GObject
-{
-	public GObject(GObjectShape shapei)
-	{
-		shape = shapei;
-		dialog = shapei.dialog;
-
-		foreach (KeyValuePair<string, int> pair in shape.partyShape)
-			for (int i = 0; i < pair.Value; i++)
-				party.Add(new LocalObject(LocalShape.Get(pair.Key)));
-
-		initiative = -0.1f;
 	}
 }

@@ -135,7 +135,7 @@ public partial class Battlefield
 		foreach (LocalObject l in objects)
 		{
 			l.p.animations.Draw();
-			l.initiative.animations.Draw();
+			if (l.initiative != null) l.initiative.animations.Draw();
 		}
 
 		for (int j = 0; j < Size.y; j++)

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-public partial class GObject
+public class GlobalObject
 {
-	protected GObjectShape shape;
+	protected GlobalShape shape;
 	public List<LocalObject> party = new List<LocalObject>();
 	public Inventory inventory = new Inventory(6, 5, null, "", false);
 
@@ -34,7 +34,18 @@ public partial class GObject
 		set { shape.texture = value; }
 	}
 
-	protected GObject() {}
+	public GlobalObject() {}
+	public GlobalObject(GlobalShape shapei)
+	{
+		shape = shapei;
+		dialog = shapei.dialog;
+
+		foreach (KeyValuePair<string, int> pair in shape.partyShape)
+			for (int i = 0; i < pair.Value; i++)
+				party.Add(new LocalObject(LocalShape.Get(pair.Key)));
+
+		initiative = -0.1f;
+	}
 
 	private bool IsVisible()
 	{
@@ -65,12 +76,12 @@ public partial class GObject
 		World.Instance.gObjects.Remove(this);
 	}
 
-	public virtual void ProcessCollisions(GObject g)
+	public virtual void ProcessCollisions(GlobalObject g)
 	{
 		//if (MyMath.SamePairs("Morlocks", "Wild Dogs", name, g.name)) { Kill(); g.Kill(); }
 	}
 
-	public static void ProcessCollisions(List<GObject> c)
+	public static void ProcessCollisions(List<GlobalObject> c)
 	{
 		if (c.Count == 2) c[0].ProcessCollisions(c[1]);
 		else if (c.Count > 2) Log.WriteLine("That is an interesting development!");

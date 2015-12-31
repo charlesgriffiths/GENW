@@ -18,13 +18,11 @@
 	public GeneralBase<Origin> origins = new GeneralBase<Origin>();
 	public GeneralBase<Background> backgrounds = new GeneralBase<Background>();
 
-	public GeneralBase<GObjectShape> gShapes = new GeneralBase<GObjectShape>();
+	public GeneralBase<GlobalShape> gShapes = new GeneralBase<GlobalShape>();
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
 
 	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
-	//public GeneralBase<PureShape> pureShapes = new GeneralBase<PureShape>();
-	//public GeneralBase<CreepType> creepTypes = new GeneralBase<CreepType>();
-	//public GeneralBase<CreepShape> creepShapes = new GeneralBase<CreepShape>();
+	public GeneralBase<LocalType> types = new GeneralBase<LocalType>();
 	public GeneralBase<CreatureType> creatureTypes = new GeneralBase<CreatureType>();
 	public GeneralBase<LocalShape> shapes = new GeneralBase<LocalShape>();
 
@@ -54,10 +52,9 @@
 		gShapes.Load("gObjects.xml");
 
 		textures.Load("textures.xml");
-		//pureShapes.Load("pureShapes.xml");
-		//creepShapes.Load("creepShapes.xml");
+		types.Load("types.xml");
 		creatureTypes.Load("creatureTypes.xml");
-		shapes.Load("objectShapes.xml");
+		shapes.Load("localShapes.xml");
 
 		races.Load("races.xml");
 		classes.Load("classes.xml");
