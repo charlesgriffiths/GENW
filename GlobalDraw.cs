@@ -73,7 +73,7 @@ public partial class Player : GlobalObject
 		float loss = toBuy.Value * 2 - toSell.Value * (1 + 0.25f * Max(Skill.Get("Speech")));
 		Color color = loss < 0 ? mtk != null ? Stuff.MyColor("Light Blue") : Color.Green : Color.Red;
 		M.DrawRectangle(position + new ZPoint(32 * 12 + 7, 0), new ZPoint(2, 56), color);
-		M.DrawRectangle(position + new ZPoint(32 * 12 + 8, 40), new ZPoint((int)(loss * 10), 16), color);
+		M.DrawRectangle(position + new ZPoint(32 * 12 + 8, 40), new ZPoint((int)(loss), 16), color);
 
 		if (mtk != null && G.LeftMouseButtonClicked)
 		{

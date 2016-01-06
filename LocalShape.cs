@@ -26,6 +26,9 @@ public class LocalShape : NamedObject
 	public List<CAbility> abilities = new List<CAbility>();
 	public bool isWalkable, isFlat;
 
+	public LocalShape corpse;
+	public ItemShape onDeath;
+
 	public override void Load(XmlNode xnode)
 	{
 		type = LocalType.Get(xnode.Name);
@@ -44,8 +47,16 @@ public class LocalShape : NamedObject
 		isWalkable = MyXml.GetBool(xnode, "walkable");
 		isFlat = MyXml.GetBool(xnode, "flat");
 
-		string ctn = MyXml.GetString(xnode, "type");
-		if (ctn != "") creatureType = CreatureType.Get(ctn);
+		string s = MyXml.GetString(xnode, "type");
+		if (s != "") creatureType = CreatureType.Get(s);
+
+		s = MyXml.GetString(xnode, "corpse");
+		if (creatureType != null && (creatureType.name == "Animal" || creatureType.name == "Sentient")) s = "Blood";
+		if (s != "") corpse = Get(s);
+
+		s = MyXml.GetString(xnode, "onDeath");
+		if (creatureType != null && creatureType.name == "Animal") s = "Large Chunk of Meat";
+		if (s != "") onDeath = ItemShape.Get(s);
 
 		for (xnode = xnode.FirstChild; xnode != null; xnode = xnode.NextSibling)
 			abilities.Add(BigBase.Instance.abilities.Get(MyXml.GetString(xnode, "name")));

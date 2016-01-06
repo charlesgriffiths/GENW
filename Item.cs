@@ -7,9 +7,21 @@ using Microsoft.Xna.Framework.Graphics;
 
 public class CComponent : NamedObject
 {
+	public float weight, value;
+	public bool isRenewable;
+	public int craftingComplexity;
+	public CAbility requirement;
+
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
+		weight = MyXml.GetFloat(xnode, "weight");
+		value = MyXml.GetFloat(xnode, "value");
+		isRenewable = MyXml.GetBool(xnode, "renewable");
+		craftingComplexity = MyXml.GetInt(xnode, "crafting");
+
+		string s = MyXml.GetString(xnode, "requires");
+		if (s != "") requirement = CAbility.Get(s);
 	}
 
 	public bool NameIs(params string[] names)
@@ -25,31 +37,40 @@ public class ItemShape : NamedObject
 
 	public Texture2D texture;
 	public Bonus bonus;
-	public float value, weight;
+	//public float value, weight;
 	public string description;
-	public bool isStackable, isEquippable, isArmor;
-	public int hands, craftLevel, range;
+	public bool isStackable, isEquippable, isCraftable, isArmor;
+	public int hands, /*craftLevel,*/ range;
 	public IAbility ability;
 
 	public static ItemShape Get(string name) { return BigBase.Instance.items.Get(name); }
+
+	public float Weight { get { return (from pair in cComponents select pair.Item1.weight * pair.Item2).Sum(); } }
+	public int CraftingComplexity { get { return (from pair in cComponents select pair.Item1.craftingComplexity).Sum(); } }
+	public float Value { get { return (from pair in cComponents select pair.Item1.value * pair.Item2).Sum() * (1.0f + 0.2f * CraftingComplexity); } }
+
+	public bool IsRenewable { get {
+			foreach (CComponent cc in MultilessComponents) if (!cc.isRenewable) return false;
+			return true; } }
 	
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
-		value = MyXml.GetFloat(xnode, "value");
-		weight = MyXml.GetFloat(xnode, "weight");
+		//value = MyXml.GetFloat(xnode, "value");
+		//weight = MyXml.GetFloat(xnode, "weight");
 		description = MyXml.GetString(xnode, "description");
 		bonus = new Bonus(xnode);
 		isArmor = MyXml.GetBool(xnode, "isArmor");
 		hands = MyXml.GetInt(xnode, "hands");
 		isStackable = MyXml.GetBool(xnode, "stackable");
 		isEquippable = MyXml.GetBool(xnode, "equippable");
+		isCraftable = MyXml.GetBool(xnode, "craftable");
 
 		range = MyXml.GetInt(xnode, "range");
 		if (range == 0) range = 1;
 
-		craftLevel = MyXml.GetInt(xnode, "craftable");
-		if (craftLevel == 0) craftLevel = 100;
+		//craftLevel = MyXml.GetInt(xnode, "craftable");
+		//if (craftLevel == 0) craftLevel = 100;
 
 		string abilityName = MyXml.GetString(xnode, "ability");
 		if (abilityName != "")
@@ -109,9 +130,13 @@ public class ItemShape : NamedObject
 		skip(8);
 		screen.DrawString(font, description, new ZPoint(0, screen.offset), Color.White, screen.size.x);
 
-		skip(8);
-		draw("VALUE: " + value);
-		draw("WEIGHT: " + weight);
+		if (MyGame.Instance.debug)
+		{
+			skip(8);
+			draw("WEIGHT: " + Weight);
+			draw("CMPLXTY: " + CraftingComplexity);
+			draw("VALUE: " + Value);
+		}
 
 		skip(8);
 		draw("COMPONENTS:");
@@ -168,4 +193,6 @@ public class Item
 
 	public Item(ItemShape shape) : this(shape, 1) { }
 	public Item(string shapeName, int n) : this(ItemShape.Get(shapeName), n) { }
+
+	public float Weight { get { return data.Weight * numberOfStacks; } }
 }

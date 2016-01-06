@@ -132,7 +132,9 @@ public partial class Abilities : LocalComponent
 		}
 	}
 
-	public bool Has(string name) { return list.Contains(BigBase.Instance.abilities.Get(name)); }
+	public bool Has(CAbility ability) { return ability == null ? true : list.Contains(ability); }
+	//public bool Has(string name) { return list.Contains(BigBase.Instance.abilities.Get(name)); }
+	public bool Has(string name) { return Has(CAbility.Get(name)); }
 
 	public void Draw(Screen screen, ZPoint position)
 	{

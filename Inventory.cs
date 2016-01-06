@@ -6,8 +6,9 @@ using Microsoft.Xna.Framework;
 public class Inventory
 {
 	private Dictionary<int, Item> data = new Dictionary<int, Item>();
-	private LocalObject owner;
-	private string name;
+	public GlobalObject globalOwner;
+	private LocalObject localOwner;
+	public string name;
 	private int width, height;
 	public bool isInParty;
 
@@ -20,22 +21,23 @@ public class Inventory
 	public int Width { get { return width; } }
 	public int Height { get { return height; } }
 
-	public Inventory(int widthi, int heighti, LocalObject owneri, string namei, bool isInPartyi)
+	public Inventory(int _width, int _height, string _name, bool _isInParty, GlobalObject _globalOwner = null, LocalObject _localOwner = null)
 	{
-		width = widthi;
-		height = heighti;
+		width = _width;
+		height = _height;
 
 		Log.Assert(Size > 0 && Size <= 100, "wrong inventory size");
 		for (int i = 0; i < Size; i++) data.Add(i, null);
 
-		owner = owneri;
-		name = namei;
-		isInParty = isInPartyi;
+		globalOwner = _globalOwner;
+		localOwner = _localOwner;
+		name = _name;
+		isInParty = _isInParty;
 	}
 
 	public List<Item> Items { get { return (from pair in data where pair.Value != null select pair.Value).Cast<Item>().ToList(); } }
 	public bool IsEmpty { get { return Items.Count == 0; } }
-	public float Value { get { return (from i in Items select i.data.value * i.numberOfStacks).Sum(); } }
+	public float Value { get { return (from i in Items select i.data.Value * i.numberOfStacks).Sum(); } }
 
 	private bool HasRoomFor(ItemShape itemShape)
 	{
@@ -46,9 +48,10 @@ public class Inventory
 
 	public bool CanAdd(Item item, int cell, bool ignoreStacking = false)
 	{
-		if (data[cell] == null)
+		if (globalOwner != null && Weight + item.Weight > globalOwner.WeightLimit) return false;
+		else if (data[cell] == null)
 		{
-			if (owner == null) return true;
+			if (localOwner == null) return true;
 			else return item.data.isEquippable && HasRoomFor(item.data);
 		}
 		else if (data[cell].data == item.data && data[cell].data.isStackable && !ignoreStacking) return true;
@@ -106,6 +109,8 @@ public class Inventory
 
 	public void RemoveStack(int cell) { data[cell] = null; }
 
+	private float Weight { get { return (from i in Items select i.Weight).Sum(); } }
+
 	private ZPoint CellPosition(int cell) { return new ZPoint((cell % width) * 32, (cell / width) * 32); }
 
 	public void Draw(ZPoint position)
@@ -118,6 +123,8 @@ public class Inventory
 
 		if (((mti != null && mti.inventory == this) || !IsEmpty) && name != "" && !G.battle) screen.DrawString(M.fonts.superSmall, name, Color.White);
 		screen.Fill(name == "ground" ? Stuff.MyColor("Very Dark Blue") : Stuff.MyColor("Very Dark Grey"));
+		if (globalOwner == World.Instance.player) screen.DrawRectangle(ZPoint.Zero, new ZPoint(screen.size.x, 
+			(int)(Weight * screen.size.y / globalOwner.WeightLimit)), new Color(0.2f, 0.2f, 0.2f, 0.5f));
 
 		for (int i = 0; i < Size; i++)
 		{
@@ -127,7 +134,7 @@ public class Inventory
 				screen.Draw(data[i].data.texture, p);
 				if (data[i].numberOfStacks > 1)
 					screen.DrawStringWithShading(M.fonts.small, data[i].numberOfStacks.ToString(), p + new ZPoint(24, 18), Color.White);
-				if (G.battle && owner == B.current && name == "" && data[i].data.ability != null)
+				if (G.battle && localOwner == B.current && name == "" && data[i].data.ability != null)
 					screen.DrawStringWithShading(M.fonts.small, Stuff.ItemHotkeys[i].ToString(), p, Color.White);
 			}
 		}
@@ -203,6 +210,16 @@ public class Inventory
 				RemoveStack(i);
 				counter++;
 			}
+		}
+	}
+
+	public float TimeMultiplier
+	{
+		get
+		{
+			if (localOwner == null) return 1.0f;
+			else if (localOwner.skills == null) return 1.0f;
+			else return (float)(1 + 0.1 * Weight * Math.Exp(-0.25 * localOwner.skills["Strength"]));
 		}
 	}
 }

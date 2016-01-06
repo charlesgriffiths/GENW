@@ -89,7 +89,7 @@ public class LocalPosition : LocalComponent
 	{
 		get
 		{
-			Inventory result = new Inventory(3, 1, null, "ground", true);
+			Inventory result = new Inventory(3, 1, "ground", true, null, null);
 			int pickupDistance = 1;
 			List<LocalObject>[] list = new List<LocalObject>[pickupDistance + 1];
 
@@ -146,10 +146,21 @@ public class LocalPosition : LocalComponent
 		Ground.Draw(screen.position + new ZPoint(192, 92));
 	}
 
+	private LocalShape Corpse
+	{
+		get
+		{
+			if (t.shape != null) return t.shape.data.corpse;
+			else if (t.race != null) return LocalShape.Get("Blood");
+			else return null;
+		}
+	}
+
 	public void Kill()
 	{
+		if (Corpse != null) B.Add(new LocalObject(Corpse), value);
+		if (t.shape != null && t.shape.data.onDeath != null) B.Add(new LocalObject(new Item(t.shape.data.onDeath)), value);
+
 		B.Remove(t);
-		B.Add(new LocalObject(LocalShape.Get("Blood")), value);
-		// тут на самом деле будет много кода для убиения всех возможных объектов: деревьев, сундуков.
 	}
 }

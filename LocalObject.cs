@@ -143,7 +143,7 @@ public class LocalObject
 
 		if (_inventory != null)
 		{
-			inventory = new Inventory(6, 1, this, "", false);
+			inventory = new Inventory(6, 1, "", false, null, this);
 			_inventory.MoveTo(inventory);
 		}
 	}
@@ -157,7 +157,7 @@ public class LocalObject
 		origin = _origin;
 
 		skills = new Skills(this);
-		inventory = new Inventory(6, 1, this, "", true);
+		inventory = new Inventory(6, 1, "", true, null, this);
 
 		hp = new HPComponent(this);
 		movement = new Movement(this);

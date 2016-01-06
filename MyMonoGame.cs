@@ -187,7 +187,8 @@ public class MyMonoGame : Game
 					mti.inventory.Add(new Item(G.dndItem.data), mti.cell);
 					mti.inventory[mti.cell].numberOfStacks = G.dndItem.numberOfStacks;
 				}
-				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell) && G.inventory.isInParty == mti.inventory.isInParty)
+				else if (mti != null && mti.inventory.CanAdd(G.dndItem, mti.cell) && G.inventory.isInParty == mti.inventory.isInParty &&
+					!(mti.inventory.name == "SELL" && G.dndItem.data.IsRenewable))
 					mti.inventory.Add(G.dndItem, mti.cell);
 				else if (mtc != null && mtc.t.eating.CanEat(G.dndItem) && G.inventory.isInParty) mtc.t.eating.Eat(G.dndItem);
 				else G.inventory.Add(G.dndItem, G.cell);

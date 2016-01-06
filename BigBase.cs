@@ -9,7 +9,6 @@
 	public GeneralBase<GTile> gTiles = new GeneralBase<GTile>();
 	public GeneralBase<LTile> lTiles = new GeneralBase<LTile>();
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
-	public GeneralBase<CComponent> ccomponents = new GeneralBase<CComponent>();
 
 	public GeneralBase<Skill> skills = new GeneralBase<Skill>();
 	public GeneralBase<EffectShape> effects = new GeneralBase<EffectShape>();
@@ -24,12 +23,12 @@
 	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
 	public GeneralBase<LocalType> types = new GeneralBase<LocalType>();
 	public GeneralBase<CreatureType> creatureTypes = new GeneralBase<CreatureType>();
-	public GeneralBase<LocalShape> shapes = new GeneralBase<LocalShape>();
-
 	public GeneralBase<Race> races = new GeneralBase<Race>();
 	public GeneralBase<CClass> classes = new GeneralBase<CClass>();
+	public GeneralBase<CComponent> ccomponents = new GeneralBase<CComponent>();
 	public GeneralBase<ItemShape> items = new GeneralBase<ItemShape>();
-	
+	public GeneralBase<LocalShape> shapes = new GeneralBase<LocalShape>();
+
 	public void Load()
 	{
 		Log.Write("loading all databases... ");
@@ -39,7 +38,6 @@
 		gTiles.Load("gTiles.xml");
 		lTiles.Load("lTiles.xml");
 		palettes.Load("palettes.xml");
-		ccomponents.Load("ccomponents.xml");
 
 		skills.Load("skills.xml");
 		effects.Load("effects.xml");
@@ -54,12 +52,13 @@
 		textures.Load("textures.xml");
 		types.Load("types.xml");
 		creatureTypes.Load("creatureTypes.xml");
-		shapes.Load("localShapes.xml");
-
+		
 		races.Load("races.xml");
 		classes.Load("classes.xml");
+		ccomponents.Load("ccomponents.xml");
 		items.Load("items.xml");
-		
+		shapes.Load("localShapes.xml");
+
 		Log.WriteLine("OK");
 	}
 }

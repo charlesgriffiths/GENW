@@ -44,7 +44,13 @@ public partial class Abilities : LocalComponent
 
 				if (ability.NameIs("Drink"))
 				{
-					if (ia.itemShape.name == "Nourishing Mix") t.hp.AddStamina(100, true);
+					if (ia.itemShape == ItemShape.Get("Nourishing Mix")) t.hp.AddStamina(100, true);
+					else if (ia.itemShape == ItemShape.Get("Bottled Blood"))
+					{
+						int amount = t.HasAbility("Omnivore") ? 2 : -2;
+						t.hp.Add(amount, true);
+						t.hp.AddStamina(amount, true);
+					}
 
 					t.inventory.Remove(ia.itemShape);
 					t.inventory.Add("Empty Bottle");

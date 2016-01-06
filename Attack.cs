@@ -40,7 +40,7 @@ public class Attack : LocalComponent
 		get
 		{
 			float result = t.shape != null ? t.shape.data.attackTime : 3;
-			if (t.inventory != null) result *= t.inventory.Prod(b => b.atm);
+			if (t.inventory != null) result *= t.inventory.Prod(b => b.atm) * t.inventory.TimeMultiplier;
 			return result;
 		}
 	}
@@ -85,6 +85,7 @@ public class Attack : LocalComponent
 		ZPoint.Direction direction = (u.p.value - t.p.value).GetDirection();
 
 		if (u.HasEffect("Sleeping")) hitChance = 100;
+		if (t.inventory != null && t.inventory.HasAbility("Chopping") && u.CommonName == "Tree") damage += 3;
 		if (t.HasAbility("Backstab") && t.p.Distance(u) == 1)
 		{
 			LocalObject behind = B.Get(t.p.value.Shift(direction, 2));

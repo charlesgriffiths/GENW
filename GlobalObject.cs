@@ -8,7 +8,7 @@ public class GlobalObject
 {
 	protected GlobalShape shape;
 	public List<LocalObject> party = new List<LocalObject>();
-	public Inventory inventory = new Inventory(6, 5, null, "", false);
+	public Inventory inventory = new Inventory(6, 5, "", false);
 
 	public HexPoint position = new HexPoint();
 	public RPoint rPosition = new RPoint();
@@ -124,6 +124,8 @@ public class GlobalObject
 	public int Max(Skill skill) {
 		return (from c in party where c.skills != null select c.skills[skill]).Max(); }
 
-	public bool HasAbility(Ability a) {	return party.Where(c => c.HasAbility(a.name)).Count() > 0; }
+	public bool HasAbility(CAbility a) {	return party.Where(c => c.abilities.Has(a)).Count() > 0; }
 	public bool HasAbility(string abilityName) { return HasAbility(CAbility.Get(abilityName)); }
+
+	public float WeightLimit { get { return (from o in party where o.skills != null select 40.0f * (1.0f + 0.25f * o.skills["Strength"])).Sum(); } }
 }
