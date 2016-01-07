@@ -124,16 +124,16 @@
     <Content Include="bin\WindowsGL\Debug\Data\gObjects.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="bin\WindowsGL\Debug\Data\gTiles.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\gTileTypes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\globalTiles.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\globalTileTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\iAbilityTypes.xml">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="bin\WindowsGL\Debug\Data\items.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="bin\WindowsGL\Debug\Data\lTiles.xml" />
-    <Content Include="bin\WindowsGL\Debug\Data\lTileTypes.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\localTiles.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\localTileTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\localShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\origins.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\palettes.xml" />

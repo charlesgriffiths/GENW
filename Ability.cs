@@ -43,13 +43,13 @@ public class Ability : NamedObject
 	}
 }
 
-public class IAbility : Ability
+public class ItemAbility : Ability
 {
 	public ItemShape itemShape;
 
 	public override void Load(XmlNode xnode) { Log.Error("should not be called"); }
 
-	public IAbility(Ability a, ItemShape s)
+	public ItemAbility(Ability a, ItemShape s)
 	{
 		itemShape = s;
 		name = a.name;
@@ -63,13 +63,13 @@ public class IAbility : Ability
 	public override bool NameIs(string s) { return name == BigBase.Instance.iAbilityTypes.Get(s).name; }
 }
 
-public class CAbility : Ability
+public class ClassAbility : Ability
 {
 	public Texture2D texture;
 	public string description;
 	public Color color;
 
-	public static CAbility Get (string name) { return BigBase.Instance.abilities.Get(name); }
+	public static ClassAbility Get (string name) { return BigBase.Instance.abilities.Get(name); }
 	
 	private static string Name(string s)
 	{
@@ -92,7 +92,7 @@ public class CAbility : Ability
 
 	public static void LoadTextures()
 	{
-		foreach (CAbility a in BigBase.Instance.abilities.data)
+		foreach (ClassAbility a in BigBase.Instance.abilities.data)
 			a.texture = M.game.Content.Load<Texture2D>("abilities/" + a.name);
 	}
 
@@ -120,11 +120,11 @@ public partial class Abilities : LocalComponent
 {
 	public Abilities(LocalObject o) : base(o) { }
 
-	public List<CAbility> list
+	public List<ClassAbility> list
 	{
 		get
 		{
-			List<CAbility> result = new List<CAbility>();
+			List<ClassAbility> result = new List<ClassAbility>();
 			if (t.shape != null) foreach (var a in t.shape.data.abilities) result.Add(a);
 			if (t.race != null) result.Add(t.race.ability);
 			if (t.cclass != null) foreach (var a in t.cclass.abilities) result.Add(a);
@@ -132,9 +132,8 @@ public partial class Abilities : LocalComponent
 		}
 	}
 
-	public bool Has(CAbility ability) { return ability == null ? true : list.Contains(ability); }
-	//public bool Has(string name) { return list.Contains(BigBase.Instance.abilities.Get(name)); }
-	public bool Has(string name) { return Has(CAbility.Get(name)); }
+	public bool Has(ClassAbility ability) { return ability == null ? true : list.Contains(ability); }
+	public bool Has(string name) { return Has(ClassAbility.Get(name)); }
 
 	public void Draw(Screen screen, ZPoint position)
 	{
@@ -145,7 +144,7 @@ public partial class Abilities : LocalComponent
 		var mtk = MouseTriggerKeyword.GetUnderMouse("ability");
 
 		int i = 0;
-		foreach (CAbility a in list)
+		foreach (ClassAbility a in list)
 		{
 			bool mouseOn = mtk != null && mtk.parameter == i.ToString();
 

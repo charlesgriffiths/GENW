@@ -22,7 +22,7 @@ public class Defence : LocalComponent
 				result -= Math.Max(enemiesNearby - 1, 0);
 
 				result += (from c in t.team.Friends where c.abilities.Has("Defender") && 
-					t.p.Distance(c) <= CAbility.Get("Defender").range select c).Count();
+					t.p.Distance(c) <= ClassAbility.Get("Defender").range select c).Count();
 
 				if (t.effects.Has("Marked Prey")) result -= 3;
 			}

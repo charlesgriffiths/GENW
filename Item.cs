@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-public class CComponent : NamedObject
+public class CraftingComponent : NamedObject
 {
 	public float weight, value;
 	public bool isRenewable;
 	public int craftingComplexity;
-	public CAbility requirement;
+	public ClassAbility requirement;
 
 	public override void Load(XmlNode xnode)
 	{
@@ -21,43 +21,42 @@ public class CComponent : NamedObject
 		craftingComplexity = MyXml.GetInt(xnode, "crafting");
 
 		string s = MyXml.GetString(xnode, "requires");
-		if (s != "") requirement = CAbility.Get(s);
+		if (s != "") requirement = ClassAbility.Get(s);
 	}
 
 	public bool NameIs(params string[] names)
 	{
-		foreach (string name in names) if (BigBase.Instance.ccomponents.Get(name) == this) return true;
+		foreach (string name in names) if (BB.components.Get(name) == this) return true;
 		return false;
 	}
+
+	public static CraftingComponent Get(string name) { return BB.components.Get(name); }
 }
 
 public class ItemShape : NamedObject
 {
-	public List<Tuple<CComponent, int>> cComponents = new List<Tuple<CComponent, int>>();
+	public List<Tuple<CraftingComponent, int>> components = new List<Tuple<CraftingComponent, int>>();
 
 	public Texture2D texture;
 	public Bonus bonus;
-	//public float value, weight;
 	public string description;
 	public bool isStackable, isEquippable, isCraftable, isArmor;
-	public int hands, /*craftLevel,*/ range;
-	public IAbility ability;
+	public int hands, range;
+	public ItemAbility ability;
 
 	public static ItemShape Get(string name) { return BigBase.Instance.items.Get(name); }
 
-	public float Weight { get { return (from pair in cComponents select pair.Item1.weight * pair.Item2).Sum(); } }
-	public int CraftingComplexity { get { return (from pair in cComponents select pair.Item1.craftingComplexity).Sum(); } }
-	public float Value { get { return (from pair in cComponents select pair.Item1.value * pair.Item2).Sum() * (1.0f + 0.2f * CraftingComplexity); } }
+	public float Weight { get { return (from pair in components select pair.Item1.weight * pair.Item2).Sum(); } }
+	public int CraftingComplexity { get { return (from pair in components select pair.Item1.craftingComplexity).Sum(); } }
+	public float Value { get { return (from pair in components select pair.Item1.value * pair.Item2).Sum() * (1.0f + 0.2f * CraftingComplexity); } }
 
 	public bool IsRenewable { get {
-			foreach (CComponent cc in MultilessComponents) if (!cc.isRenewable) return false;
+			foreach (CraftingComponent cc in MultilessComponents) if (!cc.isRenewable) return false;
 			return true; } }
 	
 	public override void Load(XmlNode xnode)
 	{
 		name = MyXml.GetString(xnode, "name");
-		//value = MyXml.GetFloat(xnode, "value");
-		//weight = MyXml.GetFloat(xnode, "weight");
 		description = MyXml.GetString(xnode, "description");
 		bonus = new Bonus(xnode);
 		isArmor = MyXml.GetBool(xnode, "isArmor");
@@ -69,13 +68,10 @@ public class ItemShape : NamedObject
 		range = MyXml.GetInt(xnode, "range");
 		if (range == 0) range = 1;
 
-		//craftLevel = MyXml.GetInt(xnode, "craftable");
-		//if (craftLevel == 0) craftLevel = 100;
-
 		string abilityName = MyXml.GetString(xnode, "ability");
 		if (abilityName != "")
 		{
-			ability = new IAbility(BigBase.Instance.iAbilityTypes.Get(abilityName), this);
+			ability = new ItemAbility(BigBase.Instance.iAbilityTypes.Get(abilityName), this);
 			isEquippable = true;
 		}
 
@@ -86,7 +82,7 @@ public class ItemShape : NamedObject
 				int amount = MyXml.GetInt(xnode, "amount");
 				if (amount == 0) amount = 1;
 
-				cComponents.Add(new Tuple<CComponent, int>(BigBase.Instance.ccomponents.Get(MyXml.GetString(xnode, "name")), amount));
+				components.Add(new Tuple<CraftingComponent, int>(CraftingComponent.Get(MyXml.GetString(xnode, "name")), amount));
 			}
 		}
 
@@ -141,23 +137,27 @@ public class ItemShape : NamedObject
 		skip(8);
 		draw("COMPONENTS:");
 		hOffset += 16;
-		foreach (var t in cComponents) draw(t.Item1.name + (t.Item2 > 1 ? " x" + t.Item2 : ""));
+		foreach (var t in components) draw(t.Item1.name + (t.Item2 > 1 ? " x" + t.Item2 : ""));
 	}
 
-	public List<CComponent> MultilessComponents { get { return cComponents.Select(t => t.Item1).ToList(); } }
+	public List<CraftingComponent> MultilessComponents { get { return components.Select(t => t.Item1).ToList(); } }
 
-	private int this[CComponent cc]
+	private int this[CraftingComponent cc]
 	{
 		get
 		{
-			var query = from tuple in cComponents where tuple.Item1 == cc select tuple.Item2;
+			var query = from tuple in components where tuple.Item1 == cc select tuple.Item2;
 			return query.Count() > 0 ? query.Single() : 0;
 		}
 	}
 
-	public bool IsComposable(Dictionary<CComponent, int> d)
+	public bool IsComposable(Dictionary<CraftingComponent, int> d)
 	{
-		foreach (var t in cComponents) if (!d.ContainsKey(t.Item1) || d[t.Item1] < t.Item2) return false;
+		foreach (var t in components)
+		{
+			if (World.Instance.map[World.Instance.player.position].components.Contains(t.Item1)) continue;
+			if (!d.ContainsKey(t.Item1) || d[t.Item1] < t.Item2) return false;
+		}
 		return true;
 	}
 
@@ -165,8 +165,10 @@ public class ItemShape : NamedObject
 	{
 		Player P = World.Instance.player;
 
-		foreach (var t in cComponents)
+		foreach (var t in components)
 		{
+			if (World.Instance.map[P.position].components.Contains(t.Item1)) continue;
+
 			int crafted = 0;
 			foreach (var pair in P.craftableShapes)
 				for (int n = 0; n < pair.Value; n++)

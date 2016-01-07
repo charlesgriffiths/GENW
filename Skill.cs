@@ -83,7 +83,7 @@ public class Background : NamedObject
 
 public class Race : NamedObject
 {
-	public CAbility ability;
+	public ClassAbility ability;
 	public Bonus bonus;
 	public string description;
 
@@ -98,9 +98,9 @@ public class Race : NamedObject
 	public static Race Get(string name) { return BB.races.Get(name); }
 }
 
-public class CClass : NamedObject
+public class CharacterClass : NamedObject
 {
-	public List<CAbility> abilities = new List<CAbility>();
+	public List<ClassAbility> abilities = new List<ClassAbility>();
 	public Dictionary<Race, Texture2D> textures = new Dictionary<Race, Texture2D>();
 	public Bonus bonus;
 	public string description;
@@ -117,7 +117,7 @@ public class CClass : NamedObject
 
 	public static void LoadTextures()
 	{
-		foreach (CClass c in BigBase.Instance.classes.data)
+		foreach (CharacterClass c in BigBase.Instance.classes.data)
 			foreach (Race r in BigBase.Instance.races.data)
 			{
 				Texture2D t = M.game.Content.Load<Texture2D>("characters/" + r.name + " " + c.name);
@@ -125,5 +125,5 @@ public class CClass : NamedObject
 			}
 	}
 
-	public static CClass Get(string name) { return BB.classes.Get(name); }
+	public static CharacterClass Get(string name) { return BB.classes.Get(name); }
 }

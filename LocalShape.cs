@@ -23,7 +23,7 @@ public class LocalShape : NamedObject
 	public CreatureType creatureType;
 	public int maxHP, damage, attack, defence, armor;
 	public float movementTime, attackTime;
-	public List<CAbility> abilities = new List<CAbility>();
+	public List<ClassAbility> abilities = new List<ClassAbility>();
 	public bool isWalkable, isFlat;
 
 	public LocalShape corpse;
@@ -62,12 +62,7 @@ public class LocalShape : NamedObject
 			abilities.Add(BigBase.Instance.abilities.Get(MyXml.GetString(xnode, "name")));
 	}
 
-	public static void LoadTextures()
-	{
-		foreach (LocalShape s in BigBase.Instance.shapes.data) s.texture.LoadImages("objects/" + s.name);
-			//s.texture = M.game.Content.Load<Texture2D>("objects/" + s.name);
-	}
-
+	public static void LoadTextures() {	foreach (LocalShape s in BigBase.Instance.shapes.data) s.texture.LoadImages("objects/" + s.name); }
 	public static LocalShape Get(string name) { return BB.shapes.Get(name); }
 }
 

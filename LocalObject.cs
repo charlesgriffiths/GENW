@@ -35,7 +35,7 @@ public class LocalObject
 
 	public Inventory inventory;
 	public Race race;
-	public CClass cclass;
+	public CharacterClass cclass;
 	public Origin origin;
 	public Background background;
 	public Skills skills;
@@ -148,7 +148,7 @@ public class LocalObject
 		}
 	}
 
-	public LocalObject(string _uniqueName, Race _race, CClass _cclass, Background _background, Origin _origin)
+	public LocalObject(string _uniqueName, Race _race, CharacterClass _cclass, Background _background, Origin _origin)
 	{
 		uniqueName = _uniqueName;
 		race = _race;

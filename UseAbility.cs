@@ -17,9 +17,9 @@ public partial class Abilities : LocalComponent
 		{
 			PayAbilityCost(ability);
 
-			if (ability is CAbility)
+			if (ability is ClassAbility)
 			{
-				CAbility ca = ability as CAbility;
+				ClassAbility ca = ability as ClassAbility;
 				Action<string> log = s => B.log.Add(" " + s, ca.color);
 
 				if (ca.NameIs("Meld"))
@@ -38,9 +38,9 @@ public partial class Abilities : LocalComponent
 				}
 			}
 
-			else if (ability is IAbility)
+			else if (ability is ItemAbility)
 			{
-				IAbility ia = ability as IAbility;
+				ItemAbility ia = ability as ItemAbility;
 
 				if (ability.NameIs("Drink"))
 				{
@@ -66,6 +66,13 @@ public partial class Abilities : LocalComponent
 
 					AnimateByDefault(ability.castTime);
 				}
+				else if (ability.NameIs("Dip"))
+				{
+					t.inventory.Remove(ia.itemShape);
+
+					var query = from o in B.GetAll(t.p.value) select o.CommonName;
+					if (query.Contains("Blood")) t.inventory.Add(ItemShape.Get("Bottled Blood"));
+				}
 			}
 
 			t.initiative.PassTurn(ability.castTime);
@@ -80,9 +87,9 @@ public partial class Abilities : LocalComponent
 		else if (ability.targetType == Ability.TargetType.Direction) Use(ability, ZPoint.GetDirection(target - t.p.value));
 		else
 		{
-			if (ability is CAbility)
+			if (ability is ClassAbility)
 			{
-				CAbility ca = ability as CAbility;
+				ClassAbility ca = ability as ClassAbility;
 				Action<string> log = s => B.log.Add(" " + s, ca.color);
 
 				if (ca.NameIs("Overgrowth"))
@@ -91,7 +98,7 @@ public partial class Abilities : LocalComponent
 
 					if (o == null && B.IsWalkable(target))
 					{
-						//B.Add(new PureLObject("Tree"), target);
+						B.Add(new LocalObject(LocalShape.Get("Tree")), target, true, false);
 						log("grows a tree.");
 					}
 					else if (o.TypeName == "Tree")
@@ -119,9 +126,9 @@ public partial class Abilities : LocalComponent
 					log("leaps to a different location.");
 				}
 			}
-			else if (ability is IAbility)
+			else if (ability is ItemAbility)
 			{
-				IAbility ia = ability as IAbility;
+				ItemAbility ia = ability as ItemAbility;
 				if (ia.name == "Destroy Wall")
 				{
 					var list = (from pair in B.palette.data where pair.Value.type.name == "ground" select pair.Key).ToList();
@@ -171,9 +178,9 @@ public partial class Abilities : LocalComponent
 
 	public void Use(Ability ability, ZPoint.Direction direction)
 	{
-		if (ability is CAbility)
+		if (ability is ClassAbility)
 		{
-			CAbility ca = ability as CAbility;
+			ClassAbility ca = ability as ClassAbility;
 			Action<string> log = s => B.log.Add(" " + s, ca.color);
 
 			if (ca.NameIs("Bull Rush"))
@@ -217,9 +224,9 @@ public partial class Abilities : LocalComponent
 				}
 			}
 		}
-		else if (ability is IAbility)
+		else if (ability is ItemAbility)
 		{
-			IAbility ia = ability as IAbility;
+			ItemAbility ia = ability as ItemAbility;
 			if (ability.NameIs("Throw"))
 			{
 				ZPoint p = t.p.value + direction;
@@ -231,12 +238,12 @@ public partial class Abilities : LocalComponent
 				if (ia.itemShape.name == "Net")
 				{
 					if (lc != null) lc.effects.Add("Net", 6);
-					//else B.Add(new LItem(ia.itemShape), p);
+					else B.Add(new LocalObject(new Item(ia.itemShape)), p);
 				}
 				else
 				{
 					if (lc != null) t.p.DoDamage(lc, t.attack.Damage * 2, false);
-					//B.Add(new LItem(ia.itemShape), p);
+					B.Add(new LocalObject(new Item(ia.itemShape)), p);
 				}
 
 				t.inventory.Remove(ia.itemShape);
@@ -261,9 +268,9 @@ public partial class Abilities : LocalComponent
 
 	public void Use(Ability ability, LocalObject target)
 	{
-		if (ability is CAbility)
+		if (ability is ClassAbility)
 		{
-			CAbility ca = ability as CAbility;
+			ClassAbility ca = ability as ClassAbility;
 			Action<string> log = s => B.log.Add(" " + s, ca.color);
 			Action<LocalObject, string> logn = (lc, s) => { B.log.AddLine(lc.CommonName, lc.LogColor); log(s); };
 
@@ -425,9 +432,9 @@ public partial class Abilities : LocalComponent
 				log("heals " + target.CommonName + " a little.");
 			}
 		}
-		else if (ability is IAbility)
+		else if (ability is ItemAbility)
 		{
-			IAbility ia = ability as IAbility;
+			ItemAbility ia = ability as ItemAbility;
 			if (ia.name == "Bash")
 			{
 				t.p.DoDamage(target, 1, false);

@@ -31,14 +31,12 @@ public partial class Battlefield
 
 	public ZPoint Size { get { return new ZPoint(data.GetUpperBound(0) + 1, data.GetUpperBound(1) + 1); } }
 
-	//public List<LCreature> Creatures { get { return (from c in objects where c is LCreature select c as LCreature).ToList(); } }
-	//public List<LCreature> AliveCreatures { get { return Creatures.Where(c => c.IsAlive).ToList(); } }
 	public List<LocalObject> ActiveObjects { get { return objects.Where(u => u.initiative != null).ToList(); } }
 	public List<LocalObject> Items { get { return objects.Where(o => o.item != null).ToList(); } }
 
 	public ZPoint Mouse { get { return ZCoordinates(MyGame.Instance.mouseState.Position.ToVector2()); } }
 
-	public LTile this[ZPoint p]
+	public LocalTile this[ZPoint p]
 	{
 		get
 		{
@@ -52,18 +50,10 @@ public partial class Battlefield
 
 	private bool InRange(ZPoint p) { return p.InBoundaries(new ZPoint(0, 0), Size - new ZPoint(1, 1)); }
 
+	public List<LocalObject> GetAll(ZPoint p) { return objects.Where(o => o.p.value.TheSameAs(p)).ToList(); }
 	public LocalObject Get(ZPoint p)	{
 		var query = from o in objects where o.p.value.TheSameAs(p) orderby o.Importance select o;
 		return query.Count() > 0 ? query.First() : null; }
-
-	/*public LCreature GetLCreature(ZPoint p)
-	{
-		var query = from c in AliveCreatures where c.position.TheSameAs(p) select c;
-		if (query.Count() > 0) return query.First() as LCreature;
-		else return null;
-	}*/
-
-	//public LCreature CurrentLCreature { get { return currentObject as LCreature; } }
 
 	public bool IsWalkable(ZPoint p)
 	{
@@ -123,7 +113,7 @@ public partial class Battlefield
 	public void StartBattle(GlobalObject g)
 	{
 		global = g;
-		GTile gTile = World.Instance.map[g.position];
+		GlobalTile gTile = World.Instance.map[g.position];
 		string battlefieldName;
 		if (gTile.type.name == "mountainPass") battlefieldName = "Custom Mountain";
 		else battlefieldName = "Custom Mountain";
@@ -142,8 +132,6 @@ public partial class Battlefield
 			if (l.initiative != null) l.initiative.Set(l.uniqueName == P.uniqueName ? 0.1f : -R.Next(100) / 100.0f, 0.01f, false);
 		}
 
-		//if(NextLObject is LCreature) { if ((NextLObject as LCreature).IsAIControlled) NextLObject.Run(); }
-		//else NextLObject.Run();
 		LocalObject next = NextObject;
 		if (next.initiative.IsAIControlled) next.initiative.Run();
 
@@ -167,22 +155,13 @@ public partial class Battlefield
 		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) data[i, j] = dataLines[j][i];
 	}
 
-	public void SetSpotlight()
-	{
-		ZPoint p = Mouse;
-        var query = from c in objects where c.p.TheSameAs(p) orderby c.Importance select c;
-		if (query.Count() > 0) spotlight = query.First();
-	}
+	public void SetSpotlight()	{
+        var query = from c in objects where c.p.TheSameAs(Mouse) orderby c.Importance select c;
+		if (query.Count() > 0) spotlight = query.First(); }
 
-	public LocalObject NextObject
-	{
-		get
-		{
-			//var query = from c in AliveCreatures orderby -c.initiative select c;
-			var query = from o in objects where o.initiative != null orderby -o.initiative.value select o;
-			return query.Count() != 0 ? query.First() : null;
-		}
-	}
+	public LocalObject NextObject {	get	{
+		var query = from o in objects where o.initiative != null orderby -o.initiative.value select o;
+		return query.Count() != 0 ? query.First() : null; }	}
 
 	private enum Resolution { Not, Victory, Retreat };
 	private Resolution GetResolution()
@@ -192,39 +171,41 @@ public partial class Battlefield
 
 		if (ActiveObjects.Where(c => !c.team.isInParty).Count() == 0) return Resolution.Victory;
 		else if (ActiveObjects.Where(c => c.team.isInParty && (!onBorder(c) || !noEnemiesNearby(c))).Count() == 0) return Resolution.Retreat;
-		//else if (AliveCreatures.Where(c => c.isInParty && onBorder(c) && noEnemiesNearby(c)).Count() == P.party.Count) return Resolution.Retreat;
 		else return Resolution.Not;
 	}
 
-	/*public void EndBattle()
+	public void EndBattle()
 	{
-		Action<List<LocalObject>, bool> reshape = (party, isInParty) =>
+		Resolution resolution = GetResolution();
+		Log.Assert(resolution == Resolution.Victory || resolution == Resolution.Retreat, "can't end battle");
+
+		Action<GlobalObject, bool> reshape = (g, party) =>
 		{
-			List<LocalObject> deadParty = party.Where(c => !c.IsAlive).ToList();
-			foreach (LocalObject c in deadParty) party.Remove(c);
+			g.party.Clear();
 
-			var newParty = from lc in AliveCreatures where !party.Contains(lc.data) && (isInParty ? lc.isInParty : !lc.isInParty) select lc.data;
-			foreach (LocalObject c in newParty) party.Add(c);
+			foreach(LocalObject o in ActiveObjects.Where(o => o.team != null && o.team.isInParty == party).OrderBy(o => o.Importance).ToList())
+			{
+				o.p = null;
+				o.drawing = null;
+				o.effects = null;
+				o.team = null;
+				o.initiative = null;
 
-			party = party.OrderBy(c => c.Importance).ToList();
+				g.party.Add(o);
+			}
 		};
 
-		Resolution resolution = GetResolution();
-		if (resolution == Resolution.Victory || resolution == Resolution.Retreat)
-		{
-			reshape(P.party, true);
-			reshape(gObject.party, false);
-
-			MyGame.Instance.battle = false;
-		}
-		else Log.Error("can't end battle");
+		reshape(P, true);
+		reshape(global, false);
+		
+		MyGame.Instance.battle = false;
 
 		if (resolution == Resolution.Victory)
 		{
-			foreach (LItem lItem in Items) P.ground.Add(lItem.data);
-			gObject.Kill();
+			foreach (var o in Items) P.ground.Add(o.item);
+			global.Kill();
 		}
-	}*/
+	}
 
 	public List<ZPoint> EveryPoint
 	{

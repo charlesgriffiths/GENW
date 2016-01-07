@@ -26,7 +26,8 @@ public partial class Player : GlobalObject
 		inventory.isInParty = true;
 		inventory.globalOwner = this;
 
-		LocalObject c1 = new LocalObject(shape.name, Race.Get("Morlock"), CClass.Get("Alchemist"), Background.Get("Engineer"), Origin.Get("Iron Alliance"));
+		LocalObject c1 = new LocalObject(shape.name, Race.Get("Morlock"), CharacterClass.Get("Alchemist"), 
+			Background.Get("Engineer"), Origin.Get("Iron Alliance"));
 		c1.inventory.Add("Staff");
 		party.Add(c1);
 
@@ -61,6 +62,8 @@ public partial class Player : GlobalObject
 
 		ground.Clear();
 		crafting.Clear();
+
+		foreach (ItemShape s in W.map[position].items) if (W.random.Next(50) <= Sum(Skill.Get("Survival")))	ground.Add(s);
 
 		if (barter != null)
 		{
@@ -120,7 +123,7 @@ public partial class Player : GlobalObject
 		var all = BigBase.Instance.items.data;
 
 		Func<ItemShape, bool> hasAbilities = s => {
-			foreach (CComponent cc in s.MultilessComponents) if (!HasAbility(cc.requirement)) return false;
+			foreach (CraftingComponent cc in s.MultilessComponents) if (!HasAbility(cc.requirement)) return false;
 			return true; };
 
 		foreach (ItemShape itemShape in all.Where(s => s.IsComposable(crafting.CComponents) && !crafting.Contains(s) && 

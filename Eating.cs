@@ -2,7 +2,7 @@
 {
 	public Eating(LocalObject o) : base(o) { }
 
-	private bool CanEat(CComponent cc)
+	private bool CanEat(CraftingComponent cc)
 	{
 		if (cc.NameIs("Iron", "Gold", "Copper", "Bottle")) return false;
 		else if (!t.HasAbility("Omnivore") && cc.NameIs("Ironwood")) return false;
@@ -12,11 +12,11 @@
 
 	public bool CanEat(Item i)
 	{
-		foreach (CComponent cc in i.data.MultilessComponents) if (!CanEat(cc)) return false;
+		foreach (CraftingComponent cc in i.data.MultilessComponents) if (!CanEat(cc)) return false;
 		return true;
 	}
 
-	private void Eat(CComponent cc)
+	private void Eat(CraftingComponent cc)
 	{
 		int nutritionalValue = 0;
 
@@ -31,7 +31,7 @@
 	public void Eat(Item item)
 	{
 		for (int n = 0; n < item.numberOfStacks; n++)
-			foreach (var t in item.data.cComponents)
+			foreach (var t in item.data.components)
 				for (int k = 0; k < t.Item2; k++) Eat(t.Item1);
 	}
 }

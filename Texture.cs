@@ -22,17 +22,10 @@ public class Texture : NamedObject
 			Log.Assert(k >= 0 && k < numberOfVariations, "Texture index out of boundaries");
 			return data[k]; } }
 
-	public static void LoadTextures()
-	{
+	public static void LoadTextures() {
 		foreach (Texture t in BigBase.Instance.textures.data)
-		{
-			for (int i = 0; i < t.numberOfVariations; i++) t.LoadImages("local/" + t.name);
-			/*{
-				string suffix = t.numberOfVariations == 1 ? "" : " " + (i + 1).ToString();
-                t.data.Add(MainScreen.Instance.game.Content.Load<Texture2D>("local/" + t.name + suffix));
-			}*/
-		}
-	}
+			for (int i = 0; i < t.numberOfVariations; i++)
+				t.LoadImages("local/" + t.name); }
 
 	public void LoadImages(string path)
 	{

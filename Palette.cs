@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 public class Palette : NamedObject
 {
-	public Dictionary<char, LTile> data = new Dictionary<char, LTile>();
+	public Dictionary<char, LocalTile> data = new Dictionary<char, LocalTile>();
 
-	public LTile this[char code] { get { return data[code]; } }
+	public LocalTile this[char code] { get { return data[code]; } }
 	public int Size { get { return data.Count; } }
 
 	public char GetKey(int i) { return data.Keys.ToList()[i]; }
@@ -19,7 +19,7 @@ public class Palette : NamedObject
 		while (node != null)
 		{
 			char code = MyXml.GetChar(node, "code");
-			LTile item = BigBase.Instance.lTiles.Get(MyXml.GetString(node, "tile"));
+			LocalTile item = BigBase.Instance.localTiles.Get(MyXml.GetString(node, "tile"));
 
 			data.Add(code, item);
 			node = node.NextSibling;

@@ -98,8 +98,6 @@ class TextAnimation : Animation
 
 		maxFrameTime = (int)(seconds * 60.0f);
 		frameTime = 0;
-
-		//texture = BigBase.Instance.textures.Get(isPure ? "pureDamage" : "damage").Single();
 	}
 
 	public override void Draw()

@@ -156,30 +156,3 @@ public partial class Player : GlobalObject
 		M.spriteBatch.Draw(Texture, M.GraphicCoordinates(rPosition));
 	}
 }
-
-//public abstract partial class Creature
-//{
-	//private static MainScreen M { get { return MainScreen.Instance; } }
-
-	/*public void DrawInfo(ZPoint position)
-	{
-		Screen screen = new Screen(position, new ZPoint(192, 1));
-		screen.DrawString(M.fonts.verdanaBold, FullName, ZPoint.Zero, Color.White);
-		
-		if (this is Character)
-		{
-			Character ch = this as Character;
-			screen.DrawString(M.fonts.small, "(" + ch.background.name + ", " + ch.origin.name + ")", new ZPoint(0, screen.offset), Color.White);
-			screen.offset += 8;
-
-			foreach (Skill skill in BigBase.Instance.skills.data)
-			{
-				int previousOffset = screen.offset;
-				screen.DrawString(M.fonts.small, skill.name, new ZPoint(0, screen.offset), Color.White);
-				int trueOffset = screen.offset;
-				screen.DrawString(M.fonts.small, ch[skill].ToString(), new ZPoint(100, previousOffset), Color.White);
-				screen.offset = trueOffset;
-			}
-		}
-	}*/
-//}

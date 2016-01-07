@@ -38,7 +38,6 @@ public class AnimationQueue
 		List<Animation> animationsToDraw = new List<Animation>();
 
 		if (data.Count >= 1) animationsToDraw.Add(data[0]);
-		//if (data.Count >= 2 && data[0] is RMove && !(data[1] is RMove)) animationsToDraw.Add(data[1]);
 		if (data.Count >= 2 && !data[1].SpendsTime) animationsToDraw.Add(data[1]);
 
 		foreach (Animation a in animationsToDraw)

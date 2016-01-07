@@ -22,10 +22,10 @@ public class Attack : LocalComponent
 				result += e.BothAD;
 
 				if (e.Has("Bravery")) result += Math.Max((from c in t.team.Enemies where t.p.Distance(c) 
-					<= CAbility.Get("Bravery").range select c).Count() - 1, 0);
+					<= ClassAbility.Get("Bravery").range select c).Count() - 1, 0);
 
 				if (t.abilities.Has("Swarm")) result += (from c in t.team.Friends where c.TypeName == t.TypeName && 
-					c != t && t.p.Distance(c) <= CAbility.Get("Swarm").range select c).Count();
+					c != t && t.p.Distance(c) <= ClassAbility.Get("Swarm").range select c).Count();
 
 				if (e.Has("True Strike")) result += 100;
 				if (e.Has("Melded")) result += 100;

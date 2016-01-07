@@ -38,13 +38,13 @@ public class MyMonoGame : Game
 		BigBase.Instance.Load();
 
 		MainScreen.Instance.LoadTextures();
-        GTile.LoadTextures();
-		LTile.LoadTextures();
+		GlobalTile.LoadTextures();
+		LocalTile.LoadTextures();
 		EffectShape.LoadTextures();
-		CAbility.LoadTextures();
+		ClassAbility.LoadTextures();
 		GlobalShape.LoadTextures();
 		Texture.LoadTextures();
-		CClass.LoadTextures();
+		CharacterClass.LoadTextures();
 		LocalShape.LoadTextures();
 		ItemShape.LoadTextures();
 		Dialog.LoadTextures();
@@ -105,7 +105,7 @@ public class MyMonoGame : Game
 				var mtk = MouseTrigger.GetUnderMouse<MouseTriggerKeyword>();
 				if (mtk != null)
 				{
-					//if (mtk.name == "End Battle") B.EndBattle();
+					if (mtk.name == "End Battle") B.EndBattle();
 				}
 				else B.SetSpotlight();
 			}
@@ -121,7 +121,7 @@ public class MyMonoGame : Game
 			foreach (char key in Stuff.AbilityHotkeys)
 			{
 				int index = Stuff.AbilityHotkeys.IndexOf(key);
-				List<CAbility> abilities = B.current.abilities.list;
+				List<ClassAbility> abilities = B.current.abilities.list;
 				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.current.abilities.Use(abilities[index]);
 			}
 
@@ -146,11 +146,11 @@ public class MyMonoGame : Game
 		}
 		else
 		{
-			if (G.RightMouseButtonClicked) W.player.GoTo();
+			if (G.RightMouseButtonClicked && MouseTrigger.GetUnderMouse<MouseTrigger>() == null) W.player.GoTo();
 			if (G.LeftMouseButtonClicked)
 			{
 				var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
-				if (mti != null)
+				if (mti != null && mti.GetItem() != null)
 				{
 					bool shift = G.keyboardState.IsKeyDown(Keys.LeftShift);
 

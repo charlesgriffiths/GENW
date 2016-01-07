@@ -135,7 +135,7 @@ public class Effects : LocalComponent
 				B.log.Add(t.CommonName, t.LogColor);
 				B.log.Add(" feels depressed.", Color.Pink);
 			}
-			//else if (e.NameIs("Net")) B.Add(new LocalObject(ItemShape.Get("Net")), t.position.value);
+			else if (e.NameIs("Net")) B.Add(new LocalObject(new Item(ItemShape.Get("Net"))), t.p.value);
 			else
 			{
 				B.log.AddLine(t.CommonName, t.LogColor);
@@ -161,7 +161,7 @@ public class Effects : LocalComponent
 			int result = 0;
 
 			if (t.HasAbility("Lone Warrior") && B.ActiveObjects.Where(u => t.p.Distance(u) <=
-				CAbility.Get("Lone Warrior").range).Count() == 0) result += 2;
+				ClassAbility.Get("Lone Warrior").range).Count() == 0) result += 2;
 
 			if (Has("Attention") && t.team.IsFriendTo(Get("Attention").parameter as LocalObject)) result += 1;
 			if (Has("Net")) result -= 2;

@@ -121,11 +121,11 @@ public class GlobalObject
 		position = p;
 	}
 
-	public int Max(Skill skill) {
-		return (from c in party where c.skills != null select c.skills[skill]).Max(); }
+	public int Max(Skill skill) { return (from c in party where c.skills != null select c.skills[skill]).Max(); }
+	public int Sum(Skill skill) { return (from c in party where c.skills != null select c.skills[skill]).Sum(); }
 
-	public bool HasAbility(CAbility a) {	return party.Where(c => c.abilities.Has(a)).Count() > 0; }
-	public bool HasAbility(string abilityName) { return HasAbility(CAbility.Get(abilityName)); }
+	public bool HasAbility(ClassAbility a) { return party.Where(c => c.abilities.Has(a)).Count() > 0; }
+	public bool HasAbility(string abilityName) { return HasAbility(ClassAbility.Get(abilityName)); }
 
 	public float WeightLimit { get { return (from o in party where o.skills != null select 40.0f * (1.0f + 0.25f * o.skills["Strength"])).Sum(); } }
 }

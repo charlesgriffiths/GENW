@@ -1,6 +1,4 @@
-﻿using System;
-
-public class Fatigue : LocalComponent
+﻿public class Fatigue : LocalComponent
 {
 	private float value;
 
@@ -19,9 +17,10 @@ public class Fatigue : LocalComponent
 		}
 	}
 
-	public void Add(float value)
+	public void Add(float f)
 	{
-		value += t.skills != null ? value * 0.1f * Math.Max(10 - t.skills["Survival"], 0) : value;
+		//value += t.skills != null ? f * 0.1f * Math.Max(10 - t.skills["Survival"], 0) : f;
+		value += f;
 		Update();
 	}
 }

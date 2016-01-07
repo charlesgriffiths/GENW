@@ -156,14 +156,8 @@ public partial class Battlefield
 	private List<ZPoint> GreenZone { get { return (from p in TotalFramedZone where !p.onFrontier select p.data).Cast<ZPoint>().ToList(); } }
 	private List<ZPoint> YellowZone { get { return (from p in TotalFramedZone where p.onFrontier select p.data).Cast<ZPoint>().ToList(); } }
 
-	private List<ZPoint> ReachableCreaturePositions
-	{
-		get
-		{
-			return (from c in ActiveObjects where !c.team.isInParty && /*c.IsAdjacentTo(GreenZone)*/
-					c.p.IsReachableFrom(GreenZone) select c.p.value).Cast<ZPoint>().ToList();
-		}
-	}
+	private List<ZPoint> ReachableCreaturePositions { get {
+		return (from c in ActiveObjects where !c.team.isInParty && c.p.IsReachableFrom(GreenZone) select c.p.value).Cast<ZPoint>().ToList(); } }
 
 	public void GoTo()
 	{

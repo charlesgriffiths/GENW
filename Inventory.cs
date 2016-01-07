@@ -166,14 +166,14 @@ public class Inventory
 		}
 	}
 
-	public Dictionary<CComponent, int> CComponents
+	public Dictionary<CraftingComponent, int> CComponents
 	{
 		get
 		{
-			Dictionary<CComponent, int> result = new Dictionary<CComponent, int>();
+			Dictionary<CraftingComponent, int> result = new Dictionary<CraftingComponent, int>();
 			foreach (Item i in Items)
 				for (int n = 0; n < i.numberOfStacks; n++)
-					foreach(var t in i.data.cComponents)
+					foreach(var t in i.data.components)
 					{
 						if (result.ContainsKey(t.Item1)) result[t.Item1] += t.Item2;
 						else result.Add(t.Item1, t.Item2);
