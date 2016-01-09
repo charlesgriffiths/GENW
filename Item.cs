@@ -188,10 +188,12 @@ public class Item
 {
 	public ItemShape data;
 	public int numberOfStacks;
+	public float cooldown;
 
 	public Item(ItemShape shape, int n) {
 		data = shape;
-		numberOfStacks = n;	}
+		numberOfStacks = n;
+		cooldown = 0; }
 
 	public Item(ItemShape shape) : this(shape, 1) { }
 	public Item(string shapeName, int n) : this(ItemShape.Get(shapeName), n) { }

@@ -37,6 +37,8 @@ public class EffectShape : NamedObject
 		screen.DrawString(M.fonts.verdanaBold, name, new ZPoint(3, 3), Color.White);
 		screen.DrawString(M.fonts.small, description, new ZPoint(3, screen.offset + 8), Color.White, screen.size.x - 3);
 	}
+
+	public static EffectShape Get(string name) { return BB.effects.Get(name); }
 }
 
 public class Effect
@@ -75,7 +77,8 @@ public class Effects : LocalComponent
 		data = new List<Effect>();
 	}
 
-	public bool Has(string name) { return data.Where(e => e.data.name == name).Count() > 0; }
+	public bool Has(EffectShape shape) { return data.Where(e => e.data == shape).Count() > 0; }
+	public bool Has(string name) { return Has(EffectShape.Get(name)); }
 	public Effect Get(string name) { return data.Where(e => e.data.name == name).Single(); }
 
 	public void Add(string name, float time) { Add(name, time, null); }

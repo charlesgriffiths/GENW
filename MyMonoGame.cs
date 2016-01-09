@@ -113,26 +113,46 @@ public class MyMonoGame : Game
 
 			if (KeyPressed(Keys.Space)) B.current.initiative.Wait();
 
-			else if (KeyPressed(Keys.Right)) B.current.attack.MoveOrAttack(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Up)) B.current.attack.MoveOrAttack(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Left)) B.current.attack.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
-			else if (KeyPressed(Keys.Down)) B.current.attack.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Right)) B.current.movement.MoveOrAttack(ZPoint.Direction.Right, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Up)) B.current.movement.MoveOrAttack(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Left)) B.current.movement.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
+			else if (KeyPressed(Keys.Down)) B.current.movement.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
 
-			foreach (char key in Stuff.AbilityHotkeys)
+			if (B.current.abilities != null)
 			{
-				int index = Stuff.AbilityHotkeys.IndexOf(key);
-				List<ClassAbility> abilities = B.current.abilities.list;
-				if (KeyPressed(Stuff.GetKey(key)) && index < abilities.Count) B.current.abilities.Use(abilities[index]);
+				foreach (char key in Stuff.AbilityHotkeys)
+				{
+					int index = Stuff.AbilityHotkeys.IndexOf(key);
+					Abilities A = B.current.abilities;
+					Experience XP = B.current.xp;
+
+					if (KeyPressed(Stuff.GetKey(key)) && index < A.list.Count)
+					{
+						ClassAbility a = A.list[index];
+						if (A.cooldowns[a] == 0)
+						{
+							if (A.Has(a)) A.Use(a);
+							else if (XP.AbilityPoints > 0) XP.learned.Add(a);
+						}
+					}
+				}
 			}
 
-			foreach(char key in Stuff.ItemHotkeys)
+			if (B.current.inventory != null)
 			{
-				int index = Stuff.ItemHotkeys.IndexOf(key);
-				LocalObject lc = B.current;
-				if (lc.inventory != null)
+				foreach (char key in Stuff.ItemHotkeys)
 				{
-					Item item = lc.inventory[index];
-					if (KeyPressed(Stuff.GetKey(key)) && item != null && item.data.ability != null)	lc.abilities.Use(item.data.ability);
+					int index = Stuff.ItemHotkeys.IndexOf(key);
+					LocalObject lc = B.current;
+					if (lc.inventory != null)
+					{
+						Item item = lc.inventory[index];
+						if (KeyPressed(Stuff.GetKey(key)) && item != null && item.data.ability != null && item.cooldown == 0)
+						{
+							item.cooldown += item.data.ability.cooldownTime;
+							lc.abilities.Use(item.data.ability);
+						}
+					}
 				}
 			}
 

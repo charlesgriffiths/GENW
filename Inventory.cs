@@ -135,7 +135,8 @@ public class Inventory
 				if (data[i].numberOfStacks > 1)
 					screen.DrawStringWithShading(M.fonts.small, data[i].numberOfStacks.ToString(), p + new ZPoint(24, 18), Color.White);
 				if (G.battle && localOwner == B.current && name == "" && data[i].data.ability != null)
-					screen.DrawStringWithShading(M.fonts.small, Stuff.ItemHotkeys[i].ToString(), p, Color.White);
+					screen.DrawStringWithShading(M.fonts.small, data[i].cooldown > 0 ? "(" + (int)data[i].cooldown + ")" 
+						: Stuff.ItemHotkeys[i].ToString(), p, Color.White);
 			}
 		}
 		
@@ -220,6 +221,15 @@ public class Inventory
 			if (localOwner == null) return 1.0f;
 			else if (localOwner.skills == null) return 1.0f;
 			else return (float)(1 + 0.1 * Weight * Math.Exp(-0.25 * localOwner.skills["Strength"]));
+		}
+	}
+
+	public void UpdateCooldowns(float time)
+	{
+		foreach (Item item in Items)
+		{
+			item.cooldown -= time;
+			if (item.cooldown < 0) item.cooldown = 0;
 		}
 	}
 }

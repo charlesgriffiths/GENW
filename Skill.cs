@@ -23,9 +23,8 @@ public class Skills : LocalComponent
 	{
 		get
 		{
-			return (int)(t.race.bonus.skills[skill] +
-				t.origin.bonus.skills[skill] +
-				t.background.bonus.skills[skill]);
+			return (int)(t.race.bonus.skills[skill] + t.origin.bonus.skills[skill] + t.background.bonus.skills[skill] +
+				(t.xp != null ? t.cclass.bonus.skills[skill] * t.xp.Level : 0));
 		}
 	}
 

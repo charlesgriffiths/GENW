@@ -22,6 +22,7 @@ public partial class Player : GlobalObject
 			Screen icon = new Screen(position + new ZPoint(0, vOffset), new ZPoint(32, 32));
 			icon.Fill(Stuff.MyColor("Very Dark Grey"));
 			icon.Draw(c.GetTexture, ZPoint.Zero);
+			if (c.xp != null) icon.DrawRectangle(new ZPoint(-2, 32), new ZPoint(2, (int)(-32 * ((float)(c.xp.value % c.xp.Max)/c.xp.Max))), Color.Yellow);
 			MouseTriggerObject<LocalObject>.Set(c, icon.position, icon.size);
 
 			float hpMissing = 1 - (float)c.hp.value / c.hp.Max;

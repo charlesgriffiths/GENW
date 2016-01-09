@@ -17,6 +17,7 @@ public partial class Battlefield
 		targetTexture = M.game.Content.Load<Texture2D>("other/target");
 		damageIcon = M.game.Content.Load<Texture2D>("other/damage");
 		armorIcon = M.game.Content.Load<Texture2D>("other/armor");
+		plusIcon = M.game.Content.Load<Texture2D>("other/plus");
 	}
 
 	private static void Draw(Texture2D texture, RPoint rPosition, Color color)

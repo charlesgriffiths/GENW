@@ -445,11 +445,12 @@ public partial class Abilities : LocalComponent
 		}
 	}
 
-	private void PayAbilityCost(Ability ability)
+	private void PayAbilityCost(Ability a)
 	{
 		t.RemoveEffect("Melded", "Hidden", "Fake Death");
 
-		t.hp.AddStamina(-ability.cost, false);
+		t.hp.AddStamina(-a.cost, false);
+		if (a is ClassAbility) cooldowns[a as ClassAbility] += a.cooldownTime;
 
 		B.log.AddLine(t.CommonName, t.LogColor);
 	}

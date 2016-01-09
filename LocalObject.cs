@@ -39,6 +39,7 @@ public class LocalObject
 	public Origin origin;
 	public Background background;
 	public Skills skills;
+	public Experience xp;
 
 	public string uniqueName = "";
 
@@ -46,7 +47,7 @@ public class LocalObject
 	{
 		get
 		{
-			if (cclass != null) return race.name + " " + cclass.name;
+			if (cclass != null) return race.name + " " + cclass.name + ", " + xp.Level;
 			else if (item != null) return item.data.name;
 			else return shape.data.name;
 		}
@@ -148,7 +149,7 @@ public class LocalObject
 		}
 	}
 
-	public LocalObject(string _uniqueName, Race _race, CharacterClass _cclass, Background _background, Origin _origin)
+	public LocalObject(string _uniqueName, Race _race, CharacterClass _cclass, Background _background, Origin _origin, int experience)
 	{
 		uniqueName = _uniqueName;
 		race = _race;
@@ -166,5 +167,7 @@ public class LocalObject
 		abilities = new Abilities(this);
 		fatigue = new Fatigue(this);
 		eating = new Eating(this);
+
+		xp = new Experience(experience, this);
 	}
 }

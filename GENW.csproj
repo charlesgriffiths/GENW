@@ -53,6 +53,7 @@
     <Compile Include="Effect.cs" />
     <Compile Include="Attack.cs" />
     <Compile Include="Defence.cs" />
+    <Compile Include="Experience.cs" />
     <Compile Include="LocalDrawing.cs" />
     <Compile Include="Eating.cs" />
     <Compile Include="Fatigue.cs" />
@@ -106,7 +107,7 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\WindowsGL\Debug\Data\Abilities.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\abilities.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\backgrounds.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\Battlefields\Custom Mountain.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\ccomponents.xml">

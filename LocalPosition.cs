@@ -74,7 +74,7 @@ public class LocalPosition : LocalComponent
 	public void DoDamage(LocalObject u, int damage, bool pure)
 	{
 		bool pastLife = u.hp.value > 0;
-		int finalDamage = pure || t.HasEffect("Prodigious Precision") ? damage : Math.Max(damage - u.hp.Armor, 0);
+		int finalDamage = pure || t.HasAbility("Prodigious Precision") ? damage : Math.Max(damage - u.hp.Armor, 0);
 
 		u.hp.Add(-finalDamage, false);
 

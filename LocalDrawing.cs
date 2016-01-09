@@ -31,7 +31,7 @@ public class LocalDrawing : LocalComponent
 			else if (t.HasEffect("Power Strike")) draw("timeEffect");
 			else if (t.HasEffect("Blind", "Blindsight")) draw("visionEffect");
 			else if (t.HasEffect("Destined to Die", "Success Prediction Failed", "Marked Prey")) draw("negativeEffect");
-			else if (t.HasEffect("Destined to Succeed", "Death Prediction Failed", "Faked Death", "True Strike")) draw("positiveEffect");
+			else if (t.HasEffect("Destined to Succeed", "Death Prediction Failed", "Fake Death", "True Strike")) draw("positiveEffect");
 			else if (t.HasEffect("Annoyed", "Attention")) draw("aggroEffect");
 		}
 	}

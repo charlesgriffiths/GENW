@@ -16,7 +16,7 @@ public partial class Battlefield
 	private GlobalObject global;
 
 	private Texture2D arrowTexture, targetTexture;
-	public Texture2D damageIcon, armorIcon;
+	public Texture2D damageIcon, armorIcon, plusIcon;
 
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
@@ -110,21 +110,22 @@ public partial class Battlefield
 		objects.Add(o);
 	}
 
-	public void StartBattle(GlobalObject g)
+	public void StartBattle(GlobalObject _global)
 	{
-		global = g;
-		GlobalTile gTile = World.Instance.map[g.position];
-		string battlefieldName;
-		if (gTile.type.name == "mountainPass") battlefieldName = "Custom Mountain";
-		else battlefieldName = "Custom Mountain";
-		Load(battlefieldName);
+		global = _global;
+		//GlobalTile gTile = World.Instance.map[g.position];
+		//string battlefieldName;
+		//if (gTile.type.name == "mountainPass") battlefieldName = "Custom Mountain";
+		//else battlefieldName = "Custom Mountain";
+		//Load(battlefieldName);
+		Generate();
 
 		objects.Clear();
 		foreach (LocalObject c in P.party) Add(c, null, true, false);
-		foreach (LocalObject c in g.party) Add(c, null, false, true);
+		foreach (LocalObject c in global.party) Add(c, null, false, true);
 
 		for (int i = 0; i <= Size.x * Size.y / 10; i++) Add(new LocalObject(LocalShape.Get("Tree")));
-		for (int i = 0; i * 6 < g.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", g.inventory));
+		for (int i = 0; i * 6 < global.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", global.inventory));
 		
 		foreach (LocalObject l in objects)
 		{
@@ -138,6 +139,20 @@ public partial class Battlefield
 		current = next;
 		spotlight = current;
 		MyGame.Instance.battle = true;
+	}
+
+	private void Generate()
+	{
+		palette = BigBase.Instance.palettes.data.Random();
+
+		int width = 20;
+		int height = 10;
+		data = new char[width, height];
+
+		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++)
+			{
+				data[i, j] = palette.data.RandomKey();
+			}
 	}
 
 	private void Load(string name)
@@ -267,8 +282,5 @@ public partial class Battlefield
 		}
 	}
 
-	public void RemoveItem(Item item)
-	{
-		objects.Remove(Items.Where(i => i.item == item).Single());
-	}
+	public void RemoveItem(Item item) { objects.Remove(Items.Where(i => i.item == item).Single()); }
 }

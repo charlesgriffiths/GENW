@@ -21,8 +21,8 @@ public class Attack : LocalComponent
 			{
 				result += e.BothAD;
 
-				if (e.Has("Bravery")) result += Math.Max((from c in t.team.Enemies where t.p.Distance(c) 
-					<= ClassAbility.Get("Bravery").range select c).Count() - 1, 0);
+				if (t.HasAbility("Bravery")) result += (from c in t.team.Enemies where t.p.Distance(c) 
+					<= ClassAbility.Get("Bravery").range select c).Count();
 
 				if (t.abilities.Has("Swarm")) result += (from c in t.team.Friends where c.TypeName == t.TypeName && 
 					c != t && t.p.Distance(c) <= ClassAbility.Get("Swarm").range select c).Count();
@@ -85,7 +85,7 @@ public class Attack : LocalComponent
 		ZPoint.Direction direction = (u.p.value - t.p.value).GetDirection();
 
 		if (u.HasEffect("Sleeping")) hitChance = 100;
-		if (t.inventory != null && t.inventory.HasAbility("Chopping") && u.CommonName == "Tree") damage += 3;
+		if (t.inventory != null && t.inventory.HasAbility("Chopping") && u.shape != null && u.shape.data.corpse.name == "Stump") damage += 3;
 		if (t.HasAbility("Backstab") && t.p.Distance(u) == 1)
 		{
 			LocalObject behind = B.Get(t.p.value.Shift(direction, 2));
@@ -143,14 +143,5 @@ public class Attack : LocalComponent
 		u.RemoveEffect("Sleeping");
 
 		t.initiative.PassTurn(Time);
-	}
-
-	public void MoveOrAttack(ZPoint.Direction d, bool control)
-	{
-		Log.Assert(t.movement != null, "kAttack.MoveOrAttack");
-		LocalObject u = B.Get(t.p.value.Shift(d));
-
-		if (u != null && u.hp != null) Execute(u);
-		else t.movement.Move(d, control);
 	}
 }

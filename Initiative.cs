@@ -68,6 +68,9 @@ public class Initiative : LocalComponent
 	{
 		Log.Assert(time > 0, "kInitiative.ContinueTurn");
 		Set(value - time, time, true);
+
+		if (t.abilities != null) t.abilities.UpdateCooldowns(time);
+		if (t.inventory != null) t.inventory.UpdateCooldowns(time);
 	}
 
 	public void PassTurn(float time)

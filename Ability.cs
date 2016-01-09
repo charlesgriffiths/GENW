@@ -118,13 +118,19 @@ public class ClassAbility : Ability
 
 public partial class Abilities : LocalComponent
 {
-	public Abilities(LocalObject o) : base(o) { }
+	public Dictionary<ClassAbility, float> cooldowns;
+
+	public Abilities(LocalObject o) : base(o)
+	{
+		cooldowns = new Dictionary<ClassAbility, float>();
+		foreach (ClassAbility a in list) cooldowns.Add(a, 0);
+	}
 
 	public List<ClassAbility> list
 	{
 		get
 		{
-			List<ClassAbility> result = new List<ClassAbility>();
+			var result = new List<ClassAbility>();
 			if (t.shape != null) foreach (var a in t.shape.data.abilities) result.Add(a);
 			if (t.race != null) result.Add(t.race.ability);
 			if (t.cclass != null) foreach (var a in t.cclass.abilities) result.Add(a);
@@ -132,7 +138,16 @@ public partial class Abilities : LocalComponent
 		}
 	}
 
-	public bool Has(ClassAbility ability) { return ability == null ? true : list.Contains(ability); }
+	public bool Has(ClassAbility ability)
+	{
+		if (ability == null) return true;
+		else
+		{
+			bool isLearned = t.xp == null ? true : t.xp.learned.Contains(ability);
+			return list.Contains(ability) && isLearned;
+		}
+	}
+
 	public bool Has(string name) { return Has(ClassAbility.Get(name)); }
 
 	public void Draw(Screen screen, ZPoint position)
@@ -147,17 +162,31 @@ public partial class Abilities : LocalComponent
 		foreach (ClassAbility a in list)
 		{
 			bool mouseOn = mtk != null && mtk.parameter == i.ToString();
+			bool has = Has(a);
+			bool levelup = t.xp != null && t.xp.AbilityPoints > 0;
+			bool passive = a.targetType == Ability.TargetType.Passive;
 
-			M.Draw(a.texture, aPosition(i), mouseOn ? a.color : Color.White);
+			if (has || levelup)
+			{
+				M.Draw(a.texture, aPosition(i), mouseOn ? a.color : Color.White);
+				if (passive || cooldowns[a] > 0) M.DrawRectangle(aPosition(i), aSize, new Color(0, 0, 0, 0.7f));
+				if (t == B.current && !passive) M.DrawStringWithShading(M.fonts.small, 
+					cooldowns[a] > 0 ? "(" + (int)cooldowns[a] + ")" : Stuff.AbilityHotkeys[i].ToString(),	aPosition(i), Color.White);
+				if (mouseOn) a.DrawDescription(screen.position + position + new ZPoint(24, 56));
+			}
 
-			if (a.targetType == Ability.TargetType.Passive) M.DrawRectangle(aPosition(i), aSize, new Color(0, 0, 0, 0.7f));
-
-			else if (t == B.current) M.DrawStringWithShading(M.fonts.small, Stuff.AbilityHotkeys[i].ToString(),
-				aPosition(i)/* + new ZPoint(37, 33)*/, Color.White);
-
-			if (mouseOn) a.DrawDescription(screen.position + position + new ZPoint(24, 56));
+			if (!has && levelup) M.Draw(B.plusIcon, aPosition(i));
 
 			i++;
+		}
+	}
+
+	public void UpdateCooldowns(float time)
+	{
+		foreach (var a in list)
+		{
+			cooldowns[a] -= time;
+			if (cooldowns[a] < 0) cooldowns[a] = 0;
 		}
 	}
 }

@@ -43,4 +43,20 @@ public class Movement : LocalComponent
 		}
 		else t.initiative.PassTurn(Time);
 	}
+
+	public void MoveOrAttack(ZPoint.Direction d, bool control)
+	{
+		LocalObject o = B.Get(t.p.value.Shift(d));
+
+		if (o != null)
+		{
+			if (o.shape != null && o.shape.data.name == "Chest" && t.skills != null && t.skills["Mechanisms"] > 0)
+			{
+				foreach (Item item in o.inventory.Items) B.Add(new LocalObject(item), o.p.value);
+				B.Remove(o);
+			}
+			else if (o.hp != null && t.attack != null) t.attack.Execute(o);
+		}
+		else t.movement.Move(d, control);
+	}
 }

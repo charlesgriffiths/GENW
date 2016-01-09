@@ -165,7 +165,7 @@ public partial class Battlefield
 		if ((melee && (move || attack)) || (move && !attack))
 		{
 			ZPoint start = current.p.value;
-			foreach (ZPoint.Direction d in Path(start, Mouse)) current.attack.MoveOrAttack(d, true);
+			foreach (ZPoint.Direction d in Path(start, Mouse)) current.movement.MoveOrAttack(d, true);
 		}
 		else if (IsReachable(Mouse, current.p.value, current.p.Range))
 			current.attack.Execute(Get(Mouse));

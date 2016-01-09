@@ -27,7 +27,7 @@ public partial class Player : GlobalObject
 		inventory.globalOwner = this;
 
 		LocalObject c1 = new LocalObject(shape.name, Race.Get("Morlock"), CharacterClass.Get("Alchemist"), 
-			Background.Get("Engineer"), Origin.Get("Iron Alliance"));
+			Background.Get("Engineer"), Origin.Get("Iron Alliance"), 320);
 		c1.inventory.Add("Staff");
 		party.Add(c1);
 
