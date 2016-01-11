@@ -54,6 +54,7 @@
     <Compile Include="Attack.cs" />
     <Compile Include="Defence.cs" />
     <Compile Include="Experience.cs" />
+    <Compile Include="Generation.cs" />
     <Compile Include="LocalDrawing.cs" />
     <Compile Include="Eating.cs" />
     <Compile Include="Fatigue.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Movement.cs" />
     <Compile Include="LocalPosition.cs" />
     <Compile Include="LocalShape.cs" />
+    <Compile Include="Noise.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="LocalObject.cs" />
     <Compile Include="GlobalDraw.cs" />

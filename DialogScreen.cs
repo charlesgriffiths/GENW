@@ -61,22 +61,31 @@ public class DialogScreen
 
 	public void Press(DialogResponse r)
 	{
-		string nextNode = r.jump;
-
-		if (r.name == "FIGHT") World.Instance.battlefield.StartBattle(global);
-		else if (r.name == "TRADE") P.barter = global;
+		if (r.action == "FIGHT") World.Instance.battlefield.StartBattle(global);
+		else if (r.action == "TRADE") P.barter = global;
 
 		if (dialog.name == "The First Dialog")
 		{
-			if (r.name == "Boo-Boo") P.party.Add(new LocalObject(LocalShape.Get("Krokar"), "Boo-Boo"));
-			else if (r.name == "escherian shard") { }
+			if (r.action == "Boo-Boo") P.party.Add(new LocalObject(LocalShape.Get("Krokar"), "Boo-Boo"));
+			else if (r.action == "escherian shard") { }
 		}
-		else if (dialog.name == "Wild Dogs Encounter")
+
+		/*else if (dialog.name == "Wild Dogs Encounter")
 		{
 			int threshold = global.Name == "Wild Dogs Large Pack" ? 6 : 1;
 			if (r.name == "condition1") nextNode = P.party.Count <= threshold ? "1positive" : "1negative";
 			else if (r.name == "condition2") nextNode = P.party.Count <= threshold + 1 ? "2positive" : "2negative";
-		}
+		}*/
+
+		string nextNode = r.jump;
+		bool condition = false;
+
+		int advantage = global.party.Count - P.party.Count;
+
+		if (r.condition == "STRONGER") condition = advantage >= 2;
+		else if (r.condition == "SAMESTRENGTH") condition = advantage < 2 && advantage > -2;
+
+		if (r.condition != "") nextNode = nextNode + "_" + condition.ToString();
 
 		if (nextNode != "") dialogNode = dialog.nodes[nextNode];
 		else MyGame.Instance.dialog = false;

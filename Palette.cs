@@ -25,4 +25,6 @@ public class Palette : NamedObject
 			node = node.NextSibling;
 		}
 	}
+
+	public static Palette Get(string name) { return BB.palettes.Get(name); }
 }

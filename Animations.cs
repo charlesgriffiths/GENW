@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 class RMove : Animation
@@ -80,7 +81,7 @@ class TextureAnimation : Animation
 
 class TextAnimation : Animation
 {
-	Vector2 position;
+	Vector2 position, shift;
 	Texture2D texture;
 	SpriteFont font;
 	Color color;
@@ -98,13 +99,17 @@ class TextAnimation : Animation
 
 		maxFrameTime = (int)(seconds * 60.0f);
 		frameTime = 0;
+
+		Random R = World.Instance.random;
+		shift.X = R.Next(20) - 10;
+		shift.Y = R.Next(20) - 10;
 	}
 
 	public override void Draw()
 	{
 		MainScreen m = MainScreen.Instance;
 		if (texture != null) m.Draw(texture, position);
-		m.DrawString(font, text, new ZPoint(position) + new ZPoint(10, 10 + (up ? -1 : 1) * (int)(frameTime * 0.35f)), color);
+		m.DrawString(font, text, new ZPoint(position + shift) + new ZPoint(10, 10 + (up ? -1 : 1) * (int)(frameTime * 0.35f)), color);
 		base.Draw();
 	}
 }

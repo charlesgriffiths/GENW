@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
@@ -108,66 +107,6 @@ public partial class Battlefield
 		}
 
 		objects.Add(o);
-	}
-
-	public void StartBattle(GlobalObject _global)
-	{
-		global = _global;
-		//GlobalTile gTile = World.Instance.map[g.position];
-		//string battlefieldName;
-		//if (gTile.type.name == "mountainPass") battlefieldName = "Custom Mountain";
-		//else battlefieldName = "Custom Mountain";
-		//Load(battlefieldName);
-		Generate();
-
-		objects.Clear();
-		foreach (LocalObject c in P.party) Add(c, null, true, false);
-		foreach (LocalObject c in global.party) Add(c, null, false, true);
-
-		for (int i = 0; i <= Size.x * Size.y / 10; i++) Add(new LocalObject(LocalShape.Get("Tree")));
-		for (int i = 0; i * 6 < global.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", global.inventory));
-		
-		foreach (LocalObject l in objects)
-		{
-			l.p.Set(RandomFreeTile(), 0.01f, false);
-			if (l.initiative != null) l.initiative.Set(l.uniqueName == P.uniqueName ? 0.1f : -R.Next(100) / 100.0f, 0.01f, false);
-		}
-
-		LocalObject next = NextObject;
-		if (next.initiative.IsAIControlled) next.initiative.Run();
-
-		current = next;
-		spotlight = current;
-		MyGame.Instance.battle = true;
-	}
-
-	private void Generate()
-	{
-		palette = BigBase.Instance.palettes.data.Random();
-
-		int width = 20;
-		int height = 10;
-		data = new char[width, height];
-
-		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++)
-			{
-				data[i, j] = palette.data.RandomKey();
-			}
-	}
-
-	private void Load(string name)
-	{
-		XmlNode xnode = MyXml.FirstChild("Data/Battlefields/" + name + ".xml");
-		palette = BigBase.Instance.palettes.Get(MyXml.GetString(xnode, "palette"));
-
-		string text = xnode.InnerText;
-		char[] delimiters = new char[] { '\r', '\n', ' ' };
-		string[] dataLines = text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-		int width = dataLines[0].Length;
-		int height = dataLines.Length;
-		data = new char[width, height];
-
-		for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) data[i, j] = dataLines[j][i];
 	}
 
 	public void SetSpotlight()	{

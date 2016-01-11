@@ -5,13 +5,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 public class DialogResponse
 {
-	public string text = "", name = "", jump = "";
+	public string text, action, jump, condition;
 
 	public DialogResponse(XmlNode xnode)
 	{
 		text = MyXml.GetString(xnode, "text");
-		name = MyXml.GetString(xnode, "name");
+		action = MyXml.GetString(xnode, "action");
 		jump = MyXml.GetString(xnode, "jump");
+		condition = MyXml.GetString(xnode, "condition");
 	}
 }
 

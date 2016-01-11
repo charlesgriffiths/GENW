@@ -21,7 +21,7 @@ public class HPComponent : LocalComponent
 		{
 			int result = t.shape != null ? t.shape.data.maxHP : 10;
 			if (t.inventory != null) result += t.inventory.Sum(b => b.hp);
-			if (t.skills != null) result += t.skills["Endurance"];
+			if (t.skills != null) result += 4 * t.skills["Endurance"];
 			return result;
 		}
 	}

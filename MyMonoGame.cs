@@ -107,7 +107,7 @@ public class MyMonoGame : Game
 				{
 					if (mtk.name == "End Battle") B.EndBattle();
 				}
-				else B.SetSpotlight();
+				else { B.SetSpotlight(); B.Step(B.Mouse); }
 			}
 			if (G.RightMouseButtonClicked) B.GoTo();
 
@@ -117,6 +117,12 @@ public class MyMonoGame : Game
 			else if (KeyPressed(Keys.Up)) B.current.movement.MoveOrAttack(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Left)) B.current.movement.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Down)) B.current.movement.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
+
+			else if (G.keyboardState.IsKeyDown(Keys.F) || KeyPressed(Keys.G)) B.Step();
+			else if (KeyPressed(Keys.H)) B.FillWithObjects();
+			else if (KeyPressed(Keys.J)) B.FillRandom();
+			else if (KeyPressed(Keys.K)) B.temperature -= 0.1;
+			else if (KeyPressed(Keys.L)) B.temperature += 0.1;
 
 			if (B.current.abilities != null)
 			{
@@ -199,7 +205,8 @@ public class MyMonoGame : Game
 				var mti = MouseTrigger.GetUnderMouse<MouseTriggerInventory>();
 				var mtc = MouseTrigger.GetUnderMouse<MouseTriggerObject<LocalObject>>();
 
-				if (mti != null && G.inventory == mti.inventory && G.inventory[G.cell] == null && mti.GetItem() != null && mti.GetItem().data != G.dndItem.data)
+				if (mti != null && G.inventory == mti.inventory && G.inventory[G.cell] == null && 
+					mti.GetItem() != null && mti.GetItem().data != G.dndItem.data)
 				{ // поменять местами 2 предмета
 					G.inventory.Add(new Item(mti.GetItem().data), G.cell);
 					G.inventory[G.cell].numberOfStacks = mti.GetItem().numberOfStacks;

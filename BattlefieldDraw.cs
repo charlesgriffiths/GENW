@@ -165,6 +165,8 @@ public partial class Battlefield
 		spotlight.p.DrawInfo(new ZPoint(M.size.x - 288 - 8, 8));
 		if (MyGame.Instance.combatLog) log.Draw();
 		DrawEndButton();
+
+		M.DrawString(M.fonts.ambient, "T = " + String.Format("{0:0.0}", temperature), new ZPoint(10, 10), Color.Red);
 	}
 }
 
