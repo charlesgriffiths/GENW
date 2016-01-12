@@ -4,10 +4,9 @@
 	public static BigBase Instance { get { return instance; } }
 	private BigBase() {}
 
+	public GeneralBase<NamedTexture> namedTextures = new GeneralBase<NamedTexture>();
 	public GeneralBase<GlobalTileType> globalTileTypes = new GeneralBase<GlobalTileType>();
 	public GeneralBase<LocalTileType> localTileTypes = new GeneralBase<LocalTileType>();
-	public GeneralBase<LocalTile> localTiles = new GeneralBase<LocalTile>();
-	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
 
 	public GeneralBase<Skill> skills = new GeneralBase<Skill>();
 	public GeneralBase<EffectShape> effects = new GeneralBase<EffectShape>();
@@ -19,7 +18,6 @@
 	public GeneralBase<GlobalShape> gShapes = new GeneralBase<GlobalShape>();
 	public GeneralBase<Dialog> dialogs = new GeneralBase<Dialog>();
 
-	public GeneralBase<Texture> textures = new GeneralBase<Texture>();
 	public GeneralBase<LocalType> types = new GeneralBase<LocalType>();
 	public GeneralBase<CreatureType> creatureTypes = new GeneralBase<CreatureType>();
 	public GeneralBase<Race> races = new GeneralBase<Race>();
@@ -28,15 +26,16 @@
 	public GeneralBase<ItemShape> items = new GeneralBase<ItemShape>();
 	public GeneralBase<GlobalTile> globalTiles = new GeneralBase<GlobalTile>();
 	public GeneralBase<LocalShape> shapes = new GeneralBase<LocalShape>();
+	public GeneralBase<LocalTile> localTiles = new GeneralBase<LocalTile>();
+	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
 
 	public void Load()
 	{
 		Log.Write("loading all databases... ");
 
+		namedTextures.Load("textures.xml");
 		globalTileTypes.Load("globalTileTypes.xml");
 		localTileTypes.Load("localTileTypes.xml");
-		localTiles.Load("localTiles.xml");
-		palettes.Load("palettes.xml");
 
 		skills.Load("skills.xml");
 		effects.Load("effects.xml");
@@ -48,16 +47,16 @@
 		dialogs.Load("dialogs.xml");
 		gShapes.Load("gObjects.xml");
 
-		textures.Load("textures.xml");
 		types.Load("types.xml");
 		creatureTypes.Load("creatureTypes.xml");
-		
 		races.Load("races.xml");
 		classes.Load("classes.xml");
 		components.Load("ccomponents.xml");
 		items.Load("items.xml");
 		globalTiles.Load("globalTiles.xml");
 		shapes.Load("localShapes.xml");
+		localTiles.Load("localTiles.xml");
+		palettes.Load("palettes.xml");
 
 		Log.WriteLine("OK");
 	}

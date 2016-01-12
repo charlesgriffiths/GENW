@@ -60,6 +60,7 @@
     <Compile Include="Fatigue.cs" />
     <Compile Include="HPComponent.cs" />
     <Compile Include="Initiative.cs" />
+    <Compile Include="LocalTile.cs" />
     <Compile Include="Movement.cs" />
     <Compile Include="LocalPosition.cs" />
     <Compile Include="LocalShape.cs" />
@@ -90,7 +91,7 @@
     <Compile Include="Skill.cs" />
     <Compile Include="Stuff.cs" />
     <Compile Include="Texture.cs" />
-    <Compile Include="Tile.cs" />
+    <Compile Include="GlobalTile.cs" />
     <Compile Include="UseAbility.cs" />
     <Compile Include="World.cs" />
     <Compile Include="ZPoint.cs" />
@@ -135,7 +136,9 @@
     <Content Include="bin\WindowsGL\Debug\Data\items.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="bin\WindowsGL\Debug\Data\localTiles.xml" />
+    <Content Include="bin\WindowsGL\Debug\Data\localTiles.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="bin\WindowsGL\Debug\Data\localTileTypes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\localShapes.xml" />
     <Content Include="bin\WindowsGL\Debug\Data\origins.xml" />

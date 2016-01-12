@@ -57,12 +57,12 @@ public class World
 		Log.WriteLine("OK");
 	}
 
-	public void LoadTextures()
+	/*public void LoadTextures()
 	{
 		map.LoadTextures();
 		player.LoadTextures();
 		battlefield.LoadTextures();
-	}
+	}*/
 
 	public void Draw()
 	{

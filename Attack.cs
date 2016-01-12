@@ -67,7 +67,7 @@ public class Attack : LocalComponent
 			B.combatAnimations.Add(new RMove(t.p.r, v, 0.5f * gameTime));
 			B.combatAnimations.Add(new RMove(t.p.r, -v, 0.5f * gameTime));
 		}
-		else B.combatAnimations.Add(new TextureAnimation("arrow", t.p.GC, Battlefield.GC(p), gameTime));
+		else B.combatAnimations.Add(new TextureAnimation(NamedTexture.Get("local/arrow"), t.p.GC, Battlefield.GC(p), gameTime));
 	}
 
 	public int HitChance(LocalObject u) {

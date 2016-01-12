@@ -3,36 +3,34 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
-public class Texture : NamedObject
+public class Texture
 {
 	public List<Texture2D> data = new List<Texture2D>();
-	public int numberOfVariations;
-
-	public static Texture2D Get(string name) { return BigBase.Instance.textures.Get(name).data[0]; }
-
-	public override void Load(XmlNode xnode)
-	{
-		name = MyXml.GetString(xnode, "name");
-		numberOfVariations = MyXml.GetInt(xnode, "variations", 1);
-	}
 
 	public Texture2D Single() { return data.Single();	}
-	public Texture2D Random() { return data[World.Instance.random.Next(numberOfVariations)]; }
-	public Texture2D this[int k] { get {
-			Log.Assert(k >= 0 && k < numberOfVariations, "Texture index out of boundaries");
-			return data[k]; } }
+	public Texture2D Random() { return data.Random(); }//{ return data[World.Instance.random.Next(data.Count)]; }
+	public Texture2D this[int k] { get { return data[k]; } }
 
-	public static void LoadTextures() {
-		foreach (Texture t in BigBase.Instance.textures.data)
-			for (int i = 0; i < t.numberOfVariations; i++)
-				t.LoadImages("local/" + t.name); }
-
-	public void LoadImages(string path)
+	public void LoadImages(string path, int variations)
 	{
-		for (int i = 0; i < numberOfVariations; i++)
+		for (int i = 0; i < variations; i++)
 		{
-			string suffix = numberOfVariations == 1 ? "" : " " + (i + 1).ToString();
+			string suffix = variations == 1 ? "" : " " + (i + 1).ToString();
 			data.Add(MainScreen.Instance.game.Content.Load<Texture2D>(path + suffix));
 		}
+	}
+}
+
+public class NamedTexture : NamedObject
+{
+	public Texture2D data;
+
+	public override void Load(XmlNode xnode) { name = MyXml.GetString(xnode, "name"); }
+	public static Texture2D Get(string name) { return BB.namedTextures.Get(name).data; }
+
+	public static void LoadTextures()
+	{
+		foreach (NamedTexture t in BigBase.Instance.namedTextures.data)
+			t.data = M.game.Content.Load<Texture2D>(t.name);
 	}
 }

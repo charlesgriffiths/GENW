@@ -142,7 +142,7 @@ public class Inventory
 		
 		if (mti != null && mti.inventory == this)
 		{
-			screen.Draw(M.zSelectionTexture, CellPosition(mti.cell));
+			screen.Draw(NamedTexture.Get("other/zSelection"), CellPosition(mti.cell));
 			Item item = mti.GetItem();
 			if (item != null)
 			{

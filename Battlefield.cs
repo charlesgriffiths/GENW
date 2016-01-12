@@ -5,17 +5,18 @@ using Microsoft.Xna.Framework.Graphics;
 
 public partial class Battlefield
 {
-	private char[,] data;
+	private LocalCell[,] data;
 	public Palette palette;
 
 	private List<LocalObject> objects = new List<LocalObject>();
+	public List<ZPoint> points = new List<ZPoint>();
 
 	public LocalObject current, spotlight;
 	public Ability ability = null;
 	private GlobalObject global;
 
-	private Texture2D arrowTexture, targetTexture;
-	public Texture2D damageIcon, armorIcon, plusIcon;
+	//private Texture2D arrowTexture, targetTexture;
+	//public Texture2D damageIcon, armorIcon, plusIcon;
 
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
@@ -39,19 +40,26 @@ public partial class Battlefield
 	{
 		get
 		{
-			if (InRange(p)) return palette[data[p.x, p.y]];
+			if (InRange(p)) return palette[data[p.x, p.y].tile];
 			else { Log.Error("battlefield index out of range");	return null; }
 		}
 	}
 
-	public void SetTile(ZPoint p, char value) { if (InRange(p)) data[p.x, p.y] = value; }
 	public void SetTile(char value) { SetTile(Mouse, value); }
-
+	public void SetTile(ZPoint p, char value)
+	{
+		if (InRange(p))
+		{
+			data[p.x, p.y].tile = value;
+			data[p.x, p.y].variation = R.Next(palette[value].variations);
+		}
+	}
+	
 	private bool InRange(ZPoint p) { return p.InBoundaries(new ZPoint(0, 0), Size - new ZPoint(1, 1)); }
 
 	public List<LocalObject> GetAll(ZPoint p) { return objects.Where(o => o.p.value.TheSameAs(p)).ToList(); }
 	public LocalObject Get(ZPoint p)	{
-		var query = from o in objects where o.p.value.TheSameAs(p) orderby o.Importance select o;
+		var query = from o in objects where o.p.value != null && o.p.value.TheSameAs(p) orderby o.Importance select o;
 		return query.Count() > 0 ? query.First() : null; }
 
 	public bool IsWalkable(ZPoint p)
@@ -91,6 +99,7 @@ public partial class Battlefield
 	}
 
 	public void Remove(LocalObject o) { objects.Remove(o); }
+
 	public void Add(LocalObject o, ZPoint position = null, bool isInParty = false, bool isAIControlled = false)
 	{
 		o.p = new LocalPosition(o);
@@ -161,7 +170,7 @@ public partial class Battlefield
 		}
 	}
 
-	public List<ZPoint> EveryPoint
+	/*public List<ZPoint> EveryPoint
 	{
 		get
 		{
@@ -169,7 +178,7 @@ public partial class Battlefield
 			for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++) result.Add(new ZPoint(i, j));
 			return result;
 		}
-	}
+	}*/
 
 	public List<ZPoint> Ray(ZPoint position, ZPoint.Direction d, int range, bool penetration)
 	{
@@ -196,7 +205,9 @@ public partial class Battlefield
 		return true;
 	}
 
-	public List<ZPoint> Range { get { return EveryPoint.Where(p => current.p.Distance(p) <= ability.range).ToList(); } }
+	public List<ZPoint> Range(ZPoint p, int value) { return points.Where(q => MyMath.ManhattanDistance(p, q) <= value).ToList(); }
+	public List<ZPoint> Range() { return Range(current.p.value, ability.range); }
+	//public List<ZPoint> Range { get { return points.Where(p => current.p.Distance(p) <= ability.range).ToList(); } }
 
 	public List<ZPoint> AbilityZone
 	{
@@ -204,22 +215,28 @@ public partial class Battlefield
 		{
 			System.Collections.IEnumerable query;
 
-			if (ability.name == "Destroy Wall") query = Range.Where(p => this[p].type.name == "wall");
+			if (ability.name == "Destroy Wall") query = Range().Where(p => this[p].type.name == "wall");
 
 			else if (ability.targetType == Ability.TargetType.Point)
-				query = from p in Range where IsWalkable(p) select p;
+				query = from p in Range() where IsWalkable(p) select p;
 			else if (ability.targetType == Ability.TargetType.Direction)
-				query = from p in EveryPoint where current.p.Distance(p) == 1 select p;
+				query = from p in points where current.p.Distance(p) == 1 select p;
 			else query = from c in ActiveObjects where current.p.Distance(c) <= ability.range select c.p.value;
 
 			List<ZPoint> result = query.Cast<ZPoint>().ToList();
 
 			if (ability.name == "Overgrowth")
-				result.AddRange(from p in Range let o = Get(p) where o != null && o.TypeName == "Tree" select p);
+				result.AddRange(from p in Range() let o = Get(p) where o != null && o.TypeName == "Tree" select p);
 			
 			return result;
 		}
 	}
 
 	public void RemoveItem(Item item) { objects.Remove(Items.Where(i => i.item == item).Single()); }
+}
+
+struct LocalCell
+{
+	public char tile;
+	public int variation;
 }

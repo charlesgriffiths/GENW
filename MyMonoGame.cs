@@ -37,20 +37,20 @@ public class MyMonoGame : Game
 		MainScreen.Instance.Init(this);
 		BigBase.Instance.Load();
 
+		NamedTexture.LoadTextures();
 		MainScreen.Instance.LoadTextures();
 		GlobalTile.LoadTextures();
 		LocalTile.LoadTextures();
 		EffectShape.LoadTextures();
 		ClassAbility.LoadTextures();
 		GlobalShape.LoadTextures();
-		Texture.LoadTextures();
 		CharacterClass.LoadTextures();
 		LocalShape.LoadTextures();
 		ItemShape.LoadTextures();
 		Dialog.LoadTextures();
 
 		World.Instance.Load();
-		World.Instance.LoadTextures();
+		//World.Instance.LoadTextures();
 	}
 
 	protected override void UnloadContent()
@@ -107,7 +107,7 @@ public class MyMonoGame : Game
 				{
 					if (mtk.name == "End Battle") B.EndBattle();
 				}
-				else { B.SetSpotlight(); B.Step(B.Mouse); }
+				else { B.SetSpotlight(); /*B.Step(B.Mouse);*/ }
 			}
 			if (G.RightMouseButtonClicked) B.GoTo();
 
@@ -118,11 +118,11 @@ public class MyMonoGame : Game
 			else if (KeyPressed(Keys.Left)) B.current.movement.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Down)) B.current.movement.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
 
-			else if (G.keyboardState.IsKeyDown(Keys.F) || KeyPressed(Keys.G)) B.Step();
+			//else if (G.keyboardState.IsKeyDown(Keys.F) || KeyPressed(Keys.G)) B.Step();
 			else if (KeyPressed(Keys.H)) B.FillWithObjects();
 			else if (KeyPressed(Keys.J)) B.FillRandom();
-			else if (KeyPressed(Keys.K)) B.temperature -= 0.1;
-			else if (KeyPressed(Keys.L)) B.temperature += 0.1;
+			//else if (KeyPressed(Keys.K)) B.temperature -= 0.1;
+			//else if (KeyPressed(Keys.L)) B.temperature += 0.1;
 
 			if (B.current.abilities != null)
 			{

@@ -11,21 +11,21 @@ public partial class Battlefield
 	public static Vector2 GC(RPoint p) { return GraphicCoordinates(p); }
 	public static ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - ScreenPosition) / 32.0f); }
 
-	public void LoadTextures()
+	/*public void LoadTextures()
 	{
 		arrowTexture = M.game.Content.Load<Texture2D>("other/arrow");
 		targetTexture = M.game.Content.Load<Texture2D>("other/target");
 		damageIcon = M.game.Content.Load<Texture2D>("other/damage");
 		armorIcon = M.game.Content.Load<Texture2D>("other/armor");
 		plusIcon = M.game.Content.Load<Texture2D>("other/plus");
-	}
+	}*/
 
 	private static void Draw(Texture2D texture, RPoint rPosition, Color color)
 	{ M.Draw(texture, new ZPoint(GraphicCoordinates(rPosition) - new Vector2(texture.Width/2 - 16, texture.Height - 32)), color); }
 
 	public static void Draw(Texture2D texture, RPoint rPosition) { Draw(texture, rPosition, Color.White); }
-	public static void Draw(string textureName, RPoint rPosition) {
-		Draw(BigBase.Instance.textures.Get(textureName).Single(), rPosition); }
+	//public static void Draw(string textureName, RPoint rPosition) {
+		//Draw(BigBase.Instance.textures.Get(textureName).Single(), rPosition); }
 
 	public void Draw(Texture2D texture, RPoint rPosition, float scaling, Color color)
 	{
@@ -108,7 +108,7 @@ public partial class Battlefield
 
 		expectedInitiative = 0.0f;
 
-		if (trigger != null) Draw(M.zSelectionTexture, trigger.t.p.value);
+		if (trigger != null) Draw(NamedTexture.Get("other/zSelection"), trigger.t.p.value);
 		MouseTrigger.Clear<MouseTriggerObject<LocalObject>>();
 	}
 
@@ -143,7 +143,7 @@ public partial class Battlefield
 			for (int i = 0; i < Size.x; i++)
 			{
 				ZPoint p = new ZPoint(i, j);
-				M.Draw(this[p].texture, GraphicCoordinates(p));
+				M.Draw(this[p].texture[data[i, j].variation], GraphicCoordinates(p));
 			}
 
 		if (combatAnimations.IsEmpty) DrawZones();
@@ -154,9 +154,9 @@ public partial class Battlefield
 		combatAnimations.Draw();
 		scaleAnimations.Draw();
 
-		if (ability != null && Mouse.IsIn(AbilityZone)) Draw(targetTexture, Mouse);
-		else if (InRange(Mouse)) Draw(M.zSelectionTexture, Mouse);
-		if (spotlight != null && spotlight != current) M.Draw(M.zSelectionTexture, spotlight.p.GC);
+		if (ability != null && Mouse.IsIn(AbilityZone)) Draw(NamedTexture.Get("other/target"), Mouse);
+		else if (InRange(Mouse)) Draw(NamedTexture.Get("other/zSelection"), Mouse);
+		if (spotlight != null && spotlight != current) M.Draw(NamedTexture.Get("other/zSelection"), spotlight.p.GC);
 
 		foreach (DelayedDrawing dd in delayedDrawings) dd.Draw();
 		delayedDrawings.Clear();
@@ -165,8 +165,6 @@ public partial class Battlefield
 		spotlight.p.DrawInfo(new ZPoint(M.size.x - 288 - 8, 8));
 		if (MyGame.Instance.combatLog) log.Draw();
 		DrawEndButton();
-
-		M.DrawString(M.fonts.ambient, "T = " + String.Format("{0:0.0}", temperature), new ZPoint(10, 10), Color.Red);
 	}
 }
 

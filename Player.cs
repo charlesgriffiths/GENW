@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 
 public partial class Player : GlobalObject
 {
@@ -42,6 +43,8 @@ public partial class Player : GlobalObject
 		inventory.Add("King Bolete", 3);
 		inventory.Add("Potato", 5);
 	}
+
+	public override Texture2D Texture { get	{ return NamedTexture.Get("other/player"); } }
 
 	public override void Kill()
 	{

@@ -60,38 +60,3 @@ public class GlobalTile : NamedObject
 		}
 	}
 }
-
-public class LocalTileType : NamedObject
-{
-	public bool isWalkable, isFlat;
-
-	public override void Load(XmlNode xnode)
-	{
-		name = MyXml.GetString(xnode, "name");
-		isWalkable = MyXml.GetBool(xnode, "walkable");
-		isFlat = MyXml.GetBool(xnode, "flat");
-	}
-}
-
-public class LocalTile : NamedObject
-{
-	public Texture2D texture;
-	public LocalTileType type;
-
-	public bool IsWalkable { get { return type.isWalkable; } }
-	public bool IsFlat { get { return type.isFlat; } }
-
-	public override void Load(XmlNode xnode)
-	{
-		name = MyXml.GetString(xnode, "name");
-		type = BigBase.Instance.localTileTypes.Get(MyXml.GetString(xnode, "type"));
-	}
-
-	public static void LoadTextures()
-	{
-		foreach (LocalTile lTile in BigBase.Instance.localTiles.data)
-		{
-			lTile.texture = MainScreen.Instance.game.Content.Load<Texture2D>("tiles/" + lTile.name);
-		}
-	}
-}

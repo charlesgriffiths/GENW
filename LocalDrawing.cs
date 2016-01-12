@@ -17,7 +17,7 @@ public class LocalDrawing : LocalComponent
 		if (!(t.item != null && !t.item.data.isEquippable))
 			B.Draw(t.GetTexture, t.p.r, scaling, t.p.IsVisible ? Color.White : new Color(0.5f, 0.5f, 0.5f, 0.5f));
 
-		Action<string> draw = textureName => Battlefield.Draw(textureName, t.p.r);
+		Action<string> draw = textureName => Battlefield.Draw(NamedTexture.Get("local/" + textureName), t.p.r);
 
 		if (t.effects != null)
 		{

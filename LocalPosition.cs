@@ -12,7 +12,7 @@ public class LocalPosition : LocalComponent
 
 	public LocalPosition(LocalObject o) : base(o)
 	{
-		value = new ZPoint();
+		//value = new ZPoint();
 		r = new RPoint();
 		animations = new AnimationQueue();
 	}
@@ -41,6 +41,8 @@ public class LocalPosition : LocalComponent
 
 	public void Set(ZPoint p, float gameTime, bool commonQueue)
 	{
+		if (value == null) value = new ZPoint();
+
 		RMove rMove = new RMove(r, p - value, gameTime);
 		if (commonQueue) B.combatAnimations.Add(rMove);
 		else animations.Add(rMove);
@@ -81,7 +83,7 @@ public class LocalPosition : LocalComponent
 		u.hp.RememberDamage(t, finalDamage);
 		//if (u.hp.value < 0 && pastLife) u.hp.Kill();
 
-		B.combatAnimations.Add(new TextAnimation(finalDamage.ToString(), Texture.Get(pure ? "pureDamage" : "damage"),
+		B.combatAnimations.Add(new TextAnimation(finalDamage.ToString(), NamedTexture.Get(pure ? "local/pureDamage" : "local/damage"),
 			M.fonts.verdanaBold, Color.White, u.p.GC, 1, true));
 	}
 
@@ -129,7 +131,7 @@ public class LocalPosition : LocalComponent
 
 		if (t.attack != null)
 		{
-			screen.Draw(B.damageIcon, new ZPoint(0, 40));
+			screen.Draw(NamedTexture.Get("other/damage"), new ZPoint(0, 40));
 			screen.DrawString(font, t.attack.Damage.ToString(), new ZPoint(22, 43), Color.White);
 			screen.DrawString(font, t.attack.Value.ToString() + "/" + t.defence.Value, 43, Color.White);
 		}
@@ -137,7 +139,7 @@ public class LocalPosition : LocalComponent
 		if (t.hp != null)
 		{
 			screen.DrawString(font, t.hp.Armor.ToString(), new ZPoint(length - 32, 43), Color.White);
-			screen.Draw(B.armorIcon, new ZPoint(length - 20, 40));
+			screen.Draw(NamedTexture.Get("other/armor"), new ZPoint(length - 20, 40));
 		}
 
 		if (t.effects != null) t.effects.Draw(screen.position + new ZPoint(0, 60), screen.position + new ZPoint(24, 180));

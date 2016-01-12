@@ -28,11 +28,11 @@ public class GlobalObject
 	public float Speed { get { return shape.speed; } }
 	public bool IsActive { get { return shape.isActive; } }
 
-	public Texture2D Texture
-	{
+	public virtual Texture2D Texture { get { return shape.texture; } }
+	/*{
 		get { return shape.texture; }
 		set { shape.texture = value; }
-	}
+	}*/
 
 	public GlobalObject() {}
 	public GlobalObject(GlobalShape shapei)

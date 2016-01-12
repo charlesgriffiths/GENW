@@ -10,7 +10,7 @@ public class ShapeComponent : LocalComponent
 	public ShapeComponent(LocalShape shape, LocalObject o) : base(o)
 	{
 		data = shape;
-		variation = R.Next(data.texture.numberOfVariations);
+		variation = R.Next(data.variations);
 	}
 
 	public Texture2D GetTexture { get { return data.texture[variation]; } }
@@ -25,6 +25,7 @@ public class LocalShape : NamedObject
 	public float movementTime, attackTime;
 	public List<ClassAbility> abilities = new List<ClassAbility>();
 	public bool isWalkable, isFlat;
+	public int variations;
 
 	public LocalShape corpse;
 	public ItemShape onDeath;
@@ -34,9 +35,8 @@ public class LocalShape : NamedObject
 		type = LocalType.Get(xnode.Name);
 
 		texture = new Texture();
-		texture.numberOfVariations = MyXml.GetInt(xnode, "variations", 1);
-
 		name = MyXml.GetString(xnode, "name");
+		variations = MyXml.GetInt(xnode, "variations", 1);
 		maxHP = MyXml.GetInt(xnode, "hp");
 		damage = MyXml.GetInt(xnode, "damage");
 		attack = MyXml.GetInt(xnode, "attack");
@@ -62,7 +62,7 @@ public class LocalShape : NamedObject
 			abilities.Add(BigBase.Instance.abilities.Get(MyXml.GetString(xnode, "name")));
 	}
 
-	public static void LoadTextures() {	foreach (LocalShape s in BigBase.Instance.shapes.data) s.texture.LoadImages("objects/" + s.name); }
+	public static void LoadTextures() {	foreach (LocalShape s in BigBase.Instance.shapes.data) s.texture.LoadImages("objects/" + s.name, s.variations); }
 	public static LocalShape Get(string name) { return BB.shapes.Get(name); }
 }
 

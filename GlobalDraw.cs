@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 public partial class Player : GlobalObject
 {
-	public void LoadTextures()
+	/*public void LoadTextures()
 	{
-		Texture = M.game.Content.Load<Texture2D>("other/player");
-	}
+		//Texture = M.game.Content.Load<Texture2D>("other/player");
+		Texture = NamedTexture.Get("other/player");
+	}*/
 
 	public void DrawParty(ZPoint position)
 	{

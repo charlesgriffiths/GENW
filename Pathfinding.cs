@@ -123,7 +123,7 @@ public partial class Battlefield
 					new ZPoint(GraphicCoordinates(position)) + 16 * new ZPoint(d) + new ZPoint(1, 8), Color.Red));
 			else
 			{
-				M.spriteBatch.Draw(arrowTexture, position: GraphicCoordinates(position) + 16 * new ZPoint(d) + new Vector2(16, 16),
+				M.spriteBatch.Draw(NamedTexture.Get("other/arrow"), position: GraphicCoordinates(position) + 16 * new ZPoint(d) + new Vector2(16, 16),
 					rotation: ZPoint.Angle(d), origin: new Vector2(16, 16));
 				position = position.Shift(d);
 				i++;

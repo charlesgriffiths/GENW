@@ -207,7 +207,7 @@ public partial class Abilities : LocalComponent
 				while (B.IsFlat(p) && t.p.Distance(p) <= ability.range) p = p + direction;
 				LocalObject lc = B.Get(p);
 
-				B.combatAnimations.Add(new TextureAnimation("stone", t.p.GC, Battlefield.GC(p), 0.5f * ability.castTime));
+				B.combatAnimations.Add(new TextureAnimation(NamedTexture.Get("local/stone"), t.p.GC, Battlefield.GC(p), 0.5f * ability.castTime));
 				log("throws a rock and hits");
 
 				if (lc != null)
@@ -259,7 +259,8 @@ public partial class Abilities : LocalComponent
 			else if (ability.NameIs("Power Shot"))
 			{
 				var ray = B.Ray(t.p.value, direction, ability.range, true);
-				B.combatAnimations.Add(new TextureAnimation("arrow", Battlefield.GC(ray.First()), Battlefield.GC(ray.Last()), ability.castTime));
+				B.combatAnimations.Add(new TextureAnimation(NamedTexture.Get("local/arrow"), 
+					Battlefield.GC(ray.First()), Battlefield.GC(ray.Last()), ability.castTime));
 				foreach (LocalObject lc in B.ActiveObjects.Where(c => c.p.value.IsIn(ray) && c != t))
 					t.p.DoDamage(lc, ia.itemShape.bonus.damage + 1, false);
 			}

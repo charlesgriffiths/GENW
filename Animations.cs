@@ -66,8 +66,8 @@ class TextureAnimation : Animation
 		frameTime = 0;
 	}
 
-	public TextureAnimation(string textureName, Vector2 start, Vector2 finish, float gameTime) :
-		this(BigBase.Instance.textures.Get(textureName).Single(), start, finish, gameTime) { }
+	//public TextureAnimation(Texture2D _texture, Vector2 start, Vector2 finish, float gameTime) :
+		//this(BigBase.Instance.textures.Get(textureName).Single(), start, finish, gameTime) { }
 
 	public override void Draw()
 	{

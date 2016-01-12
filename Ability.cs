@@ -175,7 +175,7 @@ public partial class Abilities : LocalComponent
 				if (mouseOn) a.DrawDescription(screen.position + position + new ZPoint(24, 56));
 			}
 
-			if (!has && levelup) M.Draw(B.plusIcon, aPosition(i));
+			if (!has && levelup) M.Draw(NamedTexture.Get("other/plus"), aPosition(i));
 
 			i++;
 		}
