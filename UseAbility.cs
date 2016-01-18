@@ -96,16 +96,29 @@ public partial class Abilities : LocalComponent
 				{
 					LocalObject o = B.Get(target);
 
-					if (o == null && B.IsWalkable(target))
+					if (o == null)
 					{
-						B.Add(new LocalObject(LocalShape.Get("Tree")), target, true, false);
-						log("grows a tree.");
+						if (B.IsWalkable(target))
+						{
+							B.Add(new LocalObject(LocalShape.Get("Tree")), target);
+							log("grows a tree.");
+						}
 					}
-					else if (o.TypeName == "Tree")
+					else if (o.TypeName == "Tree" || o.TypeName == "Swamp Tree")
 					{
 						B.Remove(o);
-						B.Add(new LocalObject(LocalShape.Get("Treant")), target, true, false);
+						B.Add(new LocalObject(LocalShape.Get(o.TypeName == "Tree" ? "Treant" : "Swamp Treant")), target, true, false);
 						log("transforms a tree into a treant!");
+					}
+					else if (o.TypeName == "Dead Tree")
+					{
+						B.Remove(o);
+						B.Add(new LocalObject(LocalShape.Get("Tree")), target);
+					}
+					else if (o.TypeName == "Poisoned Tree")
+					{
+						B.Remove(o);
+						B.Add(new LocalObject(LocalShape.Get("Dead Tree")), target);
 					}
 					else if (o == t)
 					{

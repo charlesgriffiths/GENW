@@ -27,4 +27,5 @@ public class Palette : NamedObject
 	}
 
 	public static Palette Get(string name) { return BB.palettes.Get(name); }
+	public static IEnumerable<Palette> Get(params string[] names) { return BB.palettes.data.Where(p => names.Contains(p.name)); }
 }

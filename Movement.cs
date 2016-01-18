@@ -48,7 +48,7 @@ public class Movement : LocalComponent
 	{
 		LocalObject o = B.Get(t.p.value.Shift(d));
 
-		if (o != null)
+		if (o != null && !o.p.IsWalkable)
 		{
 			if (o.shape != null && o.shape.data.name == "Chest" && t.skills != null && t.skills["Mechanisms"] > 0)
 			{

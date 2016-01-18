@@ -157,6 +157,8 @@ public class LocalObject
 		background = _background;
 		origin = _origin;
 
+		xp = new Experience(experience, this);
+
 		skills = new Skills(this);
 		inventory = new Inventory(6, 1, "", true, null, this);
 
@@ -167,7 +169,5 @@ public class LocalObject
 		abilities = new Abilities(this);
 		fatigue = new Fatigue(this);
 		eating = new Eating(this);
-
-		xp = new Experience(experience, this);
 	}
 }

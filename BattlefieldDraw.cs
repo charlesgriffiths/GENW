@@ -6,27 +6,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 public partial class Battlefield
 {
-	public static Vector2 ScreenPosition { get { return new Vector2(16 + 96, 8)/*Vector2(8, 8)*/; } }
+	public static Vector2 ScreenPosition { get { return new Vector2(16 + 96, 8); } }
 	public static Vector2 GraphicCoordinates(RPoint p) { return ScreenPosition + new Vector2(32 * p.x, 32 * p.y); }
 	public static Vector2 GC(RPoint p) { return GraphicCoordinates(p); }
 	public static ZPoint ZCoordinates(Vector2 mouse) { return new ZPoint((mouse - ScreenPosition) / 32.0f); }
 
-	/*public void LoadTextures()
-	{
-		arrowTexture = M.game.Content.Load<Texture2D>("other/arrow");
-		targetTexture = M.game.Content.Load<Texture2D>("other/target");
-		damageIcon = M.game.Content.Load<Texture2D>("other/damage");
-		armorIcon = M.game.Content.Load<Texture2D>("other/armor");
-		plusIcon = M.game.Content.Load<Texture2D>("other/plus");
-	}*/
-
-	private static void Draw(Texture2D texture, RPoint rPosition, Color color)
-	{ M.Draw(texture, new ZPoint(GraphicCoordinates(rPosition) - new Vector2(texture.Width/2 - 16, texture.Height - 32)), color); }
-
+	private static void Draw(Texture2D texture, RPoint rPosition, Color color) {
+		M.Draw(texture, new ZPoint(GraphicCoordinates(rPosition) - new Vector2(texture.Width/2 - 16, texture.Height - 32)), color); }
 	public static void Draw(Texture2D texture, RPoint rPosition) { Draw(texture, rPosition, Color.White); }
-	//public static void Draw(string textureName, RPoint rPosition) {
-		//Draw(BigBase.Instance.textures.Get(textureName).Single(), rPosition); }
-
 	public void Draw(Texture2D texture, RPoint rPosition, float scaling, Color color)
 	{
 		if (scaling == 1.0f) Draw(texture, rPosition, color);
@@ -143,12 +130,21 @@ public partial class Battlefield
 			for (int i = 0; i < Size.x; i++)
 			{
 				ZPoint p = new ZPoint(i, j);
-				M.Draw(this[p].texture[data[i, j].variation], GraphicCoordinates(p));
+				Draw(this[p].texture[data[i, j].variation], p);
+
+				foreach (var d in ZPoint.Directions)
+				{
+					ZPoint q = p + d;
+					if (!InRange(q)) continue;
+					bool draw = (!this[p].IsWalkable && !this[p].IsFlat && this[q].IsWalkable && this[q].IsFlat) || 
+						(this[p].name != "Sky" && this[q].name == "Sky");
+					if (draw) Draw(NamedTexture.Get("local/wall mask " + (int)d), p);
+				}
 			}
 
 		if (combatAnimations.IsEmpty) DrawZones();
 
-		var query = objects.OrderBy(o => o.p.y).ThenBy(o => -o.Importance);
+		var query = objects.OrderBy(o => !o.p.IsWalkable).ThenBy(o => o.p.y).ThenBy(o => -o.Importance);
 		foreach (LocalObject l in query) l.drawing.Draw();
 
 		combatAnimations.Draw();

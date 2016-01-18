@@ -118,11 +118,7 @@ public class MyMonoGame : Game
 			else if (KeyPressed(Keys.Left)) B.current.movement.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Down)) B.current.movement.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
 
-			//else if (G.keyboardState.IsKeyDown(Keys.F) || KeyPressed(Keys.G)) B.Step();
-			else if (KeyPressed(Keys.H)) B.FillWithObjects();
-			else if (KeyPressed(Keys.J)) B.FillRandom();
-			//else if (KeyPressed(Keys.K)) B.temperature -= 0.1;
-			//else if (KeyPressed(Keys.L)) B.temperature += 0.1;
+			else if (KeyPressed(Keys.F)) B.Fill();
 
 			if (B.current.abilities != null)
 			{
@@ -167,7 +163,7 @@ public class MyMonoGame : Game
 				if (G.mouseState.ScrollWheelValue > G.previousMouseState.ScrollWheelValue) M.editor.GoLeft();
 				else if (G.mouseState.ScrollWheelValue < G.previousMouseState.ScrollWheelValue) M.editor.GoRight();
 
-				if (G.mouseState.LeftButton == ButtonState.Pressed) B.SetTile(M.editor.LocalBrush);
+				if (G.mouseState.LeftButton == ButtonState.Pressed) B.SetTile(B.Mouse, M.editor.LocalBrush);
 			}
 		}
 		else

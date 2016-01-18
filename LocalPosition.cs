@@ -12,18 +12,18 @@ public class LocalPosition : LocalComponent
 
 	public LocalPosition(LocalObject o) : base(o)
 	{
-		//value = new ZPoint();
 		r = new RPoint();
 		animations = new AnimationQueue();
 	}
 
-	public ZPoint GC { get { return new ZPoint(Battlefield.GC(r)); } }
+	public ZPoint GC { get { return new ZPoint(Battlefield.GC(value)); } }
 
 	public bool IsWalkable
 	{
 		get
 		{
-			if (t.hp != null) return t.hp.value <= 0;
+			if (t.shape != null) return t.shape.data.isWalkable;
+			else if (t.hp != null) return t.hp.value <= 0;
 			else return true;
 		}
 	}
@@ -53,8 +53,7 @@ public class LocalPosition : LocalComponent
 	public int x { get { return value.x; } }
 	public int y { get { return value.y; } }
 
-	public bool IsAdjacentTo(LocalObject u) { return value.IsAdjacentTo(u.p.value); }
-	public bool IsAdjacentTo(List<ZPoint> zone) { return zone.Where(p => p.IsAdjacentTo(value)).Count() > 0; }
+	public bool IsAdjacentTo(LocalObject o) { return value.IsAdjacentTo(o.p.value); }
 	public bool IsReachableFrom(List<ZPoint> zone) {
 		return (zone.Where(p => B.IsReachable(p, value, B.current.p.Range))).Count() > 0; }
 
@@ -73,18 +72,18 @@ public class LocalPosition : LocalComponent
 
 	public int Range { get { return t.inventory != null && !t.inventory.IsEmpty ? (from i in t.inventory.Items select i.data.range).Max() : 1; } }
 
-	public void DoDamage(LocalObject u, int damage, bool pure)
+	public void DoDamage(LocalObject o, int damage, bool pure)
 	{
-		bool pastLife = u.hp.value > 0;
-		int finalDamage = pure || t.HasAbility("Prodigious Precision") ? damage : Math.Max(damage - u.hp.Armor, 0);
+		bool pastLife = o.hp.value > 0;
+		int finalDamage = pure || t.HasAbility("Prodigious Precision") ? damage : Math.Max(damage - o.hp.Armor, 0);
 
-		u.hp.Add(-finalDamage, false);
+		o.hp.Add(-finalDamage, false);
 
-		u.hp.RememberDamage(t, finalDamage);
+		o.hp.RememberDamage(t, finalDamage);
 		//if (u.hp.value < 0 && pastLife) u.hp.Kill();
 
 		B.combatAnimations.Add(new TextAnimation(finalDamage.ToString(), NamedTexture.Get(pure ? "local/pureDamage" : "local/damage"),
-			M.fonts.verdanaBold, Color.White, u.p.GC, 1, true));
+			M.fonts.verdanaBold, Color.White, o.p.GC, 1, true));
 	}
 
 	public Inventory Ground

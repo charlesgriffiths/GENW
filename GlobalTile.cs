@@ -1,4 +1,5 @@
 ﻿using System.Xml;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -59,4 +60,6 @@ public class GlobalTile : NamedObject
 			if (t.hasTop) t.topTexture = MainScreen.Instance.game.Content.Load<Texture2D>("terrain/" + t.picture + " Top");
 		}
 	}
+
+	public static GlobalTile Get(string name) {	return BB.globalTiles.data.Where(t => t.picture == name).First(); }
 }

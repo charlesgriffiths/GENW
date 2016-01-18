@@ -15,9 +15,6 @@ public partial class Battlefield
 	public Ability ability = null;
 	private GlobalObject global;
 
-	//private Texture2D arrowTexture, targetTexture;
-	//public Texture2D damageIcon, armorIcon, plusIcon;
-
 	public AnimationQueue scaleAnimations = new AnimationQueue();
 	public AnimationQueue combatAnimations = new AnimationQueue();
 	public CombatLog log = new CombatLog();
@@ -36,6 +33,7 @@ public partial class Battlefield
 
 	public ZPoint Mouse { get { return ZCoordinates(MyGame.Instance.mouseState.Position.ToVector2()); } }
 
+	public GlobalTile Terrain { get { return World.Instance.map[P.position]; } }
 	public LocalTile this[ZPoint p]
 	{
 		get
@@ -45,7 +43,6 @@ public partial class Battlefield
 		}
 	}
 
-	public void SetTile(char value) { SetTile(Mouse, value); }
 	public void SetTile(ZPoint p, char value)
 	{
 		if (InRange(p))
@@ -65,12 +62,10 @@ public partial class Battlefield
 	public bool IsWalkable(ZPoint p)
 	{
 		if (!InRange(p)) return false;
-		if (!this[p].IsWalkable) return false;
 
 		LocalObject o = Get(p);
-		if (o != null && !o.p.IsWalkable) return false;
-	
-		return true;
+		if (o != null) return o.p.IsWalkable;
+		else return this[p].IsWalkable;
     }
 
 	public bool IsFlat(ZPoint p)
@@ -84,7 +79,7 @@ public partial class Battlefield
 		return true;
 	}
 
-	private ZPoint RandomFreeTile()
+	/*private ZPoint RandomFreeTile()
 	{
 		for (int i = 0; i < 100; i++)
 		{
@@ -96,7 +91,7 @@ public partial class Battlefield
 		}
 
 		return new ZPoint(0, 0);
-	}
+	}*/
 
 	public void Remove(LocalObject o) { objects.Remove(o); }
 

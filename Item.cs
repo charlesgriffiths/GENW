@@ -113,15 +113,16 @@ public class ItemShape : NamedObject
 
 		skip(8);
 		if (ability != null) draw("ABILITY: " + ability.name);
-		if (bonus.mtm != 1) draw("MOVEMENT TIME MULT.: " + bonus.mtm);
-		if (bonus.atm != 1) draw("ATTACK TIME MULT.: " + bonus.atm);
 
 		skip(8);
+		if (hands > 0) draw(hands == 1 ? "One-handed" : "Two-handed");
 		drawInt("Damage", bonus.damage);
 		drawInt("Armor", bonus.armor);
 		drawInt("Attack", bonus.attack);
 		drawInt("Defence", bonus.defence);
 		drawInt("HP", bonus.hp);
+		if (bonus.mtm != 1) draw("Movement time x" + bonus.mtm);
+		if (bonus.atm != 1) draw("Attack time x" + bonus.atm);
 
 		skip(8);
 		screen.DrawString(font, description, new ZPoint(0, screen.offset), Color.White, screen.size.x);

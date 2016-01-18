@@ -47,6 +47,8 @@ public class LocalShape : NamedObject
 		isWalkable = MyXml.GetBool(xnode, "walkable");
 		isFlat = MyXml.GetBool(xnode, "flat");
 
+		if (xnode.Name == "Thing") isWalkable = true;
+
 		string s = MyXml.GetString(xnode, "type");
 		if (s != "") creatureType = CreatureType.Get(s);
 

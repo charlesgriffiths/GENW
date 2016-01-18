@@ -18,9 +18,11 @@ public partial class Battlefield
 {
 	private void Run()
 	{
+		var component = LargestComponent();
+
 		foreach (LocalObject l in objects)
 		{
-			if (l.p.value == null) l.p.Set(RandomFreeTile(), 0.01f, false);
+			if (l.p.value == null) l.p.Set(component.Where(p => IsWalkable(p)).ToList().Random(), 0.01f, false);
 			if (l.initiative != null) l.initiative.Set(l.uniqueName == P.uniqueName ? 0.1f : -R.Next(100) / 100.0f, 0.01f, false);
 		}
 
@@ -37,19 +39,17 @@ public partial class Battlefield
 		AddBridges(LocalShape.Get("Horizontal Wooden Bridge"), ZPoint.Direction.Right);
 		AddBridges(LocalShape.Get("Vertical Wooden Bridge"), ZPoint.Direction.Down);
 
-		foreach (LocalObject c in P.party) Add(c, null, true, false);
-		foreach (LocalObject c in global.party) Add(c, null, false, true);
-
 		foreach (ZPoint p in points)
 		{
 			if (String.Concat(from q in Range(p, 1) let o = Get(q) where o != null select o.CommonName).Contains("Bridge")) continue;
 			LocalShape shape = this[p].spawns.Random(false);
-			if (shape != null) Add(new LocalObject(shape), p);
+			if (shape != null) Add(new LocalObject(shape), p, false, false);
 		}
 
-		for (int i = 0; i * 6 < global.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", global.inventory));
+		foreach (LocalObject c in P.party) Add(c, null, true, false);
+		foreach (LocalObject c in global.party) Add(c, null, false, true);
 
-		Run();
+		for (int i = 0; i * 6 < global.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", global.inventory));
 	}
 
 	public void StartBattle(GlobalObject _global)
@@ -57,42 +57,89 @@ public partial class Battlefield
 		global = _global;
 		//Load("Custom Mountain");
 		Generate();
-		objects.Clear();
-		Add(P.party[0], null, true, false);
-		Run();
 		MyGame.Instance.battle = true;
 	}
 
 	public void FillRandom()
 	{
-		var noise_1 = new OpenSimplexNoise();
+		var n1 = new OpenSimplexNoise();
+		var n4 = new OpenSimplexNoise();
 
-		//for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++)
 		foreach (ZPoint p in points)
 		{
-			double h = noise_1.Evaluate(0.1 * p.x, 0.1 * p.y);
+			double h1 = n1.Evaluate(0.1 * p.x, 0.1 * p.y);
+			double h4 = n4.Evaluate(0.4 * p.x, 0.4 * p.y);
+			Action<char> set = c => SetTile(p, c);
 
-			if (h <= -0.2) SetTile(p, '.');
-			else if (h <= 0.2) SetTile(p, '_');
-			else SetTile(p, 'W');
+			if (palette == Palette.Get("Mountains"))
+			{
+				if (h1 < -0.2) set('.');
+				else if (h1 < 0.2) set('_');
+				else set('W');
+			}
+			else if (Palette.Get("Plains", "Barren Hills").Contains(palette))
+			{
+				if (h1 < -0.1) set('_');
+				else set(',');
+			}
+			else if (palette == Palette.Get("Light Autumn Forest"))
+			{
+				if (h1 < 0) set(',');
+				else set(';');
+
+			}
+			else if (palette == Palette.Get("Deep Autumn Forest"))
+			{
+				if (h1 < -0.3) set(',');
+				else if (h1 < 0.3) set(';');
+				else set(':');
+			}
+			else if (Palette.Get("Grass", "Light Forest", "Deep Forest", "Hills").Contains(palette)) set(h1 < 0 ? ',' : ';');
+			else if (palette == Palette.Get("Swamp")) set(h4 < 0 ? '_' : '-');
+			else SetTile(p, palette.data.RandomKey());
+
+			if (Palette.Get("Hills", "Barren Hills").Contains(palette)) if (h4 < -0.4) set('W');
 		}
+
+		if (Terrain == GlobalTile.Get("Road")) AddRoad();
 	}
+
+	public void Fill()
+	{
+		List<ZPoint> largestComponent;
+
+		Func<List<ZPoint>, bool> isIsolated = (list) => {
+			foreach (ZPoint p in list) if (p.x == 0 || p.y == 0 || p.x == Size.x - 1 || p.y == Size.y - 1) return false;
+			return true; };
+
+		do
+		{
+			FillRandom();
+			FillWithObjects();
+			largestComponent = LargestComponent();
+		}
+		while (largestComponent.Count < 4 * NumberOfCreatures || isIsolated(largestComponent));
+
+		Run();
+	}
+
+	private int NumberOfCreatures { get { return P.party.Count + global.party.Count; } }
 
 	private void Generate()
 	{
-		palette = Palette.Get("mountains");
-		int width = 27, height = 22;
+		palette = Palette.Get("Mountains");
+		int width = Math.Min(6 + NumberOfCreatures, 27), height = Math.Min(6 + NumberOfCreatures, 22);
 
 		if (data == null) data = new LocalCell[width, height];
 		for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++) points.Add(new ZPoint(i, j));
 
-		FillRandom();
+		Fill();
 	}
 
 	private void Load(string name)
 	{
 		XmlNode xnode = MyXml.FirstChild("Data/Battlefields/" + name + ".xml");
-		palette = BigBase.Instance.palettes.Get(MyXml.GetString(xnode, "palette"));
+		palette = Palette.Get(MyXml.GetString(xnode, "palette"));
 
 		string text = xnode.InnerText;
 		char[] delimiters = new char[] { '\r', '\n', ' ' };
@@ -141,5 +188,67 @@ public partial class Battlefield
 		}
 
 		foreach (var t in bridges.Random(2)) for (int k = 1; k <= t.Item3; k++) Add(new LocalObject(shape), t.Item1.Shift(t.Item2, k));
+	}
+
+	private void AddRoad()
+	{
+		bool vertical = R.Next(2) == 0 ? false : true;
+		ZPoint.Direction d = vertical ? ZPoint.Direction.Down : ZPoint.Direction.Right;
+		int z = vertical ? R.Next(Size.x - 3) : R.Next(Size.y - 3);
+
+		if (vertical)
+		{
+			for (int i = 0; i < Size.y; i++)
+			{
+				//SetTile(new ZPoint(z, i), '_');
+				SetTile(new ZPoint(z + 1, i), 'r');
+				SetTile(new ZPoint(z + 2, i), 'r');
+				//SetTile(new ZPoint(z + 3, i), '_');
+			}
+		}
+		else
+		{
+			for (int i = 0; i < Size.x; i++)
+			{
+				//SetTile(new ZPoint(i, z), '_');
+				SetTile(new ZPoint(i, z + 1), 'r');
+				SetTile(new ZPoint(i, z + 2), 'r');
+				//SetTile(new ZPoint(i, z + 3), '_');
+			}
+		}
+	}
+
+	private List<ZPoint> LargestComponent()
+	{
+		var components = ConnectedComponents();
+		if (components.Count == 0) return new List<ZPoint>();
+		else return components.OrderBy(l => l.Count).Last();
+	}
+
+	private List<List<ZPoint>> ConnectedComponents()
+	{
+		List<List<ZPoint>> result = new List<List<ZPoint>>();
+		List<ZPoint> remaining = points.Where(p => IsWalkable(p)).ToList();
+
+		while (remaining.Count > 0)
+		{
+			List<ZPoint> frontier = new List<ZPoint>();
+			List<ZPoint> component = new List<ZPoint>();
+
+			ZPoint start = remaining.First();
+			frontier.Add(start);
+
+			while (frontier.Count > 0)
+			{
+				foreach (ZPoint p in frontier) component.Add(p);
+				foreach (ZPoint p in frontier) if (p.IsIn(remaining)) remaining.Remove(p);
+				foreach (ZPoint p in remaining) if (p.IsAdjacentTo(frontier)) frontier.Add(p);
+				foreach (ZPoint p in points) if (p.IsIn(frontier) && !p.IsIn(remaining)) frontier.Remove(p);
+			}
+
+			result.Add(component);
+		}
+
+		return result;
 	}
 }

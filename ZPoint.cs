@@ -127,6 +127,7 @@ public class ZPoint
 	public bool TheSameAs(ZPoint p) { return x == p.x && y == p.y; }
 	public bool InBoundaries(ZPoint p1, ZPoint p2) { return x >= p1.x && y >= p1.y && x <= p2.x && y <= p2.y; }
 	public bool IsAdjacentTo(ZPoint p) { return MyMath.ManhattanDistance(this, p) == 1; }
+	public bool IsAdjacentTo(List<ZPoint> zone) { return zone.Where(p => IsAdjacentTo(p)).Count() > 0; }
 
 	public bool IsIn(List<ZPoint> list)	{ return (from p in list where TheSameAs(p) select p).Count() > 0; }
 	public bool IsIn(List<FramedZPoint> list) {	return (from p in list where TheSameAs(p.data) select p).Count() > 0; }
