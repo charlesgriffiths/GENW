@@ -31,7 +31,9 @@
 	public void Eat(Item item)
 	{
 		for (int n = 0; n < item.numberOfStacks; n++)
-			foreach (var t in item.data.components)
-				for (int k = 0; k < t.Item2; k++) Eat(t.Item1);
+		{
+			foreach (var c in item.data.components) for (int k = 0; k < c.Item2; k++) Eat(c.Item1);
+			if (t.xp != null) t.xp.RewardEating(item.data);
+		}
 	}
 }

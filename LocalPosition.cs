@@ -80,7 +80,7 @@ public class LocalPosition : LocalComponent
 		o.hp.Add(-finalDamage, false);
 
 		o.hp.RememberDamage(t, finalDamage);
-		//if (u.hp.value < 0 && pastLife) u.hp.Kill();
+		if (o.hp.value <= 0 && pastLife && t.xp != null && o.shape != null) t.xp.Reward(o.shape.data);
 
 		B.combatAnimations.Add(new TextAnimation(finalDamage.ToString(), NamedTexture.Get(pure ? "local/pureDamage" : "local/damage"),
 			M.fonts.verdanaBold, Color.White, o.p.GC, 1, true));
@@ -157,9 +157,9 @@ public class LocalPosition : LocalComponent
 		}
 	}
 
-	public void Kill()
+	public void Kill(bool corpse = true)
 	{
-		if (Corpse != null) B.Add(new LocalObject(Corpse), value);
+		if (corpse && Corpse != null) B.Add(new LocalObject(Corpse), value);
 		if (t.shape != null && t.shape.data.onDeath != null) B.Add(new LocalObject(new Item(t.shape.data.onDeath)), value);
 
 		B.Remove(t);

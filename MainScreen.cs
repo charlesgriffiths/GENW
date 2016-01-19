@@ -9,13 +9,11 @@ public class MainScreen : Screen
 	public ZPoint windowPosition;
 	public SpriteBatch spriteBatch;
 	public Game game;
+	public Texture2D universalTexture;
 
 	public Editor editor;
 	public DialogScreen dialogScreen;
 
-	public Texture2D universalTexture;//, zSelectionTexture;
-	//private Texture2D hexSelectionTexture;
-	
 	public struct Fonts { public SpriteFont ambient, small, verySmall, superSmall, verdana, verdanaBold; }
 	public Fonts fonts;
 
@@ -47,9 +45,6 @@ public class MainScreen : Screen
 		editor = new Editor(size - new ZPoint(66, 62), new ZPoint(56, 52));
 		ZPoint dialogSize = new ZPoint(400, 200);
         dialogScreen = new DialogScreen(new ZPoint((int)(0.5f * (size.x - dialogSize.x)), size.y - 8 - dialogSize.y), dialogSize);
-
-		//hexSelectionTexture = game.Content.Load<Texture2D>("other/hexSelection");
-		//zSelectionTexture = game.Content.Load<Texture2D>("other/zSelection");
 
 		fonts.ambient = game.Content.Load<SpriteFont>("fonts/ambient");
 		fonts.small = game.Content.Load<SpriteFont>("fonts/small");

@@ -200,7 +200,7 @@ public class Inventory
 		return false;
 	}
 
-	public void MoveTo(Inventory inventory)
+	public void CopyTo(Inventory inventory)
 	{
 		int counter = 0;
 		for (int i = 0; i < Size && counter < inventory.Size; i++)
@@ -208,7 +208,7 @@ public class Inventory
 			if (data[i] != null)
 			{
 				inventory.Add(data[i]);
-				RemoveStack(i);
+				//RemoveStack(i);
 				counter++;
 			}
 		}

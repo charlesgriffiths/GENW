@@ -97,7 +97,7 @@ public class Attack : LocalComponent
 			}
 		}
 
-		List<ZPoint.Direction> availableDirections = ZPoint.Directions.Where(d => B.IsWalkable(u.p.value.Shift(d))).ToList();
+		List<ZPoint.Direction> availableDirections = ZPoint.Directions.Where(d => B.IsWalkable(u.p.value.Shift(d), t)).ToList();
 		int n = availableDirections.Count;
 
 		if (u.HasAbility("Heightened Grace") && n > 0)

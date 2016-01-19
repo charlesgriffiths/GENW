@@ -3,61 +3,47 @@ using System.Xml;
 using System.Linq;
 using System.Collections.Generic;
 
-public class CharPair
-{
-	private char c1, c2;
-
-	public CharPair(char _c1, char _c2) { c1 = _c1;  c2 = _c2; }
-
-	public bool AreTwins { get { return c1 == c2; } }
-	public bool Contains(char c) { return c == c1 || c == c2; }
-	public bool TheSameAs(char d1, char d2) { return (c1 == d1 && c2 == d2) || (c1 == d2 && c2 == d1); }
-}
-
 public partial class Battlefield
 {
-	private void Run()
-	{
-		var component = LargestComponent();
-
-		foreach (LocalObject l in objects)
-		{
-			if (l.p.value == null) l.p.Set(component.Where(p => IsWalkable(p)).ToList().Random(), 0.01f, false);
-			if (l.initiative != null) l.initiative.Set(l.uniqueName == P.uniqueName ? 0.1f : -R.Next(100) / 100.0f, 0.01f, false);
-		}
-
-		LocalObject next = NextObject;
-		if (next.initiative.IsAIControlled) next.initiative.Run();
-
-		current = next;
-		spotlight = current;
-	}
-
-	public void FillWithObjects()
-	{
-		objects.Clear();
-		AddBridges(LocalShape.Get("Horizontal Wooden Bridge"), ZPoint.Direction.Right);
-		AddBridges(LocalShape.Get("Vertical Wooden Bridge"), ZPoint.Direction.Down);
-
-		foreach (ZPoint p in points)
-		{
-			if (String.Concat(from q in Range(p, 1) let o = Get(q) where o != null select o.CommonName).Contains("Bridge")) continue;
-			LocalShape shape = this[p].spawns.Random(false);
-			if (shape != null) Add(new LocalObject(shape), p, false, false);
-		}
-
-		foreach (LocalObject c in P.party) Add(c, null, true, false);
-		foreach (LocalObject c in global.party) Add(c, null, false, true);
-
-		for (int i = 0; i * 6 < global.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", global.inventory));
-	}
-
 	public void StartBattle(GlobalObject _global)
 	{
 		global = _global;
 		//Load("Custom Mountain");
 		Generate();
 		MyGame.Instance.battle = true;
+	}
+
+	private void Generate()
+	{
+		//palette = Terrain.palette;
+		palette = Palette.Get("Mountains");
+		int width = Math.Min(6 + NumberOfCreatures, 27), height = Math.Min(6 + NumberOfCreatures, 22);
+
+		data = new LocalCell[width, height];
+
+		points.Clear();
+		for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++) points.Add(new ZPoint(i, j));
+
+		Fill();
+	}
+
+	public void Fill()
+	{
+		List<ZPoint> largestComponent;
+
+		Func<List<ZPoint>, bool> isIsolated = (list) => {
+			foreach (ZPoint p in list) if (p.x == 0 || p.y == 0 || p.x == Size.x - 1 || p.y == Size.y - 1) return false;
+			return true; };
+
+		do
+		{
+			FillRandom();
+			FillWithObjects();
+			largestComponent = LargestComponent();
+		}
+		while (largestComponent.Count < 4 * NumberOfCreatures || isIsolated(largestComponent));
+
+		Run();
 	}
 
 	public void FillRandom()
@@ -104,36 +90,41 @@ public partial class Battlefield
 		if (Terrain == GlobalTile.Get("Road")) AddRoad();
 	}
 
-	public void Fill()
+	public void FillWithObjects()
 	{
-		List<ZPoint> largestComponent;
+		objects.Clear();
+		AddBridges(LocalShape.Get("Horizontal Wooden Bridge"), ZPoint.Direction.Right);
+		AddBridges(LocalShape.Get("Vertical Wooden Bridge"), ZPoint.Direction.Down);
 
-		Func<List<ZPoint>, bool> isIsolated = (list) => {
-			foreach (ZPoint p in list) if (p.x == 0 || p.y == 0 || p.x == Size.x - 1 || p.y == Size.y - 1) return false;
-			return true; };
-
-		do
+		foreach (ZPoint p in points)
 		{
-			FillRandom();
-			FillWithObjects();
-			largestComponent = LargestComponent();
+			if (String.Concat(from q in Range(p, 1) let o = Get(q) where o != null select o.CommonName).Contains("Bridge")) continue;
+			LocalShape shape = this[p].spawns.Random(false);
+			if (shape != null) Add(new LocalObject(shape), p, false, false);
 		}
-		while (largestComponent.Count < 4 * NumberOfCreatures || isIsolated(largestComponent));
 
-		Run();
+		foreach (LocalObject c in P.party) Add(c, null, true, false);
+		foreach (LocalObject c in global.party) Add(c, null, false, true);
+
+		for (int i = 0; i * 6 < global.inventory.Items.Count; i++) Add(new LocalObject(LocalShape.Get("Chest"), "", global.inventory));
 	}
 
-	private int NumberOfCreatures { get { return P.party.Count + global.party.Count; } }
-
-	private void Generate()
+	private void Run()
 	{
-		palette = Palette.Get("Mountains");
-		int width = Math.Min(6 + NumberOfCreatures, 27), height = Math.Min(6 + NumberOfCreatures, 22);
+		global.inventory.Clear();
+		var component = LargestComponent();
 
-		if (data == null) data = new LocalCell[width, height];
-		for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++) points.Add(new ZPoint(i, j));
+		foreach (LocalObject l in objects)
+		{
+			if (l.p.value == null) l.p.Set(component.Where(p => IsWalkable(p)).ToList().Random(), 0.01f, false);
+			if (l.initiative != null) l.initiative.Set(l.uniqueName == P.uniqueName ? 0.1f : -R.Next(100) / 100.0f, 0.01f, false);
+		}
 
-		Fill();
+		LocalObject next = NextObject;
+		if (next.initiative.IsAIControlled) next.initiative.Run();
+
+		current = next;
+		spotlight = current;
 	}
 
 	private void Load(string name)

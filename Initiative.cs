@@ -8,6 +8,7 @@ public class Initiative : LocalComponent
 	public RPoint r;
 	public AnimationQueue animations;
 	public bool isAIControlled;
+	public int movementCounter;
 
 	public Initiative(bool isAIControlledi, LocalObject o) : base(o)
 	{
@@ -15,6 +16,7 @@ public class Initiative : LocalComponent
 		r = new RPoint();
 		animations = new AnimationQueue();
 		isAIControlled = isAIControlledi;
+		movementCounter = 3;
 	}
 
 	public void Set(float valuei, float gameTime, bool commonQueue)
@@ -81,7 +83,7 @@ public class Initiative : LocalComponent
 			foreach (Effect e in t.effects.data.Where(f => f.timeLeft <= 0).ToList()) t.effects.Remove(e.data.name);
 		}
 
-		if (t.movement != null) t.movement.counter = 3;
+		if (t.movement != null) movementCounter = 3;
 
 		ContinueTurn(time);
 
@@ -122,7 +124,7 @@ public class Initiative : LocalComponent
 		LocalObject target = viableTargets.Last();
 		if (t.p.IsAdjacentTo(target)) return new AAttack(target);
 
-		List<ZPoint.Direction> path = B.Path(t.p.value, target.p.value);
+		List<ZPoint.Direction> path = B.Path(t.p.value, target.p.value, t);
 		if (path != null) return new AMove(path.First());
 		else return new AWait(t.movement.Time);
 	}

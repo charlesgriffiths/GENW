@@ -29,10 +29,6 @@ public class GlobalObject
 	public bool IsActive { get { return shape.isActive; } }
 
 	public virtual Texture2D Texture { get { return shape.texture; } }
-	/*{
-		get { return shape.texture; }
-		set { shape.texture = value; }
-	}*/
 
 	public GlobalObject() {}
 	public GlobalObject(GlobalShape shapei)
@@ -46,6 +42,8 @@ public class GlobalObject
 
 		initiative = -0.1f;
 	}
+
+	public Vector2 GC { get { return M.GraphicCoordinates(position); } }
 
 	private bool IsVisible()
 	{

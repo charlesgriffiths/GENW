@@ -22,6 +22,7 @@ public class GlobalTile : NamedObject
 	public Texture2D texture, topTexture;
 	public string picture;
 	public GlobalTileType type;
+	public Palette palette;
 	public bool hasTop;
 
 	public List<CraftingComponent> components = new List<CraftingComponent>();
@@ -36,6 +37,9 @@ public class GlobalTile : NamedObject
 		type = BigBase.Instance.globalTileTypes.Get(MyXml.GetString(xnode, "type"));
 		picture = MyXml.GetString(xnode, "picture");
 		hasTop = MyXml.GetBool(xnode, "top");
+
+		string s = xnode.Get<string>("palette");
+		palette = s == default(string) ? null : Palette.Get(s);
 
 		for (XmlNode secondNode = xnode.FirstChild; secondNode != null; secondNode = secondNode.NextSibling)
 		{

@@ -2,12 +2,7 @@
 
 public class Movement : LocalComponent
 {
-	public int counter;
-
-	public Movement(LocalObject o) : base(o)
-	{
-		counter = 3;
-	}
+	public Movement(LocalObject o) : base(o) { }
 
 	public float Time
 	{
@@ -31,14 +26,14 @@ public class Movement : LocalComponent
 	public void Move(ZPoint.Direction d, bool control)
 	{
 		ZPoint destination = t.p.value.Shift(d);
-		if (CanMove && B.IsWalkable(destination)) t.p.Set(destination, Time, true);
+		if (CanMove && B.IsWalkable(destination, t)) t.p.Set(destination, Time, true);
 		else AnimateFailedMovement(d);
 
 		t.RemoveEffect("Melded", "Fake Death");
 
-		if (control == true && counter > 0)
+		if (control == true && t.initiative.movementCounter > 0)
 		{
-			counter--;
+			t.initiative.movementCounter--;
 			t.initiative.ContinueTurn(Time);
 		}
 		else t.initiative.PassTurn(Time);

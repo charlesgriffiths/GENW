@@ -28,4 +28,13 @@ public class Palette : NamedObject
 
 	public static Palette Get(string name) { return BB.palettes.Get(name); }
 	public static IEnumerable<Palette> Get(params string[] names) { return BB.palettes.data.Where(p => names.Contains(p.name)); }
+
+	public Palette Next
+	{
+		get
+		{
+			var s = BB.palettes.data;
+			return this == s.Last() ? s.First() : s[s.IndexOf(this) + 1];
+		}
+	}
 }

@@ -145,7 +145,7 @@ public class LocalObject
 		if (_inventory != null)
 		{
 			inventory = new Inventory(6, 1, "", false, null, this);
-			_inventory.MoveTo(inventory);
+			_inventory.CopyTo(inventory);
 		}
 	}
 

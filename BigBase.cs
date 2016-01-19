@@ -24,10 +24,10 @@
 	public GeneralBase<CharacterClass> classes = new GeneralBase<CharacterClass>();
 	public GeneralBase<CraftingComponent> components = new GeneralBase<CraftingComponent>();
 	public GeneralBase<ItemShape> items = new GeneralBase<ItemShape>();
-	public GeneralBase<GlobalTile> globalTiles = new GeneralBase<GlobalTile>();
 	public GeneralBase<LocalShape> shapes = new GeneralBase<LocalShape>();
 	public GeneralBase<LocalTile> localTiles = new GeneralBase<LocalTile>();
 	public GeneralBase<Palette> palettes = new GeneralBase<Palette>();
+	public GeneralBase<GlobalTile> globalTiles = new GeneralBase<GlobalTile>();
 
 	public void Load()
 	{
@@ -53,10 +53,10 @@
 		classes.Load("classes.xml");
 		components.Load("ccomponents.xml");
 		items.Load("items.xml");
-		globalTiles.Load("globalTiles.xml");
 		shapes.Load("localShapes.xml");
 		localTiles.Load("localTiles.xml");
 		palettes.Load("palettes.xml");
+		globalTiles.Load("globalTiles.xml");
 
 		Log.WriteLine("OK");
 	}

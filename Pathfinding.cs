@@ -66,9 +66,9 @@ public partial class Player : GlobalObject
 
 public partial class Battlefield
 {
-	private void AddToFrontier(List<FramedZPoint> list, ZPoint zPoint, ZPoint.Direction d, ZPoint start)
+	private void AddToFrontier(List<FramedZPoint> list, ZPoint zPoint, ZPoint.Direction d, ZPoint start, LocalObject t = null)
 	{
-		if (!IsWalkable(zPoint) && !zPoint.TheSameAs(start)) return;
+		if (!IsWalkable(zPoint, t) && !zPoint.TheSameAs(start)) return;
 
 		FramedZPoint item = new FramedZPoint(zPoint, d, true);
 		var query = from p in list where p.data.TheSameAs(zPoint) select p;
@@ -77,7 +77,7 @@ public partial class Battlefield
 
 	private void AddToFrontier(List<FramedZPoint> list, ZPoint zPoint) { AddToFrontier(list, zPoint, ZPoint.Direction.Right, new ZPoint(-2, -2)); }
 
-	public List<ZPoint.Direction> Path(ZPoint start, ZPoint finish)
+	public List<ZPoint.Direction> Path(ZPoint start, ZPoint finish, LocalObject t = null)
 	{
 		List<FramedZPoint> visited = new List<FramedZPoint>();
 		visited.Add(new FramedZPoint(finish, true));
@@ -94,7 +94,7 @@ public partial class Battlefield
 			{
 				p.onFrontier = false;
 				foreach (ZPoint.Direction d in ZPoint.Directions)
-					AddToFrontier(visited, p.data.Shift(d), ZPoint.Opposite(d), start);
+					AddToFrontier(visited, p.data.Shift(d), ZPoint.Opposite(d), start, t);
 			}
 		}
 
@@ -138,7 +138,7 @@ public partial class Battlefield
 			List<FramedZPoint> visited = new List<FramedZPoint>();
 			visited.Add(new FramedZPoint(current.p.value, true));
 
-			for (int i = 0; i <= current.movement.counter; i++)
+			for (int i = 0; i <= current.initiative.movementCounter; i++)
 			{
 				List<FramedZPoint> frontier = (from p in visited where p.onFrontier select p).Cast<FramedZPoint>().ToList();
 				foreach (FramedZPoint p in frontier)

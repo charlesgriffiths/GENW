@@ -50,7 +50,6 @@ public class MyMonoGame : Game
 		Dialog.LoadTextures();
 
 		World.Instance.Load();
-		//World.Instance.LoadTextures();
 	}
 
 	protected override void UnloadContent()
@@ -106,8 +105,9 @@ public class MyMonoGame : Game
 				if (mtk != null)
 				{
 					if (mtk.name == "End Battle") B.EndBattle();
+					else Log.WriteLine("Should not be called, " + mtk.name + " " + mtk.parameter);
 				}
-				else { B.SetSpotlight(); /*B.Step(B.Mouse);*/ }
+				else B.SetSpotlight();
 			}
 			if (G.RightMouseButtonClicked) B.GoTo();
 
@@ -117,8 +117,6 @@ public class MyMonoGame : Game
 			else if (KeyPressed(Keys.Up)) B.current.movement.MoveOrAttack(ZPoint.Direction.Up, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Left)) B.current.movement.MoveOrAttack(ZPoint.Direction.Left, G.keyboardState.IsKeyDown(Keys.LeftControl));
 			else if (KeyPressed(Keys.Down)) B.current.movement.MoveOrAttack(ZPoint.Direction.Down, G.keyboardState.IsKeyDown(Keys.LeftControl));
-
-			else if (KeyPressed(Keys.F)) B.Fill();
 
 			if (B.current.abilities != null)
 			{

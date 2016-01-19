@@ -182,9 +182,14 @@ public partial class Abilities : LocalComponent
 		{
 			ZPoint last = train.Last().p.value;
 			i = 1;
-			while (B.IsWalkable(last.Shift(d, i))) i++;
+			while (B.IsWalkable(last.Shift(d, i)) || B.IsFlat(last.Shift(d, i))) i++;
 			int shift = Math.Min(i - 1, distance);
-			foreach (LocalObject o in train) o.p.Set(o.p.value.Shift(d, shift), gameTime, o == train.First());
+
+			foreach (LocalObject o in train)
+			{
+				o.p.Set(o.p.value.Shift(d, shift), gameTime, o == train.First());
+				if (!B.IsWalkable(o.p.value, o)) o.p.Kill(false);
+			}
 		}
 		else AnimateByDefault(gameTime);
 	}
@@ -465,6 +470,12 @@ public partial class Abilities : LocalComponent
 
 		t.hp.AddStamina(-a.cost, false);
 		if (a is ClassAbility) cooldowns[a as ClassAbility] += a.cooldownTime;
+
+		if (t.xp != null)
+		{
+			if (a is ClassAbility) t.xp.Reward(a as ClassAbility);
+			else t.xp.RewardUsing((a as ItemAbility).itemShape);
+		}
 
 		B.log.AddLine(t.CommonName, t.LogColor);
 	}

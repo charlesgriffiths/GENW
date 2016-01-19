@@ -1,4 +1,5 @@
 ﻿using System.Xml;
+using System.ComponentModel;
 
 static class MyXml
 {
@@ -23,4 +24,11 @@ static class MyXml
 	public static bool GetBool(XmlNode xmlNode, string attribute) {
 		string s = GetString(xmlNode, attribute);
 		return s == "" ? false : bool.Parse(s);	}
+
+	public static T Get<T>(this XmlNode node, string attribute, T defaultT = default(T))
+	{
+		string s = ((XmlElement)node).GetAttribute(attribute);
+		var converter = TypeDescriptor.GetConverter(typeof(T));
+		return s == "" ? defaultT : (T)converter.ConvertFromString(s);
+	}
 }

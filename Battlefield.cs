@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
 
 public partial class Battlefield
 {
@@ -34,6 +33,8 @@ public partial class Battlefield
 	public ZPoint Mouse { get { return ZCoordinates(MyGame.Instance.mouseState.Position.ToVector2()); } }
 
 	public GlobalTile Terrain { get { return World.Instance.map[P.position]; } }
+	private int NumberOfCreatures { get { return P.party.Count + global.party.Count; } }
+
 	public LocalTile this[ZPoint p]
 	{
 		get
@@ -59,13 +60,13 @@ public partial class Battlefield
 		var query = from o in objects where o.p.value != null && o.p.value.TheSameAs(p) orderby o.Importance select o;
 		return query.Count() > 0 ? query.First() : null; }
 
-	public bool IsWalkable(ZPoint p)
+	public bool IsWalkable(ZPoint p, LocalObject t = null)
 	{
 		if (!InRange(p)) return false;
 
 		LocalObject o = Get(p);
 		if (o != null) return o.p.IsWalkable;
-		else return this[p].IsWalkable;
+		else return (t != null && t.HasAbility("Flying")) ? this[p].IsFlat : this[p].IsWalkable;
     }
 
 	public bool IsFlat(ZPoint p)
@@ -78,20 +79,6 @@ public partial class Battlefield
 
 		return true;
 	}
-
-	/*private ZPoint RandomFreeTile()
-	{
-		for (int i = 0; i < 100; i++)
-		{
-			int zx = World.Instance.random.Next(Size.x);
-			int zy = World.Instance.random.Next(Size.y);
-
-			ZPoint z = new ZPoint(zx, zy);
-			if (IsWalkable(z)) return z;
-		}
-
-		return new ZPoint(0, 0);
-	}*/
 
 	public void Remove(LocalObject o) { objects.Remove(o); }
 
@@ -153,27 +140,22 @@ public partial class Battlefield
 			}
 		};
 
+		MyGame.Instance.battle = false;
+
 		reshape(P, true);
 		reshape(global, false);
 		
-		MyGame.Instance.battle = false;
-
 		if (resolution == Resolution.Victory)
 		{
 			foreach (var o in Items) P.ground.Add(o.item);
 			global.Kill();
 		}
-	}
-
-	/*public List<ZPoint> EveryPoint
-	{
-		get
+		else if (resolution == Resolution.Retreat)
 		{
-			List<ZPoint> result = new List<ZPoint>();
-			for (int j = 0; j < Size.y; j++) for (int i = 0; i < Size.x; i++) result.Add(new ZPoint(i, j));
-			return result;
+			var chests = objects.Where(o => o.shape != null && o.shape.data == LocalShape.Get("Chest"));
+			foreach (LocalObject chest in chests) chest.inventory.CopyTo(global.inventory);
 		}
-	}*/
+	}
 
 	public List<ZPoint> Ray(ZPoint position, ZPoint.Direction d, int range, bool penetration)
 	{
